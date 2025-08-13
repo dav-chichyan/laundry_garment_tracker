@@ -1,0 +1,86 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.3)
+
+2025-08-13T15:29:35.787+04:00  INFO 33355 --- [maqoor] [           main] com.chich.maqoor.MaqoorApplication       : Starting MaqoorApplication using Java 22.0.2 with PID 33355 (/Users/chichyan/Dev/maqoor_garmentTracker/target/classes started by chichyan in /Users/chichyan/Dev/maqoor_garmentTracker)
+2025-08-13T15:29:35.788+04:00  INFO 33355 --- [maqoor] [           main] com.chich.maqoor.MaqoorApplication       : No active profile set, falling back to 1 default profile: "default"
+2025-08-13T15:29:36.084+04:00  INFO 33355 --- [maqoor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-08-13T15:29:36.112+04:00  INFO 33355 --- [maqoor] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 23 ms. Found 4 JPA repository interfaces.
+2025-08-13T15:29:36.346+04:00  INFO 33355 --- [maqoor] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 7575 (http)
+2025-08-13T15:29:36.355+04:00  INFO 33355 --- [maqoor] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-08-13T15:29:36.355+04:00  INFO 33355 --- [maqoor] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2025-08-13T15:29:36.377+04:00  INFO 33355 --- [maqoor] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-08-13T15:29:36.377+04:00  INFO 33355 --- [maqoor] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 571 ms
+2025-08-13T15:29:36.447+04:00  INFO 33355 --- [maqoor] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-08-13T15:29:36.468+04:00  INFO 33355 --- [maqoor] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2025-08-13T15:29:36.480+04:00  INFO 33355 --- [maqoor] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-08-13T15:29:36.598+04:00  INFO 33355 --- [maqoor] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-08-13T15:29:36.611+04:00  INFO 33355 --- [maqoor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-08-13T15:29:36.694+04:00  INFO 33355 --- [maqoor] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4a2e1e52
+2025-08-13T15:29:36.695+04:00  INFO 33355 --- [maqoor] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-08-13T15:29:36.725+04:00  INFO 33355 --- [maqoor] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.2
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-08-13T15:29:37.133+04:00  INFO 33355 --- [maqoor] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-08-13T15:29:37.164+04:00  INFO 33355 --- [maqoor] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-08-13T15:29:37.315+04:00  INFO 33355 --- [maqoor] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-08-13T15:29:37.702+04:00  WARN 33355 --- [maqoor] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-08-13T15:29:37.779+04:00  INFO 33355 --- [maqoor] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2025-08-13T15:29:37.933+04:00  INFO 33355 --- [maqoor] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 7575 (http) with context path '/'
+2025-08-13T15:29:37.938+04:00  INFO 33355 --- [maqoor] [           main] com.chich.maqoor.MaqoorApplication       : Started MaqoorApplication in 2.341 seconds (process running for 2.473)
+2025-08-13T15:29:51.067+04:00  INFO 33355 --- [maqoor] [nio-7575-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-13T15:29:51.068+04:00  INFO 33355 --- [maqoor] [nio-7575-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-08-13T15:29:51.069+04:00  INFO 33355 --- [maqoor] [nio-7575-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-08-13T15:29:51.302+04:00  WARN 33355 --- [maqoor] [nio-7575-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' is not supported]
+Searching for order: 1001
+Found 3 garments for order 1001
+Garment: 101, Dept: IRONING
+Garment: 102, Dept: DELIVERY
+Garment: 103, Dept: WASHING
+Returning template: auth/admin/order-detail
+Searching for order: 1001
+Found 3 garments for order 1001
+Garment: 101, Dept: IRONING
+Garment: 102, Dept: DELIVERY
+Garment: 103, Dept: WASHING
+Returning template: auth/admin/order-detail
+Searching for order: 1001
+Found 3 garments for order 1001
+Garment: 101, Dept: IRONING
+Garment: 102, Dept: DELIVERY
+Garment: 103, Dept: WASHING
+Returning template: auth/admin/order-detail
+Searching for order: 1001
+Found 3 garments for order 1001
+Garment: 101, Dept: IRONING
+Garment: 102, Dept: DELIVERY
+Garment: 103, Dept: WASHING
+Returning template: auth/admin/order-detail
+Searching for order: 103
+Found 0 garments for order 103
+Returning template: auth/admin/order-detail
+Searching for order: 1001
+Found 3 garments for order 1001
+Garment: 101, Dept: IRONING
+Garment: 102, Dept: DELIVERY
+Garment: 103, Dept: WASHING
+Returning template: auth/admin/order-detail
+2025-08-13T15:44:06.784+04:00  WARN 33355 --- [maqoor] [l-1:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Retrograde clock change detected (housekeeper delta=29s865ms), soft-evicting connections from pool.
+ith exit code: 137 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

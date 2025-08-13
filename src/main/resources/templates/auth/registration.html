@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Registration</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #97C0B4, #7FA89E);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .registration-container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #7FA89E;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #97C0B4;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7FA89E;
+    }
+  </style>
+</head>
+<body>
+
+<div class="registration-container">
+  <img src="/group.png" alt="Group" class="login-logo">
+  <h2>Register to Maqoor</h2>
+
+  <form th:action="@{/auth/register}" method="post">
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    
+    <select name="department" required style="padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; width: 100%;">
+      <option value="">Select Department</option>
+      <option th:each="dept : ${departments}" th:value="${dept.value}" th:text="${dept.label}"></option>
+    </select>
+    
+    <button type="submit">Register</button>
+  </form>
+  
+  <div class="text-center mt-3">
+    <p>Already have an account? <a href="/auth/login" style="color: #97C0B4;">Login here</a></p>
+  </div>
+</div>
+
+</body>
+</html>
