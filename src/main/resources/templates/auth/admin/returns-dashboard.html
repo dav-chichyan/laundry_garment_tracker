@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Returns Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
+            background-color: #ffc107;
+            color: #000;
+            border-bottom: none;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+        .return-item {
+            border-left: 4px solid #ffc107;
+            background-color: #fff3cd;
+        }
+        .return-item:hover {
+            background-color: #ffeaa7;
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+            color: white;
+            border: none;
+        }
+        .transition-badge {
+            background-color: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <img src="/logo.png" alt="Maqoor Logo" style="height: 40px; width: auto; margin-right: 15px;">
+                                <h2 class="mb-0" style="color: #000;">Returns Dashboard</h2>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="/admin/users-management" class="btn btn-primary">
+                                    <i class="fas fa-users"></i> Back to Dashboard
+                                </a>
+                                <a href="/auth/logout" class="btn btn-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" th:text="${totalReturns}">0</h3>
+                        <p class="mb-0">Total Returns</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" th:text="${#maps.size(returnsByReason)}">0</h3>
+                        <p class="mb-0">Return Reasons</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" th:text="${#maps.size(returnsByTransition)}">0</h3>
+                        <p class="mb-0">Department Transitions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" th:if="${#lists.isEmpty(returns)}">0</h3>
+                        <h3 class="mb-0" th:if="${!#lists.isEmpty(returns)}" th:text="${#dates.format(returns[0].returnTime, 'dd/MM')}">-</h3>
+                        <p class="mb-0">Latest Return</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return Reasons Chart -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Returns by Reason</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#maps.isEmpty(returnsByReason)}" class="text-center text-muted">
+                            <i class="fas fa-chart-pie fa-3x mb-3"></i>
+                            <p>No return data available</p>
+                        </div>
+                        <div th:each="entry : ${returnsByReason}" class="d-flex justify-content-between align-items-center mb-2">
+                            <span th:text="${entry.key}">Reason</span>
+                            <span class="badge bg-warning text-dark" th:text="${entry.value}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Returns by Department Transition</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#maps.isEmpty(returnsByTransition)}" class="text-center text-muted">
+                            <i class="fas fa-exchange-alt fa-3x mb-3"></i>
+                            <p>No transition data available</p>
+                        </div>
+                        <div th:each="entry : ${returnsByTransition}" class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="transition-badge" th:text="${entry.key}">From → To</span>
+                            <span class="badge bg-warning text-dark" th:text="${entry.value}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Returns List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> All Returns</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${#lists.isEmpty(returns)}" class="text-center text-muted py-5">
+                            <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                            <h5>No Returns Found</h5>
+                            <p>All workflow transitions are following the correct order.</p>
+                        </div>
+                        
+                        <div th:each="returnRecord : ${returns}" class="return-item p-3 mb-3 rounded">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <strong>Garment ID:</strong><br>
+                                    <span class="badge bg-info" th:text="${returnRecord.garment.cleanCloudGarmentId}">ID</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>From:</strong><br>
+                                    <span class="badge bg-secondary" th:text="${returnRecord.fromDepartment}">From</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>To:</strong><br>
+                                    <span class="badge bg-danger" th:text="${returnRecord.toDepartment}">To</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Expected:</strong><br>
+                                    <span class="badge bg-success" th:text="${returnRecord.expectedNextDepartment}">Expected</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>User:</strong><br>
+                                    <span th:text="${returnRecord.user.name}">User</span>
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>Time:</strong><br>
+                                    <small th:text="${#dates.format(returnRecord.returnTime, 'dd/MM HH:mm')}">Time</small>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <strong>Reason:</strong> 
+                                    <span th:text="${returnRecord.returnReason}">Reason</span>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <a th:href="@{'/admin/users/' + ${returnRecord.user.id}}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-user"></i> View User
+                                    </a>
+                                    <a th:href="@{'/admin/garments/' + ${returnRecord.garment.cleanCloudGarmentId}}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-tshirt"></i> View Garment
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

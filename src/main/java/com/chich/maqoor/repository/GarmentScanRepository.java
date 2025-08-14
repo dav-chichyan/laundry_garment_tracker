@@ -19,6 +19,12 @@ public interface GarmentScanRepository extends JpaRepository<GarmentScan, Intege
 
     List<GarmentScan> findByGarment_GarmentId(int garmentId);
 
+    List<GarmentScan> findByUser_IdAndDepartmentAndScannedAtBetweenOrderByScannedAtDesc(int userId, Departments department, Date fromDate, Date toDate);
+
+    List<GarmentScan> findByDepartmentAndScannedAtBetweenOrderByScannedAtDesc(Departments department, Date fromDate, Date toDate);
+
+    List<GarmentScan> findByScannedAtBetweenOrderByScannedAtDesc(Date fromDate, Date toDate);
+
     @Query("SELECT gs.user.id, COUNT(gs) FROM GarmentScan gs WHERE gs.department = :department AND gs.scannedAt BETWEEN :fromDate AND :toDate GROUP BY gs.user.id")
     List<Object[]> countByUserInDepartmentBetween(@Param("department") Departments department, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
@@ -27,6 +33,22 @@ public interface GarmentScanRepository extends JpaRepository<GarmentScan, Intege
 
     @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.scannedAt BETWEEN :fromDate AND :toDate")
     long countByScannedAtBetween(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+    @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.user.id = :userId AND gs.scannedAt BETWEEN :fromDate AND :toDate")
+    long countByUser_IdAndScannedAtBetween(@Param("userId") int userId, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+    @Query("SELECT gs FROM GarmentScan gs WHERE gs.garment.garmentId = :garmentId AND gs.user.id = :userId AND gs.department = :department AND gs.scannedAt > :scannedAtAfter")
+    List<GarmentScan> findByGarment_GarmentIdAndUser_IdAndDepartmentAndScannedAtAfter(
+        @Param("garmentId") int garmentId, 
+        @Param("userId") int userId, 
+        @Param("department") Departments department, 
+        @Param("scannedAtAfter") Date scannedAtAfter);
+
+    @Query("SELECT gs FROM GarmentScan gs WHERE gs.garment.garmentId = :garmentId AND gs.department = :department AND gs.scannedAt > :scannedAtAfter")
+    List<GarmentScan> findByGarment_GarmentIdAndDepartmentAndScannedAtAfter(
+        @Param("garmentId") int garmentId, 
+        @Param("department") Departments department, 
+        @Param("scannedAtAfter") Date scannedAtAfter);
 }
 
 

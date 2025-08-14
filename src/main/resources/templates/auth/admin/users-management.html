@@ -62,6 +62,11 @@
             background-color: #e9ecef;
         }
         
+        .dept-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
         .dept-name {
             font-weight: 600;
             color: #495057;
@@ -243,6 +248,10 @@
                                     <i class="fas fa-bell"></i>
                                 </span>
                             </a>
+                            <a href="/admin/returns-dashboard" class="btn btn-warning" style="background-color: #ffc107; border-color: #ffc107; color: #000;">
+                                <i class="fas fa-undo"></i> Returns Dashboard
+                            </a>
+
                             <a href="/auth/logout" class="btn btn-danger" style="background-color: #dc3545; border-color: #dc3545; color: white;">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
@@ -321,6 +330,7 @@
                             <thead>
                             <tr style="background-color: #f8f9fa;">
                                 <th style="color: #003366;">Name</th>
+                                <th style="color: #003366;">Total Scans</th>
                                 <th th:each="dept : ${departments}" style="color: #003366;">
                                     <span th:text="${dept}">Department</span>
                                 </th>
@@ -333,7 +343,20 @@
                                 <td>
                                     <a th:href="@{'/admin/users/' + ${user.id}}" th:text="${user.name}" style="color: #007B55; text-decoration: none;">Name</a>
                                 </td>
-                                <td th:each="dept : ${departments}" th:text="${userDeptCounts.get(user.id) != null ? userDeptCounts.get(user.id).get(dept) : 0}">0</td>
+                                <td>
+                                    <a th:href="@{'/admin/scanned-garments?userId=' + ${user.id}}" class="btn btn-info btn-sm" style="background-color: #17a2b8; border-color: #17a2b8; color: white;">
+                                        <i class="fas fa-barcode"></i>
+                                        <span th:text="${scansByUser.get(user.id) != null ? scansByUser.get(user.id) : 0}">0</span>
+                                    </a>
+                                </td>
+                                <td th:each="dept : ${departments}">
+                                    <a th:href="@{'/admin/scanned-garments?userId=' + ${user.id} + '&department=' + ${dept}}" 
+                                       class="btn btn-outline-secondary btn-sm" 
+                                       style="border-color: #6c757d; color: #6c757d;"
+                                       th:title="'View ' + ${dept} + ' scans for ' + ${user.name}">
+                                        <span th:text="${userDeptCounts.get(user.id) != null ? userDeptCounts.get(user.id).get(dept) : 0}">0</span>
+                                    </a>
+                                </td>
                                 <td>
                                     <a th:href="@{'/admin/returns?userId=' + ${user.id}}" class="btn btn-danger btn-sm" style="background-color: #dc3545; border-color: #dc3545;">
                                         <span th:text="${returnsByUser.get(user.id) != null ? returnsByUser.get(user.id) : 0}">0</span>
@@ -361,19 +384,21 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3" th:each="dept : ${departments}">
-                            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #003366 !important;">
-                                <div class="card-body text-center p-3">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="dept-info">
-                                            <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
-                                            <small class="text-muted">Current garments</small>
-                                        </div>
-                                        <div class="dept-quantity">
-                                            <span class="badge rounded-pill" th:text="${departmentCounts.get(dept) != null ? departmentCounts.get(dept) : 0}" style="background-color: #FFC107; color: #000;">0</span>
+                            <a th:href="@{'/admin/scanned-garments?department=' + ${dept}}" style="text-decoration: none; color: inherit;">
+                                <div class="card border-0 shadow-sm h-100 dept-link" style="border-left: 4px solid #003366 !important; cursor: pointer;">
+                                    <div class="card-body text-center p-3">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="dept-info">
+                                                <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
+                                                <small class="text-muted">Current garments</small>
+                                            </div>
+                                            <div class="dept-quantity">
+                                                <span class="badge rounded-pill" th:text="${departmentCounts.get(dept) != null ? departmentCounts.get(dept) : 0}" style="background-color: #FFC107; color: #000;">0</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -408,7 +433,7 @@
                             </tr>
                             <tr th:each="ret : ${returns}">
                                 <td th:text="${ret.user.name}">Staff Name</td>
-                                <td th:text="${ret.garment.garmentId}">Garment ID</td>
+                                                                        <td th:text="${ret.garment.cleanCloudGarmentId}">Garment ID</td>
                                 <td th:text="${ret.fromDepartment}">From Dept</td>
                                 <td th:text="${ret.toDepartment}">To Dept</td>
                                 <td th:text="${ret.expectedNextDepartment}">Expected</td>
@@ -433,19 +458,21 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3" th:each="dept : ${departments}">
-                            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #fd7e14 !important;">
-                                <div class="card-body text-center p-3">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="dept-info">
-                                            <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
-                                            <small class="text-muted">Returns count</small>
-                                        </div>
-                                        <div class="dept-quantity">
-                                            <span class="badge rounded-pill" th:text="${returnsByDepartment.get(dept) != null ? returnsByDepartment.get(dept) : 0}" style="background-color: #fd7e14; color: #000;">0</span>
+                            <a th:href="@{'/admin/scanned-garments?department=' + ${dept}}" style="text-decoration: none; color: inherit;">
+                                <div class="card border-0 shadow-sm h-100 dept-link" style="border-left: 4px solid #fd7e14 !important; cursor: pointer;">
+                                    <div class="card-body text-center p-3">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="dept-info">
+                                                <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
+                                                <small class="text-muted">Returns count</small>
+                                            </div>
+                                            <div class="dept-quantity">
+                                                <span class="badge rounded-pill" th:text="${returnsByDepartment.get(dept) != null ? returnsByDepartment.get(dept) : 0}" style="background-color: #fd7e14; color: #000;">0</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>

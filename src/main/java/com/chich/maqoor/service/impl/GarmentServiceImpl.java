@@ -76,6 +76,31 @@ public class GarmentServiceImpl implements GarmentService {
         return workflowService.isValidTransition(garment.getDepartmentId(), newDepartment, garmentType);
     }
     
+    @Override
+    public boolean updateGarmentDepartmentWithValidationAndReturnStatus(int garmentId, Departments newDepartment, int userId) {
+        Garments garment = garmentRepository.findById(garmentId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow();
+        
+        Departments currentDepartment = garment.getDepartmentId();
+        String garmentType = determineGarmentType(garment);
+        
+        boolean isReturn = false;
+        
+        // Check if this is a valid transition
+        if (!workflowService.isValidTransition(currentDepartment, newDepartment, garmentType)) {
+            // Record this as a return/flow violation
+            recordReturn(garment, user, currentDepartment, newDepartment, garmentType);
+            isReturn = true;
+        }
+        
+        // Update the garment department
+        garment.setDepartmentId(newDepartment);
+        garment.setLastUpdate(new Date());
+        garmentRepository.save(garment);
+        
+        return isReturn;
+    }
+    
     /**
      * Record a return/flow violation
      */

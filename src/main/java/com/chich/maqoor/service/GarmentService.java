@@ -22,6 +22,12 @@ public interface GarmentService {
     Garments updateGarmentDepartmentWithValidation(int garmentId, Departments newDepartment, int userId);
     
     /**
+     * Update garment department with validation and return whether it was recorded as a return
+     * @return true if the transition was invalid and recorded as a return, false otherwise
+     */
+    boolean updateGarmentDepartmentWithValidationAndReturnStatus(int garmentId, Departments newDepartment, int userId);
+    
+    /**
      * Check if department transition is valid
      */
     boolean isValidDepartmentTransition(int garmentId, Departments newDepartment);

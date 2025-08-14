@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class ScanRequestDto {
-    private int garmentId;
+    private String garmentId;
     private int userId;
     private Departments department;
 }

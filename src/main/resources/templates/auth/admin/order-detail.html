@@ -56,7 +56,7 @@
             <div th:each="garment : ${garments}" class="garment-dropdown">
                 <div class="garment-header" onclick="toggleGarment(this)">
                     <span>
-                        <strong>Garment ID: <span th:text="${garment.garmentId}">101</span></strong>
+                        <strong>Garment ID: <span th:text="${garment.cleanCloudGarmentId}">101</span></strong>
                         <span class="ms-3 text-muted">(<span th:text="${garment.description != null ? garment.description : 'No Description'}">White Shirt</span>)</span>
                     </span>
                     <span class="badge bg-primary department-badge" th:text="${garment.departmentId != null ? garment.departmentId : 'UNKNOWN'}">IRONING</span>
@@ -82,7 +82,7 @@
                         </div>
                     </div>
                     <div class="mt-2">
-                        <a class="btn btn-outline-info btn-sm" th:href="@{'/admin/garments/' + ${garment.garmentId}}">
+                        <a class="btn btn-outline-info btn-sm" th:href="@{'/admin/garments/' + ${garment.cleanCloudGarmentId}}">
                             View Complete History
                         </a>
                     </div>

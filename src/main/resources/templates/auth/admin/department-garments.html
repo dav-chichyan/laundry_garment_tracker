@@ -82,11 +82,11 @@
                         </tr>
                         
                         <tr th:each="garment : ${garments}" class="garment-row" 
-                            th:data-garment-id="${garment.garmentId}"
+                            th:data-garment-id="${garment.cleanCloudGarmentId}"
                             th:data-description="${garment.description}"
                             th:data-order-id="${garment.order.orderId}">
                             <td>
-                                <strong th:text="${garment.garmentId}">101</strong>
+                                <strong th:text="${garment.cleanCloudGarmentId}">101</strong>
                             </td>
                             <td th:text="${garment.description != null ? garment.description : 'No Description'}">White Shirt</td>
                             <td>
@@ -106,7 +106,7 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a class="btn btn-outline-info" th:href="@{'/admin/garments/' + ${garment.garmentId}}" 
+                                    <a class="btn btn-outline-info" th:href="@{'/admin/garments/' + ${garment.cleanCloudGarmentId}}" 
                                        title="View History">
                                         <i class="fas fa-history"></i> History
                                     </a>

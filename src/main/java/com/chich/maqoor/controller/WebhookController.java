@@ -10,6 +10,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import com.chich.maqoor.dto.CleanCloudOrderDetails;
+import com.chich.maqoor.entity.Garments;
+import com.chich.maqoor.entity.GarmentScan;
+import com.chich.maqoor.entity.Orders;
+import com.chich.maqoor.entity.User;
+import com.chich.maqoor.repository.GarmentRepository;
+import com.chich.maqoor.repository.GarmentScanRepository;
+import com.chich.maqoor.repository.OrdersRepository;
+import com.chich.maqoor.repository.UserRepository;
 
 @Slf4j
 @RestController
@@ -18,6 +29,18 @@ public class WebhookController {
 
     @Autowired
     private CleanCloudService cleanCloudService;
+
+    @Autowired
+    private OrdersRepository ordersRepository;
+
+    @Autowired
+    private GarmentRepository garmentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private GarmentScanRepository garmentScanRepository;
 
     @PostMapping("/cleancloud")
     public ResponseEntity<Map<String, String>> handleCleanCloudWebhook(@RequestBody CleanCloudWebhookPayload payload) {
@@ -67,6 +90,126 @@ public class WebhookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Internal server error: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/test-api/{orderId}")
+    public ResponseEntity<Map<String, Object>> testCleanCloudAPI(@PathVariable int orderId) {
+        log.info("Testing CleanCloud API directly for order: {}", orderId);
+        
+        try {
+            // Call the service directly
+            CleanCloudOrderDetails orderDetails = cleanCloudService.getOrder(orderId);
+            
+            Map<String, Object> response = new HashMap<>();
+            if (orderDetails != null) {
+                response.put("success", true);
+                response.put("orderId", orderDetails.getOrderId());
+                response.put("summary", orderDetails.getSummary());
+                response.put("garmentsCount", orderDetails.getGarments() != null ? orderDetails.getGarments().size() : 0);
+                
+                if (orderDetails.getGarments() != null) {
+                    List<Map<String, String>> garments = new ArrayList<>();
+                    for (CleanCloudOrderDetails.CleanCloudGarment g : orderDetails.getGarments()) {
+                        Map<String, String> garment = new HashMap<>();
+                        garment.put("barcodeID", g.getBarcodeID());
+                        garment.put("description", g.getDescription());
+                        garment.put("type", g.getType());
+                        garments.add(garment);
+                    }
+                    response.put("garments", garments);
+                }
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed to fetch order details");
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error testing CleanCloud API for order {}: {}", orderId, e.getMessage(), e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/db-viewer")
+    public ResponseEntity<Map<String, Object>> viewDatabase() {
+        log.info("Database viewer accessed");
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Get orders
+            List<Orders> orders = ordersRepository.findAll();
+            Map<String, Object> ordersData = new HashMap<>();
+            for (Orders order : orders) {
+                Map<String, Object> orderInfo = new HashMap<>();
+                orderInfo.put("orderId", order.getOrderId());
+                orderInfo.put("cleanCloudOrderId", order.getCleanCloudOrderId());
+                orderInfo.put("customerName", order.getCustomerName());
+                orderInfo.put("status", order.getStatus());
+                orderInfo.put("createdAt", order.getCreatedAt());
+                ordersData.put("Order_" + order.getOrderId(), orderInfo);
+            }
+            response.put("orders", ordersData);
+            
+            // Get garments
+            List<Garments> garments = garmentRepository.findAll();
+            Map<String, Object> garmentsData = new HashMap<>();
+            for (Garments garment : garments) {
+                Map<String, Object> garmentInfo = new HashMap<>();
+                garmentInfo.put("garmentId", garment.getGarmentId());
+                garmentInfo.put("cleanCloudGarmentId", garment.getCleanCloudGarmentId());
+                garmentInfo.put("description", garment.getDescription());
+                garmentInfo.put("departmentId", garment.getDepartmentId());
+                garmentInfo.put("orderId", garment.getOrder() != null ? garment.getOrder().getOrderId() : null);
+                garmentInfo.put("createdAt", garment.getCreatedAt());
+                garmentsData.put("Garment_" + garment.getGarmentId(), garmentInfo);
+            }
+            response.put("garments", garmentsData);
+            
+            // Get users
+            List<User> users = userRepository.findAll();
+            Map<String, Object> usersData = new HashMap<>();
+            for (User user : users) {
+                Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("id", user.getId());
+                userInfo.put("name", user.getName());
+                userInfo.put("email", user.getEmail());
+                userInfo.put("department", user.getDepartment());
+                userInfo.put("role", user.getRole());
+                usersData.put("User_" + user.getId(), userInfo);
+            }
+            response.put("users", usersData);
+            
+            // Get garment scans
+            List<GarmentScan> scans = garmentScanRepository.findAll();
+            Map<String, Object> scansData = new HashMap<>();
+            for (GarmentScan scan : scans) {
+                Map<String, Object> scanInfo = new HashMap<>();
+                scanInfo.put("id", scan.getId());
+                scanInfo.put("garmentId", scan.getGarment().getGarmentId());
+                scanInfo.put("cleanCloudGarmentId", scan.getGarment().getCleanCloudGarmentId());
+                scanInfo.put("userId", scan.getUser().getId());
+                scanInfo.put("userName", scan.getUser().getName());
+                scanInfo.put("department", scan.getDepartment());
+                scanInfo.put("scannedAt", scan.getScannedAt());
+                scansData.put("Scan_" + scan.getId(), scanInfo);
+            }
+            response.put("scans", scansData);
+            
+            response.put("success", true);
+            response.put("message", "Database contents retrieved successfully");
+            
+        } catch (Exception e) {
+            log.error("Error retrieving database contents: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/health")

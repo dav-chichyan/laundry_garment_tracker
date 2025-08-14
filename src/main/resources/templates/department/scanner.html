@@ -145,30 +145,7 @@
             outline: none;
         }
         
-        .scan-button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 20px 40px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        
-        .scan-button:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
-        }
-        
-        .scan-button:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+
         
         .result-card {
             background: #f8f9fa;
@@ -217,47 +194,7 @@
             color: #212529;
         }
         
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .action-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-stain {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .btn-stain:hover {
-            background: #e0a800;
-        }
-        
-        .btn-return {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-return:hover {
-            background: #c82333;
-        }
-        
-        .btn-confirm {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-confirm:hover {
-            background: #218838;
-        }
+
         
         .status-badge {
             display: inline-block;
@@ -336,15 +273,10 @@
                     <input type="text" 
                            class="form-control scan-input" 
                            id="garmentIdInput" 
-                           placeholder="Scan or enter garment ID"
+                           placeholder="Scan barcode or enter garment ID (auto-scans after 0.5s)"
                            autocomplete="off"
                            autofocus>
                 </div>
-                
-                <!-- Scan Button -->
-                <button class="scan-button" id="scanButton" onclick="scanGarment()">
-                    <i class="fas fa-search"></i> Scan Garment
-                </button>
                 
                 <!-- Loading -->
                 <div class="loading" id="loading">
@@ -362,18 +294,6 @@
                     <div class="garment-info" id="garmentInfo">
                         <!-- Garment info will be populated here -->
                     </div>
-                    
-                    <div class="action-buttons">
-                        <button class="action-btn btn-stain" onclick="markStain()">
-                            <i class="fas fa-exclamation-triangle"></i> Has Stain
-                        </button>
-                        <button class="action-btn btn-return" onclick="markReturn()">
-                            <i class="fas fa-undo"></i> Return Required
-                        </button>
-                        <button class="action-btn btn-confirm" onclick="confirmScan()">
-                            <i class="fas fa-check"></i> Confirm
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -381,8 +301,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentGarmentId = null;
         let dailyScanCount = 0;
+        let currentUser = {
+            id: /*[[${userId}]]*/ 1,
+            name: /*[[${userName}]]*/ 'Staff Name',
+            department: /*[[${userDepartment}]]*/ 'Department'
+        };
         
         // Load daily scan count from localStorage
         function loadDailyScanCount() {
@@ -419,103 +343,210 @@
             }
         });
         
+        // Auto-scan when garment ID is entered (with delay for barcode scanners)
+        let scanTimeout;
+        document.getElementById('garmentIdInput').addEventListener('input', function(e) {
+            const garmentId = e.target.value.trim();
+            
+            // Clear any existing timeout
+            if (scanTimeout) {
+                clearTimeout(scanTimeout);
+            }
+            
+            // If garment ID is entered, auto-scan after 500ms delay
+            if (garmentId && garmentId.length > 0) {
+                scanTimeout = setTimeout(() => {
+                    scanGarment();
+                }, 500); // 500ms delay to allow barcode scanner to complete
+            }
+        });
+        
         // Auto-focus input when page loads
         window.addEventListener('load', function() {
             document.getElementById('garmentIdInput').focus();
         });
         
-        function scanGarment() {
+        async function scanGarment() {
             const garmentId = document.getElementById('garmentIdInput').value.trim();
             
             if (!garmentId) {
-                alert('Please enter a garment ID');
+                showError('Please enter a garment ID');
+                return;
+            }
+            
+            // Validate that garmentId is not empty
+            if (!garmentId || garmentId.trim().length === 0) {
+                showError('Please enter a valid garment ID');
                 return;
             }
             
             // Show loading
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultCard').style.display = 'none';
+            showLoading(true);
+            hideResult();
             
-            // Simulate API call
-            setTimeout(() => {
-                // Hide loading
-                document.getElementById('loading').style.display = 'none';
+            try {
+                // First, get garment details to validate it exists
+                const detailsResponse = await fetch(`/api/garment/${garmentId}/details`);
+                if (!detailsResponse.ok) {
+                    if (detailsResponse.status === 404) {
+                        showError(`Garment ID ${garmentId} not found in database. Please scan a valid garment.`);
+                        // Clear input and focus for next scan
+                        document.getElementById('garmentIdInput').value = '';
+                        document.getElementById('garmentIdInput').focus();
+                    } else {
+                        showError('Error retrieving garment details. Please try again.');
+                    }
+                    return;
+                }
                 
-                // Show result (simulated)
-                currentGarmentId = garmentId;
-                document.getElementById('resultTitle').textContent = `Garment #${garmentId}`;
-                document.getElementById('statusBadge').textContent = 'Current Department';
-                document.getElementById('statusBadge').className = 'status-badge status-current';
+                const detailsData = await detailsResponse.json();
+                if (!detailsData.success) {
+                    showError(detailsData.message || 'Error retrieving garment details');
+                    return;
+                }
                 
-                // Populate garment info
-                document.getElementById('garmentInfo').innerHTML = `
-                    <div class="mb-2"><strong>Garment ID:</strong> ${garmentId}</div>
-                    <div class="mb-2"><strong>Order ID:</strong> 1001</div>
-                    <div class="mb-2"><strong>Description:</strong> Cotton T-Shirt</div>
-                    <div class="mb-2"><strong>Customer:</strong> John Doe</div>
-                    <div class="mb-2"><strong>Special Instructions:</strong> Handle with care</div>
-                `;
+                // Display garment details
+                displayGarmentDetails(detailsData.garment);
                 
-                document.getElementById('resultCard').style.display = 'block';
+                // Now perform the actual scan
+                const scanResponse = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        garmentId: garmentId,
+                        userId: currentUser.id,
+                        department: currentUser.department
+                    })
+                });
                 
-                // Increment daily scan count
-                incrementScanCount();
+                if (scanResponse.ok) {
+                    const scanData = await scanResponse.json();
+                    
+                    if (scanData.success) {
+                        // Show success message
+                        showSuccess(scanData.message);
+                        
+                        // If this was recorded as a return, show additional information
+                        if (scanData.isReturn) {
+                            showInfo(scanData.returnMessage || "This scan was recorded as a workflow return.");
+                        }
+                        
+                        // Clear input for next scan
+                        document.getElementById('garmentIdInput').value = '';
+                        
+                        // Update scan count if needed
+                        if (typeof updateScanCount === 'function') {
+                            updateScanCount();
+                        }
+                    } else {
+                        const errorData = await scanResponse.json();
+                        
+                        // Handle specific error cases
+                        if (errorData.errorCode === 'ALREADY_IN_DEPARTMENT') {
+                            // Special handling for garment already in department
+                            showInfo(`<strong>Garment Already in ${currentUser.department}</strong><br>
+                                 <small>This garment is already in your department. No need to scan again.</small><br>
+                                 <small class="text-muted">Last updated: ${new Date(errorData.lastUpdate).toLocaleString()}</small>`);
+                            
+                            // Clear input for next scan
+                            document.getElementById('garmentIdInput').value = '';
+                        } else {
+                            showError(errorData.message || 'Scan failed');
+                        }
+                    }
+                } else {
+                    showError('Failed to process scan');
+                }
                 
-                // Clear input
-                document.getElementById('garmentIdInput').value = '';
-                document.getElementById('garmentIdInput').focus();
-            }, 1500);
+            } catch (error) {
+                console.error('Error during scan:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                showLoading(false);
+            }
         }
         
-        function processScanResult(garmentId) {
-            // This would be replaced with actual API call to your backend
-            const mockResult = {
-                garmentId: garmentId,
-                orderId: Math.floor(Math.random() * 9000) + 1000,
-                description: 'Sample Garment',
-                currentDepartment: 'Washing',
-                customerName: 'John Doe',
-                specialInstructions: 'Handle with care'
-            };
-            
-            displayResult(mockResult);
-        }
-        
-        function displayResult(result) {
+        function displayGarmentDetails(garment) {
             const resultCard = document.getElementById('resultCard');
             const resultTitle = document.getElementById('resultTitle');
             const statusBadge = document.getElementById('statusBadge');
             const garmentInfo = document.getElementById('garmentInfo');
             
-            resultTitle.textContent = `Garment #${result.garmentId}`;
-            statusBadge.textContent = result.currentDepartment;
-            statusBadge.className = `status-badge status-${result.currentDepartment.toLowerCase()}`;
+            resultTitle.textContent = `Garment #${garment.cleanCloudGarmentId}`;
             
-            garmentInfo.innerHTML = `
-                <div class="info-item">
-                    <div class="info-label">Order ID</div>
-                    <div class="info-value">#${result.orderId}</div>
-                </div>
+            // Set status badge based on current department
+            const currentDept = garment.departmentId || 'RECEPTION';
+            statusBadge.textContent = currentDept;
+            statusBadge.className = `status-badge status-${currentDept.toLowerCase()}`;
+            
+            // Build garment info HTML
+            let infoHTML = '';
+            
+            if (garment.order) {
+                infoHTML += `
+                    <div class="info-item">
+                        <div class="info-label">Order ID</div>
+                        <div class="info-value">#${garment.order.cleanCloudOrderId || garment.order.orderId}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Customer</div>
+                        <div class="info-value">${garment.order.customerName || 'N/A'}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phone</div>
+                        <div class="info-value">${garment.order.customerPhone || 'N/A'}</div>
+                    </div>
+                `;
+            }
+            
+            infoHTML += `
                 <div class="info-item">
                     <div class="info-label">Description</div>
-                    <div class="info-value">${result.description}</div>
+                    <div class="info-value">${garment.description || 'N/A'}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Customer</div>
-                    <div class="info-value">${result.customerName}</div>
+                    <div class="info-label">Type</div>
+                    <div class="info-value">${garment.type || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Color</div>
+                    <div class="info-value">${garment.color || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Size</div>
+                    <div class="info-value">${garment.size || 'N/A'}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Instructions</div>
-                    <div class="info-value">${result.specialInstructions}</div>
+                    <div class="info-value">${garment.specialInstructions || 'None'}</div>
                 </div>
             `;
+            
+            garmentInfo.innerHTML = infoHTML;
+            
+            // Show the result card
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card';
+        }
+        
+        function showSuccess(message) {
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const garmentInfo = document.getElementById('garmentInfo');
+            
+            resultTitle.textContent = 'Success!';
+            resultTitle.className = 'text-success';
+            garmentInfo.innerHTML = `<p class="text-success mb-0">${message}</p>`;
             
             resultCard.style.display = 'block';
             resultCard.className = 'result-card';
             
-            // Clear input and focus for next scan
-            document.getElementById('garmentIdInput').value = '';
-            document.getElementById('garmentIdInput').focus();
+            // Auto-hide success message after 3 seconds
+            setTimeout(() => {
+                hideResult();
+            }, 3000);
         }
         
         function showError(message) {
@@ -524,37 +555,32 @@
             const garmentInfo = document.getElementById('garmentInfo');
             
             resultTitle.textContent = 'Error';
+            resultTitle.className = 'text-danger';
             garmentInfo.innerHTML = `<p class="text-danger mb-0">${message}</p>`;
             
             resultCard.style.display = 'block';
             resultCard.className = 'result-card error';
         }
+
+        function showInfo(message) {
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const garmentInfo = document.getElementById('garmentInfo');
+
+            resultTitle.textContent = 'Info';
+            resultTitle.className = 'text-info';
+            garmentInfo.innerHTML = `<p class="text-info mb-0">${message}</p>`;
+
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card';
+        }
+        
+        function hideResult() {
+            document.getElementById('resultCard').style.display = 'none';
+        }
         
         function showLoading(show) {
             document.getElementById('loading').style.display = show ? 'block' : 'none';
-            document.getElementById('scanButton').disabled = show;
-        }
-        
-        function markStain() {
-            if (currentGarmentId) {
-                // API call to mark stain
-                alert(`Garment #${currentGarmentId} marked as having stain`);
-            }
-        }
-        
-        function markReturn() {
-            if (currentGarmentId) {
-                // API call to mark return required
-                alert(`Garment #${currentGarmentId} marked for return`);
-            }
-        }
-        
-        function confirmScan() {
-            if (currentGarmentId) {
-                // API call to confirm scan and move to next department
-                alert(`Garment #${currentGarmentId} confirmed and moved to next department`);
-                document.getElementById('resultCard').style.display = 'none';
-            }
         }
     </script>
 </body>

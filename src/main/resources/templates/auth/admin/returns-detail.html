@@ -5,239 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Returns & Flow Violations - Maqoor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f4f4;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .card {
-            border: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 12px;
-        }
-        
-        .card-header {
-            border-radius: 12px 12px 0 0 !important;
-            border-bottom: none;
-        }
-        
-        .btn {
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            transition: transform 0.2s ease;
-        }
-        
-        .table tbody tr:hover {
-            background-color: #f8f9fa !important;
-        }
-        
-        .logo-container img {
-            transition: transform 0.2s ease;
-        }
-        
-        .logo-container:hover img {
-            transform: scale(1.05);
-        }
-        
-        .returns-filter {
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
-            color: white;
-        }
-        
-        .returns-table th {
-            background-color: #dc3545 !important;
-            color: white !important;
-            border-color: #dc3545 !important;
-        }
-        
-        .returns-table tbody tr:nth-child(even) {
-            background-color: #fff5f5;
-        }
-        
-        .returns-table tbody tr:nth-child(odd) {
-            background-color: #fff;
-        }
-    </style>
 </head>
 <body>
-
-<div class="container py-5">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center logo-container">
-                            <img src="/logo.png" alt="Maqoor Logo" style="height: 40px; width: auto; margin-right: 15px;">
-                            <h2 class="mb-0" style="color: #003366;">Returns & Flow Violations</h2>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="/admin/users" class="btn btn-primary" style="background-color: #003366; border-color: #003366;">
-                                <i class="fas fa-arrow-left"></i> Back to Dashboard
-                            </a>
-                            <a href="/auth/logout" class="btn btn-danger" style="background-color: #dc3545; border-color: #dc3545; color: white;">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2>Returns & Flow Violations</h2>
+                <a href="/admin/users" class="btn btn-primary">Back to Dashboard</a>
             </div>
         </div>
-    </div>
 
-    <!-- Filter Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card returns-filter">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-3">
-                            <h6 class="mb-0" th:if="${filteredUser}">
-                                <i class="fas fa-user me-2"></i>
-                                <span th:text="${filteredUser.name}">User Name</span> - Returns
-                            </h6>
-                            <h6 class="mb-0" th:unless="${filteredUser}">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                All Returns & Flow Violations
-                            </h6>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input type="date" class="form-control form-control-sm" id="fromDate" name="fromDate" 
-                                           th:value="${#dates.format(from, 'yyyy-MM-dd')}" placeholder="From">
-                                </div>
-                                <div class="col-6">
-                                    <input type="date" class="form-control form-control-sm" id="toDate" name="toDate" 
-                                           th:value="${#dates.format(to, 'yyyy-MM-dd')}" placeholder="To">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="button" class="btn btn-light btn-sm w-100" onclick="applyDateFilter()">
-                                <i class="fas fa-filter me-1"></i>Apply Filter
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <!-- Simple Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Returns History</h5>
             </div>
-        </div>
-    </div>
-
-    <!-- Returns Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header" style="background-color: #dc3545; color: white;">
-                    <h5 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Returns Details
-                        <span class="badge bg-light text-danger ms-2" th:text="${returns.size()}">0</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle text-center returns-table">
-                            <thead>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
                             <tr>
                                 <th>Staff Member</th>
                                 <th>Garment ID</th>
                                 <th>From Department</th>
                                 <th>To Department</th>
-                                <th>Expected Next</th>
                                 <th>Time</th>
                                 <th>Reason</th>
-                                <th>Actions</th>
                             </tr>
-                            </thead>
-                            <tbody>
+                        </thead>
+                        <tbody>
                             <tr th:if="${#lists.isEmpty(returns)}">
-                                <td colspan="8" class="text-muted py-4">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    No returns recorded in the selected date range
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <p>No returns recorded in the selected date range</p>
                                 </td>
                             </tr>
                             <tr th:each="ret : ${returns}">
-                                <td>
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-user text-primary me-2"></i>
-                                        <span th:text="${ret.user.name}">Staff Name</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info" th:text="${ret.garment.garmentId}">Garment ID</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-warning" th:text="${ret.fromDepartment}">From Dept</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger" th:text="${ret.toDepartment}">To Dept</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success" th:text="${ret.expectedNextDepartment}">Expected</span>
-                                </td>
-                                <td>
-                                    <small th:text="${#dates.format(ret.returnTime, 'dd/MM/yyyy HH:mm')}">Time</small>
-                                </td>
-                                <td>
-                                    <span class="text-danger" th:text="${ret.returnReason}">Reason</span>
-                                </td>
-                                <td>
-                                    <a th:href="@{'/admin/garments/' + ${ret.garment.garmentId}}" 
-                                       class="btn btn-outline-primary btn-sm" title="View Garment History">
-                                        <i class="fas fa-history"></i>
-                                    </a>
-                                </td>
+                                <td th:text="${ret.user.name}">Staff Name</td>
+                                <td th:text="${ret.garment.cleanCloudGarmentId}">Garment ID</td>
+                                <td th:text="${ret.fromDepartment}">From Dept</td>
+                                <td th:text="${ret.toDepartment}">To Dept</td>
+                                <td th:text="${#dates.format(ret.returnTime, 'dd/MM/yyyy HH:mm')}">Time</td>
+                                <td th:text="${ret.returnReason}">Reason</td>
                             </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function applyDateFilter() {
-            const fromDate = document.getElementById('fromDate').value;
-            const toDate = document.getElementById('toDate').value;
-            
-            if (!fromDate || !toDate) {
-                alert('Please select both from and to dates');
-                return;
-            }
-            
-            // Build the URL with current parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('fromDate', fromDate + 'T00:00');
-            urlParams.set('toDate', toDate + 'T23:59');
-            
-            // Redirect to the filtered view
-            window.location.href = '/admin/returns?' + urlParams.toString();
-        }
-        
-        // Set default dates if not already set
-        document.addEventListener('DOMContentLoaded', function() {
-            const fromInput = document.querySelector('#fromDate');
-            const toInput = document.querySelector('#toDate');
-            
-            if (fromInput && toInput && !fromInput.value && !toInput.value) {
-                const now = new Date();
-                const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-                
-                fromInput.value = weekAgo.toISOString().slice(0, 10);
-                toInput.value = now.toISOString().slice(0, 10);
-            }
-        });
-    </script>
 </body>
 </html>
