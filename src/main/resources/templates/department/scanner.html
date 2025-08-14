@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Scanner - Maqoor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .scanner-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        /* User Info Header - Outside the box, right above */
+        .user-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #003366 0%, #007B55 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .user-department {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .daily-stats {
+            text-align: center;
+        }
+        
+        .scan-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .scan-count i {
+            color: #FFC107;
+        }
+        
+        .logout-section {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logout-section .btn {
+            border: 2px solid white;
+            color: white;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-section .btn:hover {
+            background: white;
+            color: #003366;
+        }
+        
+        /* Scanner Box */
+        .scanner-box {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .scanner-header {
+            background: linear-gradient(135deg, #003366 0%, #007B55 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .scanner-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .scanner-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .user-info {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .user-info small {
+            color: rgba(255,255,255,0.9);
+            font-size: 12px;
+        }
+        
+        .scanner-body {
+            padding: 40px;
+        }
+        
+        .scan-input-group {
+            margin-bottom: 30px;
+        }
+        
+        .scan-input {
+            font-size: 24px;
+            padding: 20px;
+            text-align: center;
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .scan-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+            outline: none;
+        }
+        
+        .scan-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .scan-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        
+        .scan-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 5px solid #28a745;
+            display: none;
+        }
+        
+        .result-card.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .result-card.warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .garment-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-stain {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-stain:hover {
+            background: #e0a800;
+        }
+        
+        .btn-return {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-return:hover {
+            background: #c82333;
+        }
+        
+        .btn-confirm {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-confirm:hover {
+            background: #218838;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-reception { background: #e2e3e5; color: #383d41; }
+        .status-examination { background: #cce5ff; color: #004085; }
+        .status-washing { background: #d1ecf1; color: #0c5460; }
+        .status-ironing { background: #fff3cd; color: #856404; }
+        .status-packaging { background: #d4edda; color: #155724; }
+        .status-delivery { background: #f8d7da; color: #721c24; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <!-- User Info Header - Outside the box, right above -->
+        <div class="user-info-header">
+            <div class="user-details">
+                <span class="user-name" th:text="${userName}">Staff Name</span>
+                <span class="user-department" th:text="${userDepartment}">Department</span>
+            </div>
+            <div class="daily-stats">
+                <span class="scan-count">
+                    <i class="fas fa-barcode"></i>
+                    <span id="dailyScanCount">0</span> items today
+                </span>
+            </div>
+            <div class="logout-section">
+                <a href="/auth/logout" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Scanner Box -->
+        <div class="scanner-box">
+            <!-- Header -->
+            <div class="scanner-header">
+                <h1><i class="fas fa-barcode"></i> Department Scanner</h1>
+                <p th:text="${departmentName} + ' Department'">Washing Department</p>
+            </div>
+            
+            <!-- Scanner Body -->
+            <div class="scanner-body">
+                <!-- Scan Input -->
+                <div class="scan-input-group">
+                    <label for="garmentIdInput" class="form-label fw-bold mb-3">
+                        <i class="fas fa-qrcode"></i> Scan Garment ID
+                    </label>
+                    <input type="text" 
+                           class="form-control scan-input" 
+                           id="garmentIdInput" 
+                           placeholder="Scan or enter garment ID"
+                           autocomplete="off"
+                           autofocus>
+                </div>
+                
+                <!-- Scan Button -->
+                <button class="scan-button" id="scanButton" onclick="scanGarment()">
+                    <i class="fas fa-search"></i> Scan Garment
+                </button>
+                
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Processing scan...</p>
+                </div>
+                
+                <!-- Result Card -->
+                <div class="result-card" id="resultCard">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0" id="resultTitle">Scan Result</h5>
+                        <span class="status-badge" id="statusBadge">Reception</span>
+                    </div>
+                    
+                    <div class="garment-info" id="garmentInfo">
+                        <!-- Garment info will be populated here -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn btn-stain" onclick="markStain()">
+                            <i class="fas fa-exclamation-triangle"></i> Has Stain
+                        </button>
+                        <button class="action-btn btn-return" onclick="markReturn()">
+                            <i class="fas fa-undo"></i> Return Required
+                        </button>
+                        <button class="action-btn btn-confirm" onclick="confirmScan()">
+                            <i class="fas fa-check"></i> Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentGarmentId = null;
+        let dailyScanCount = 0;
+        
+        // Load daily scan count from localStorage
+        function loadDailyScanCount() {
+            const today = new Date().toDateString();
+            const stored = localStorage.getItem(`scanCount_${today}`);
+            if (stored) {
+                dailyScanCount = parseInt(stored);
+                updateScanCountDisplay();
+            }
+        }
+        
+        // Update scan count display
+        function updateScanCountDisplay() {
+            document.getElementById('dailyScanCount').textContent = dailyScanCount;
+        }
+        
+        // Increment scan count
+        function incrementScanCount() {
+            dailyScanCount++;
+            const today = new Date().toDateString();
+            localStorage.setItem(`scanCount_${today}`, dailyScanCount.toString());
+            updateScanCountDisplay();
+        }
+        
+        // Load count when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDailyScanCount();
+        });
+        
+        // Auto-focus input and handle Enter key
+        document.getElementById('garmentIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                scanGarment();
+            }
+        });
+        
+        // Auto-focus input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('garmentIdInput').focus();
+        });
+        
+        function scanGarment() {
+            const garmentId = document.getElementById('garmentIdInput').value.trim();
+            
+            if (!garmentId) {
+                alert('Please enter a garment ID');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Show result (simulated)
+                currentGarmentId = garmentId;
+                document.getElementById('resultTitle').textContent = `Garment #${garmentId}`;
+                document.getElementById('statusBadge').textContent = 'Current Department';
+                document.getElementById('statusBadge').className = 'status-badge status-current';
+                
+                // Populate garment info
+                document.getElementById('garmentInfo').innerHTML = `
+                    <div class="mb-2"><strong>Garment ID:</strong> ${garmentId}</div>
+                    <div class="mb-2"><strong>Order ID:</strong> 1001</div>
+                    <div class="mb-2"><strong>Description:</strong> Cotton T-Shirt</div>
+                    <div class="mb-2"><strong>Customer:</strong> John Doe</div>
+                    <div class="mb-2"><strong>Special Instructions:</strong> Handle with care</div>
+                `;
+                
+                document.getElementById('resultCard').style.display = 'block';
+                
+                // Increment daily scan count
+                incrementScanCount();
+                
+                // Clear input
+                document.getElementById('garmentIdInput').value = '';
+                document.getElementById('garmentIdInput').focus();
+            }, 1500);
+        }
+        
+        function processScanResult(garmentId) {
+            // This would be replaced with actual API call to your backend
+            const mockResult = {
+                garmentId: garmentId,
+                orderId: Math.floor(Math.random() * 9000) + 1000,
+                description: 'Sample Garment',
+                currentDepartment: 'Washing',
+                customerName: 'John Doe',
+                specialInstructions: 'Handle with care'
+            };
+            
+            displayResult(mockResult);
+        }
+        
+        function displayResult(result) {
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const statusBadge = document.getElementById('statusBadge');
+            const garmentInfo = document.getElementById('garmentInfo');
+            
+            resultTitle.textContent = `Garment #${result.garmentId}`;
+            statusBadge.textContent = result.currentDepartment;
+            statusBadge.className = `status-badge status-${result.currentDepartment.toLowerCase()}`;
+            
+            garmentInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Order ID</div>
+                    <div class="info-value">#${result.orderId}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Description</div>
+                    <div class="info-value">${result.description}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Customer</div>
+                    <div class="info-value">${result.customerName}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Instructions</div>
+                    <div class="info-value">${result.specialInstructions}</div>
+                </div>
+            `;
+            
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card';
+            
+            // Clear input and focus for next scan
+            document.getElementById('garmentIdInput').value = '';
+            document.getElementById('garmentIdInput').focus();
+        }
+        
+        function showError(message) {
+            const resultCard = document.getElementById('resultCard');
+            const resultTitle = document.getElementById('resultTitle');
+            const garmentInfo = document.getElementById('garmentInfo');
+            
+            resultTitle.textContent = 'Error';
+            garmentInfo.innerHTML = `<p class="text-danger mb-0">${message}</p>`;
+            
+            resultCard.style.display = 'block';
+            resultCard.className = 'result-card error';
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('scanButton').disabled = show;
+        }
+        
+        function markStain() {
+            if (currentGarmentId) {
+                // API call to mark stain
+                alert(`Garment #${currentGarmentId} marked as having stain`);
+            }
+        }
+        
+        function markReturn() {
+            if (currentGarmentId) {
+                // API call to mark return required
+                alert(`Garment #${currentGarmentId} marked for return`);
+            }
+        }
+        
+        function confirmScan() {
+            if (currentGarmentId) {
+                // API call to confirm scan and move to next department
+                alert(`Garment #${currentGarmentId} confirmed and moved to next department`);
+                document.getElementById('resultCard').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+

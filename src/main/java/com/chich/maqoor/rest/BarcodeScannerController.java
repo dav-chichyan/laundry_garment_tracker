@@ -40,7 +40,8 @@ public class BarcodeScannerController {
         Garments garment = garmentRepository.findById(request.getGarmentId()).orElseThrow();
         User user = userRepository.findById(request.getUserId()).orElseThrow();
 
-        garmentService.updateGarmentDepartment(request.getGarmentId(), request.getDepartment());
+        // Use the new workflow validation method
+        garmentService.updateGarmentDepartmentWithValidation(request.getGarmentId(), request.getDepartment(), request.getUserId());
 
         GarmentScan scan = new GarmentScan();
         scan.setGarment(garment);

@@ -3,9 +3,10 @@ package com.chich.maqoor.entity;
 import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.entity.constant.UserState;
+import com.chich.maqoor.entity.constant.UserStatus;
 import jakarta.persistence.*;
+import java.util.List;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,9 +40,35 @@ public class User  {
     private UserState state;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "department")
+    @Column(name = "department", nullable = true)
     private Departments department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus status;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_schedule_times", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "schedule_time")
+    private List<String> scheduleTimes;
 
     @Column(name = "username")
     private String username;
+
+    // Additional getters and setters for new fields
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
+    public List<String> getScheduleTimes() {
+        return scheduleTimes;
+    }
+
+    public void setScheduleTimes(List<String> scheduleTimes) {
+        this.scheduleTimes = scheduleTimes;
+    }
 }

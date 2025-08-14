@@ -34,6 +34,186 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        
+        .dept-sidebar {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .dept-item {
+            transition: all 0.3s ease;
+        }
+        
+        .dept-link {
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+        
+        .dept-link:hover {
+            background-color: #f8f9fa;
+            border-left-color: #007bff;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .dept-link:active {
+            background-color: #e9ecef;
+        }
+        
+        .dept-name {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+        }
+        
+        .quantity-badge {
+            background-color: #FFD700;
+            color: #000;
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 1rem;
+            min-width: 35px;
+            text-align: center;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .dept-info small {
+            font-size: 0.8rem;
+        }
+        
+        .sticky-top {
+            z-index: 1020;
+        }
+        
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        
+        /* Task Management Button with Notification Badge */
+        .btn-info {
+            position: relative;
+        }
+        
+        #taskNotificationBadge {
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 50%;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            z-index: 1000;
+            color: white;
+        }
+        
+        #taskNotificationBadge i {
+            font-size: 10px;
+        }
+        
+        /* Bell shake animation for new notifications */
+        @keyframes bellShake {
+            0%, 100% { transform: rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(-5deg); }
+            20%, 40%, 60%, 80% { transform: rotate(5deg); }
+        }
+        
+        .animate__bell-shake {
+            animation: bellShake 0.5s ease-in-out;
+        }
+        
+        /* Pulse animation for new notifications */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Hover effect for notification badge */
+        #taskNotificationBadge:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        
+        /* Glow effect for high notification counts */
+        #taskNotificationBadge[data-count="high"] {
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.6);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(220, 53, 69, 0.6); }
+            to { box-shadow: 0 0 20px rgba(220, 53, 69, 0.8); }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #taskNotificationBadge {
+                font-size: 8px;
+                padding: 2px 4px;
+                min-width: 16px;
+                height: 16px;
+            }
+        }
+        
+        /* Maqoor Brand Colors */
+        .btn-outline-primary:hover {
+            background-color: #003366 !important;
+            border-color: #003366 !important;
+            color: white !important;
+        }
+        
+        .btn-outline-info:hover {
+            background-color: #007B55 !important;
+            border-color: #007B55 !important;
+            color: white !important;
+        }
+        
+        .btn-outline-success:hover {
+            background-color: #007B55 !important;
+            border-color: #007B55 !important;
+            color: white !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: #002244 !important;
+            border-color: #002244 !important;
+        }
+        
+        .btn-info:hover {
+            background-color: #005a3f !important;
+            border-color: #005a3f !important;
+        }
+        
+        /* Department cards hover effect */
+        .card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        
+        /* Table hover effects */
+        .table tbody tr:hover {
+            background-color: #f8f9fa !important;
+        }
+        
+        /* Logo styling */
+        .logo-container img {
+            transition: transform 0.2s ease;
+        }
+        
+        .logo-container img:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -43,15 +223,33 @@
         <span th:text="${msg}"></span>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Staff Performance</h2>
-        <div class="d-flex gap-2">
-            <form th:method="GET" th:action="@{/auth/register}">
-                <button type="submit" class="btn btn-success">Create User</button>
-            </form>
-            <form th:action="@{/auth/logout}" method="post" style="display: inline;">
-                <button type="submit" class="btn btn-outline-secondary">Logout</button>
-            </form>
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center logo-container">
+                            <img src="/logo.png" alt="Maqoor Logo" style="height: 40px; width: auto; margin-right: 15px;">
+                            <h2 class="mb-0" style="color: #003366;">Staff Performance Dashboard</h2>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/admin/users-management" class="btn btn-primary" style="background-color: #003366; border-color: #003366;">
+                                <i class="fas fa-users"></i> Users Management
+                            </a>
+                            <a href="/admin/task-management" class="btn btn-info" style="background-color: #007B55; border-color: #007B55; color: white;">
+                                <i class="fas fa-tasks"></i> Task Management
+                                <span id="taskNotificationBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display: none;">
+                                    <i class="fas fa-bell"></i>
+                                </span>
+                            </a>
+                            <a href="/auth/logout" class="btn btn-danger" style="background-color: #dc3545; border-color: #dc3545; color: white;">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -73,22 +271,181 @@
         </div>
     </div>
 
-    <!-- Department Garments Section -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Current Garments by Department</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3" th:each="dept : ${departments}">
-                    <div class="card">
-                        <div class="card-header">
-                            <h6 class="mb-0" th:text="${dept}">Department</h6>
+    <!-- Simple Filters Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="setFilter('today')" style="border-color: #003366; color: #003366;">
+                                <i class="fas fa-calendar-day me-1"></i>Today
+                            </button>
                         </div>
-                        <div class="card-body">
-                            <a th:href="@{'/admin/departments/' + ${dept}}" class="btn btn-outline-primary btn-sm w-100">
-                                View Garments
-                            </a>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="setFilter('yesterday')" style="border-color: #007B55; color: #007B55;">
+                                <i class="fas fa-calendar-minus me-1"></i>Yesterday
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" id="fromDate" name="fromDate" placeholder="From" style="border-color: #003366;">
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control form-control-sm" id="toDate" name="toDate" placeholder="To" style="border-color: #003366;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="applyCustomRange()" style="border-color: #007B55; color: #007B55;">
+                                <i class="fas fa-check me-1"></i>Apply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Staff Performance Table - Full Width -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #003366; color: white;">
+                    <h5 class="mb-0">Staff Performance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle text-center">
+                            <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="color: #003366;">Name</th>
+                                <th th:each="dept : ${departments}" style="color: #003366;">
+                                    <span th:text="${dept}">Department</span>
+                                </th>
+                                <th style="color: #003366;">Returns</th>
+                                <th style="color: #003366;">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td>
+                                    <a th:href="@{'/admin/users/' + ${user.id}}" th:text="${user.name}" style="color: #007B55; text-decoration: none;">Name</a>
+                                </td>
+                                <td th:each="dept : ${departments}" th:text="${userDeptCounts.get(user.id) != null ? userDeptCounts.get(user.id).get(dept) : 0}">0</td>
+                                <td>
+                                    <a th:href="@{'/admin/returns?userId=' + ${user.id}}" class="btn btn-danger btn-sm" style="background-color: #dc3545; border-color: #dc3545;">
+                                        <span th:text="${returnsByUser.get(user.id) != null ? returnsByUser.get(user.id) : 0}">0</span>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/users/' + ${user.id}}" style="border-color: #003366; color: #003366;">View</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Departments Section - Under Staff Performance -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #007B55; color: white;">
+                    <h5 class="mb-0">Departments Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3" th:each="dept : ${departments}">
+                            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #003366 !important;">
+                                <div class="card-body text-center p-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="dept-info">
+                                            <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
+                                            <small class="text-muted">Current garments</small>
+                                        </div>
+                                        <div class="dept-quantity">
+                                            <span class="badge rounded-pill" th:text="${departmentCounts.get(dept) != null ? departmentCounts.get(dept) : 0}" style="background-color: #FFC107; color: #000;">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Returns & Flow Violations Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #dc3545; color: white;">
+                    <h5 class="mb-0">Returns & Flow Violations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle text-center">
+                            <thead>
+                            <tr style="background-color: #f8f9fa;">
+                                <th style="color: #003366;">Staff Member</th>
+                                <th style="color: #003366;">Garment ID</th>
+                                <th style="color: #003366;">From Department</th>
+                                <th style="color: #003366;">To Department</th>
+                                <th style="color: #003366;">Expected Next</th>
+                                <th style="color: #003366;">Time</th>
+                                <th style="color: #003366;">Reason</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${#lists.isEmpty(returns)}">
+                                <td colspan="7" class="text-muted">No returns recorded in the selected date range</td>
+                            </tr>
+                            <tr th:each="ret : ${returns}">
+                                <td th:text="${ret.user.name}">Staff Name</td>
+                                <td th:text="${ret.garment.garmentId}">Garment ID</td>
+                                <td th:text="${ret.fromDepartment}">From Dept</td>
+                                <td th:text="${ret.toDepartment}">To Dept</td>
+                                <td th:text="${ret.expectedNextDepartment}">Expected</td>
+                                <td th:text="${#dates.format(ret.returnTime, 'dd/MM/yyyy HH:mm')}">Time</td>
+                                <td th:text="${ret.returnReason}">Reason</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Department Returns Summary -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color: #fd7e14; color: white;">
+                    <h5 class="mb-0">Department Returns Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3" th:each="dept : ${departments}">
+                            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #fd7e14 !important;">
+                                <div class="card-body text-center p-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="dept-info">
+                                            <h6 class="dept-name mb-1" th:text="${dept}" style="color: #003366;">Department</h6>
+                                            <small class="text-muted">Returns count</small>
+                                        </div>
+                                        <div class="dept-quantity">
+                                            <span class="badge rounded-pill" th:text="${returnsByDepartment.get(dept) != null ? returnsByDepartment.get(dept) : 0}" style="background-color: #fd7e14; color: #000;">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -96,65 +453,71 @@
         </div>
     </div>
 
-    <form class="row g-2 mb-3" th:action="@{/admin/users}" method="get">
-        <div class="col-md-4">
-            <label class="form-label">From</label>
-            <input class="form-control" type="datetime-local" name="from" th:value="${#dates.format(from, 'yyyy-MM-dd''T''HH:mm:ss')}">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">To</label>
-            <input class="form-control" type="datetime-local" name="to" th:value="${#dates.format(to, 'yyyy-MM-dd''T''HH:mm:ss')}">
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">Department</label>
-            <select class="form-select" name="dept">
-                <option th:selected="${activeDept == null}" value="">All</option>
-                <option th:each="d : ${departments}" th:value="${d}" th:text="${d}" th:selected="${activeDept == d}"></option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">Only with activity</label>
-            <select class="form-select" name="only">
-                <option th:selected="${!onlyDept}" value="false">No</option>
-                <option th:selected="${onlyDept}" value="true">Yes</option>
-            </select>
-        </div>
-        <div class="col-12 d-flex align-items-end justify-content-end">
-            <button class="btn btn-primary" type="submit">Apply</button>
-        </div>
-    </form>
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th th:each="dept : ${departments}">
-                    <a class="text-decoration-none" th:href="@{'/admin/users'(from=${#dates.format(from, 'yyyy-MM-dd''T''HH:mm:ss')},to=${#dates.format(to, 'yyyy-MM-dd''T''HH:mm:ss')},dept=${dept},sort=${sortDir == 'asc' ? 'desc' : 'asc'},only=${onlyDept})}">
-                        <span th:text="${dept}">Department</span>
-                        <span th:if="${activeDept == dept}" th:text="${sortDir == 'asc' ? '▲' : '▼'}" class="ms-1"></span>
-                    </a>
-                </th>
-                <th>Returns</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="u : ${users}">
-                <td>
-                    <a th:href="@{'/admin/users/' + ${u.id} + '(?from=' + ${#dates.format(from, 'yyyy-MM-dd''T''HH:mm:ss')} + '&to=' + ${#dates.format(to, 'yyyy-MM-dd''T''HH:mm:ss')} + ')'}" th:text="${u.name}">Name</a>
-                </td>
-                <td th:each="dept : ${departments}" th:text="${userDeptCounts[u.id] != null && userDeptCounts[u.id][dept.name()] != null ? userDeptCounts[u.id][dept.name()] : 0}">0</td>
-                <td th:text="${returnsByUser[u.id] != null ? returnsByUser[u.id] : 0}">0</td>
-                <td>
-                    <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/users/' + ${u.id}}">View</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple date formatting for the new simplified filter form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates if not already set
+            const fromInput = document.querySelector('#fromDate');
+            const toInput = document.querySelector('#toDate');
+            
+            if (fromInput && toInput && !fromInput.value && !toInput.value) {
+                const now = new Date();
+                const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+                
+                // Format for date input
+                fromInput.value = yesterday.toISOString().slice(0, 10);
+                toInput.value = now.toISOString().slice(0, 10);
+            }
+        });
+        
+        // Filter functions
+        function setFilter(type) {
+            const fromInput = document.querySelector('#fromDate');
+            const toInput = document.querySelector('#toDate');
+            
+            if (!fromInput || !toInput) return;
+            
+            const now = new Date();
+            let fromDate, toDate;
+            
+            switch(type) {
+                case 'today':
+                    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    toDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    break;
+                case 'yesterday':
+                    fromDate = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+                    toDate = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+                    break;
+                default:
+                    return;
+            }
+            
+            fromInput.value = fromDate.toISOString().slice(0, 10);
+            toInput.value = toDate.toISOString().slice(0, 10);
+            
+            // Auto-submit the form
+            submitFilter();
+        }
+        
+        function applyCustomRange() {
+            submitFilter();
+        }
+        
+        function submitFilter() {
+            const fromInput = document.querySelector('#fromDate');
+            const toInput = document.querySelector('#toDate');
+            
+            if (fromInput && toInput && fromInput.value && toInput.value) {
+                // Convert date to datetime format for the controller
+                const fromDate = fromInput.value + 'T00:00';
+                const toDate = toInput.value + 'T23:59';
+                
+                // Redirect with the filter parameters
+                window.location.href = `/admin/users?fromDate=${fromDate}&toDate=${toDate}`;
+            }
+        }
+    </script>
 </body>
 </html>

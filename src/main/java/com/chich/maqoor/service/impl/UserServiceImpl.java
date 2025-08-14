@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -29,8 +30,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void save(User user) {
-        user.setState(UserState.ACTIVE);
-        user.setRole(Role.USER);
+        // Only set default values if they're not already set
+        if (user.getState() == null) {
+            user.setState(UserState.ACTIVE);
+        }
+        if (user.getRole() == null) {
+            user.setRole(Role.USER);
+        }
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -38,12 +44,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(int userId) {
-        return userRepository.findById(userId).orElseThrow();
+    public Optional<User> findById(int userId) {
+        return userRepository.findById(userId);
     }
 
     @Override
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow();
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public void deleteById(int userId) {
+        userRepository.deleteById(userId);
     }
 }

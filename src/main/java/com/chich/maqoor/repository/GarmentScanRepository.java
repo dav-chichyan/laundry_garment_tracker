@@ -13,20 +13,20 @@ import java.util.List;
 @Repository
 public interface GarmentScanRepository extends JpaRepository<GarmentScan, Integer> {
 
+    List<GarmentScan> findByUser_Id(int userId);
+
+    List<GarmentScan> findByUser_IdAndScannedAtBetweenOrderByScannedAtDesc(int userId, Date fromDate, Date toDate);
+
     List<GarmentScan> findByGarment_GarmentId(int garmentId);
 
-    @Query("select gs.user.id as userId, count(gs) as total from GarmentScan gs where gs.department = :department and gs.scannedAt between :from and :to group by gs.user.id")
-    List<Object[]> countByUserInDepartmentBetween(@Param("department") Departments department,
-                                                  @Param("from") Date from,
-                                                  @Param("to") Date to);
+    @Query("SELECT gs.user.id, COUNT(gs) FROM GarmentScan gs WHERE gs.department = :department AND gs.scannedAt BETWEEN :fromDate AND :toDate GROUP BY gs.user.id")
+    List<Object[]> countByUserInDepartmentBetween(@Param("department") Departments department, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
-    @Query("select gs.user.id as userId, gs.department as department, count(gs) as total from GarmentScan gs where gs.scannedAt between :from and :to group by gs.user.id, gs.department")
-    List<Object[]> countByUserAndDepartmentBetween(@Param("from") Date from,
-                                                   @Param("to") Date to);
+    @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.user.id = :userId AND gs.department = :department AND gs.scannedAt BETWEEN :fromDate AND :toDate")
+    long countByUser_IdAndDepartmentAndScannedAtBetween(@Param("userId") int userId, @Param("department") Departments department, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
-    List<GarmentScan> findByUser_IdAndScannedAtBetweenOrderByScannedAtDesc(int userId, Date from, Date to);
-
-    List<GarmentScan> findByScannedAtBetweenOrderByScannedAtAsc(Date from, Date to);
+    @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.scannedAt BETWEEN :fromDate AND :toDate")
+    long countByScannedAtBetween(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 }
 
 

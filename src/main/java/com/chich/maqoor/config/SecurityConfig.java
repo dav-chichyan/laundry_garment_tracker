@@ -1,5 +1,6 @@
 package com.chich.maqoor.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,11 +13,16 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/group.png", "/logo.png").permitAll()
+                .requestMatchers("/webhook/**").permitAll() // Allow webhook access
+                .requestMatchers("/department/**").hasRole("USER") // Require USER role for department access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").hasRole("USER")
                 .anyRequest().authenticated()
@@ -24,7 +30,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/auth/login")
-                .defaultSuccessUrl("/admin/users", true)
+                .successHandler(customAuthenticationSuccessHandler)
                 .failureUrl("/auth/login?error=true")
                 .permitAll()
             )

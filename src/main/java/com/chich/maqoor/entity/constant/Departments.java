@@ -9,13 +9,11 @@ public enum Departments {
     WASHING,
     STAIN_REMOVAL,
     DRY_CLEANING,
+    SHOES,
     IRONING,
-    ALTERATION,
-    FINISHING,
+    PACKAGING,
     DELIVERY,
-    LOCKER
-
-
-
-
+    LOCKER,
+    ALTERATION,
+    FINISHING
 }

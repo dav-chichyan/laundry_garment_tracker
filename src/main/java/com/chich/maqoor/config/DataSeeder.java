@@ -71,31 +71,58 @@ public class DataSeeder implements CommandLineRunner {
 
         // Order with garments
         Orders order = new Orders();
-        order.setOrderId(1001);
+        // Don't set orderId manually - let it be generated
+        order.setCleanCloudOrderId(44886); // Test CleanCloud order ID
+        order.setOrderNumber("ORD-1001");
+        order.setCustomerName("John Doe");
+        order.setCustomerPhone("+1234567890");
+        order.setPickupDate("2025-01-15");
+        order.setDeliveryDate("2025-01-17");
+        order.setStatus("PENDING");
         order.setType("DRY_CLEAN");
         order.setExpress(false);
-        ordersRepository.save(order);
+        order.setCreatedAt(new Date());
+        order.setUpdatedAt(new Date());
+        Orders savedOrder = ordersRepository.save(order);
 
         Garments g1 = new Garments();
-        g1.setGarmentId(101);
-        g1.setOrder(order);
+        // Don't set garmentId manually - let it be generated
+        g1.setCleanCloudGarmentId("GAR-101");
+        g1.setOrder(savedOrder);
         g1.setDescription("White Shirt");
+        g1.setType("Shirt");
+        g1.setColor("White");
+        g1.setSize("M");
+        g1.setSpecialInstructions("Handle with care");
         g1.setDepartmentId(Departments.RECEPTION);
         g1.setLastUpdate(new Date());
+        g1.setCreatedAt(new Date());
 
         Garments g2 = new Garments();
-        g2.setGarmentId(102);
-        g2.setOrder(order);
+        // Don't set garmentId manually - let it be generated
+        g2.setCleanCloudGarmentId("GAR-102");
+        g2.setOrder(savedOrder);
         g2.setDescription("Blue Dress");
+        g2.setType("Dress");
+        g2.setColor("Blue");
+        g2.setSize("S");
+        g2.setSpecialInstructions("Gentle wash only");
         g2.setDepartmentId(Departments.RECEPTION);
         g2.setLastUpdate(new Date());
+        g2.setCreatedAt(new Date());
 
         Garments g3 = new Garments();
-        g3.setGarmentId(103);
-        g3.setOrder(order);
+        // Don't set garmentId manually - let it be generated
+        g3.setCleanCloudGarmentId("GAR-103");
+        g3.setOrder(savedOrder);
         g3.setDescription("Black Coat");
+        g3.setType("Coat");
+        g3.setColor("Black");
+        g3.setSize("L");
+        g3.setSpecialInstructions("Dry clean only");
         g3.setDepartmentId(Departments.RECEPTION);
         g3.setLastUpdate(new Date());
+        g3.setCreatedAt(new Date());
 
         garmentRepository.saveAll(Arrays.asList(g1, g2, g3));
 
