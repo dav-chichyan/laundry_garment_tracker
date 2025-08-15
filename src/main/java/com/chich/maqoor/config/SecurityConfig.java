@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
@@ -21,7 +22,8 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/group.png", "/logo.png").permitAll()
-                .requestMatchers("/webhook/**").permitAll() // Allow webhook access
+                .requestMatchers("/webhook/**").permitAll() // Allow webhook access - NO AUTH REQUIRED
+                .requestMatchers("/h2-console/**").permitAll() // Allow H2 console access
                 .requestMatchers("/department/**").hasRole("USER") // Require USER role for department access
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").hasRole("USER")
@@ -39,7 +41,13 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/auth/login?logout=true")
                 .permitAll()
             )
-            .csrf(csrf -> csrf.disable()); // For API endpoints
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+            )
+            .csrf(csrf -> csrf.disable()) // For API endpoints
+            .headers(headers -> headers.frameOptions().disable()); // For H2 console
 
         return http.build();
     }

@@ -103,23 +103,6 @@ public class AdminController {
             userDeptCounts.put(user.getId(), userCounts);
         }
         
-        // Get returns data for the date range
-        List<GarmentReturn> returns = garmentReturnRepository.findByReturnTimeBetween(fromDate, toDate);
-        
-        // Get returns by department
-        Map<Departments, Long> returnsByDepartment = new HashMap<>();
-        for (Departments dept : Departments.values()) {
-            long count = garmentReturnRepository.countReturnsByDepartmentBetween(dept, fromDate, toDate);
-            returnsByDepartment.put(dept, count);
-        }
-        
-        // Get returns by user - initialize with 0 for all users
-        Map<Integer, Long> returnsByUser = new HashMap<>();
-        for (User user : users) {
-            long count = garmentReturnRepository.countReturnsByUserBetween(user.getId(), fromDate, toDate);
-            returnsByUser.put(user.getId(), count);
-        }
-        
         // Get total scans by user for the date range
         Map<Integer, Long> scansByUser = new HashMap<>();
         for (User user : users) {
@@ -133,9 +116,6 @@ public class AdminController {
         model.addAttribute("to", toDate.toString());
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("userDeptCounts", userDeptCounts);
-        model.addAttribute("returns", returns);
-        model.addAttribute("returnsByDepartment", returnsByDepartment);
-        model.addAttribute("returnsByUser", returnsByUser);
         model.addAttribute("scansByUser", scansByUser);
         return "auth/admin/users-management";
     }
@@ -361,29 +341,67 @@ public class AdminController {
     }
 
     @GetMapping("/returns-dashboard")
-    public String showReturnsDashboard(Model model) {
+    public String showReturnsDashboard(Model model,
+                                      @RequestParam(value = "fromDate", required = false) String fromDateStr,
+                                      @RequestParam(value = "toDate", required = false) String toDateStr) {
         try {
+            Date fromDate;
+            Date toDate;
+            
+            if (fromDateStr == null || toDateStr == null) {
+                // Default to yesterday to today
+                java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(1).atStartOfDay();
+                fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                toDate = new java.util.Date();
+            } else {
+                try {
+                    // Parse the date strings (format: yyyy-MM-ddTHH:mm)
+                    java.time.LocalDateTime from = java.time.LocalDateTime.parse(fromDateStr);
+                    java.time.LocalDateTime to = java.time.LocalDateTime.parse(toDateStr);
+                    fromDate = java.util.Date.from(from.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = java.util.Date.from(to.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                } catch (Exception e) {
+                    // Fallback to default dates if parsing fails
+                    java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(1).atStartOfDay();
+                    fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = new java.util.Date();
+                }
+            }
+            
             // Get all returns with detailed information
             List<GarmentReturn> returns = garmentReturnRepository.findAllWithDetails();
             
+            // Get returns for the date range
+            List<GarmentReturn> returnsInRange = garmentReturnRepository.findByReturnTimeBetween(fromDate, toDate);
+            
             // Group returns by reason for better analysis
-            Map<String, Long> returnsByReason = returns.stream()
+            Map<String, Long> returnsByReason = returnsInRange.stream()
                 .collect(Collectors.groupingBy(
                     returnRecord -> returnRecord.getReturnReason() != null ? returnRecord.getReturnReason() : "Unknown",
                     Collectors.counting()
                 ));
             
             // Group returns by department transition
-            Map<String, Long> returnsByTransition = returns.stream()
+            Map<String, Long> returnsByTransition = returnsInRange.stream()
                 .collect(Collectors.groupingBy(
                     returnRecord -> returnRecord.getFromDepartment() + " → " + returnRecord.getToDepartment(),
                     Collectors.counting()
                 ));
             
-            model.addAttribute("returns", returns);
+            // Get returns by department
+            Map<Departments, Long> returnsByDepartment = new HashMap<>();
+            for (Departments dept : Departments.values()) {
+                long count = garmentReturnRepository.countReturnsByDepartmentBetween(dept, fromDate, toDate);
+                returnsByDepartment.put(dept, count);
+            }
+            
+            model.addAttribute("returns", returnsInRange);
             model.addAttribute("returnsByReason", returnsByReason);
             model.addAttribute("returnsByTransition", returnsByTransition);
-            model.addAttribute("totalReturns", returns.size());
+            model.addAttribute("returnsByDepartment", returnsByDepartment);
+            model.addAttribute("totalReturns", returnsInRange.size());
+            model.addAttribute("from", fromDate.toString());
+            model.addAttribute("to", toDate.toString());
             
             return "auth/admin/returns-dashboard";
             

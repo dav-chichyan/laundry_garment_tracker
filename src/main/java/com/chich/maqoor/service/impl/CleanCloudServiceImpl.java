@@ -247,16 +247,23 @@ public class CleanCloudServiceImpl implements CleanCloudService {
             CleanCloudOrderDetails orderDetails = getOrder(orderId);
             if (orderDetails == null) {
                 log.error("Failed to fetch order details from CleanCloud for order: {}", orderId);
-                return;
+                throw new RuntimeException("Failed to fetch order details from CleanCloud for order: " + orderId);
             }
+            
+            log.info("Successfully fetched order details: orderId={}, customerName={}, garmentsCount={}", 
+                    orderDetails.getOrderId(), 
+                    orderDetails.getCustomerName(),
+                    orderDetails.getGarments() != null ? orderDetails.getGarments().size() : 0);
             
             // Check if order already exists
             Optional<Orders> existingOrder = ordersRepository.findByCleanCloudOrderId(orderId);
             
             if (existingOrder.isPresent()) {
+                log.info("Updating existing order: {}", existingOrder.get().getOrderId());
                 // Update existing order
                 updateExistingOrder(existingOrder.get(), orderDetails);
             } else {
+                log.info("Creating new order for CleanCloud order: {}", orderId);
                 // Create new order
                 createNewOrder(orderDetails);
             }
@@ -265,7 +272,7 @@ public class CleanCloudServiceImpl implements CleanCloudService {
             
         } catch (Exception e) {
             log.error("Error synchronizing order {} with database: {}", orderId, e.getMessage(), e);
-            throw new RuntimeException("Failed to sync order with database", e);
+            throw new RuntimeException("Failed to sync order " + orderId + " with database: " + e.getMessage(), e);
         }
     }
 
@@ -300,37 +307,54 @@ public class CleanCloudServiceImpl implements CleanCloudService {
     }
 
     private void createNewOrder(CleanCloudOrderDetails orderDetails) {
-        log.info("Creating new order with CleanCloud ID: {}", orderDetails.getOrderId());
-        
-        Orders newOrder = new Orders();
-        // Convert String orderId to Integer for database compatibility
         try {
-            newOrder.setCleanCloudOrderId(Integer.parseInt(orderDetails.getOrderId()));
-        } catch (NumberFormatException e) {
-            log.error("Invalid order ID format: {}", orderDetails.getOrderId());
-            return;
-        }
-        newOrder.setOrderNumber(orderDetails.getOrderId());
-        newOrder.setCustomerName(orderDetails.getCustomerName());
-        newOrder.setCustomerPhone(orderDetails.getCustomerPhone());
-        newOrder.setPickupDate(orderDetails.getPickupDate());
-        newOrder.setDeliveryDate(orderDetails.getDeliveryDate());
-        newOrder.setStatus(orderDetails.getStatus());
-        newOrder.setCreatedAt(new Date());
-        newOrder.setUpdatedAt(new Date());
-        
-        // Save the order first
-        Orders savedOrder = ordersRepository.save(newOrder);
-        
-        // Create garments for this order
-        if (orderDetails.getGarments() != null) {
-            for (CleanCloudOrderDetails.CleanCloudGarment garmentData : orderDetails.getGarments()) {
-                createGarment(garmentData, savedOrder);
+            log.info("Creating new order with CleanCloud ID: {}", orderDetails.getOrderId());
+            
+            Orders newOrder = new Orders();
+            // Convert String orderId to Integer for database compatibility
+            try {
+                newOrder.setCleanCloudOrderId(Integer.parseInt(orderDetails.getOrderId()));
+            } catch (NumberFormatException e) {
+                log.error("Invalid order ID format: {}", orderDetails.getOrderId());
+                throw new RuntimeException("Invalid order ID format: " + orderDetails.getOrderId(), e);
             }
+            newOrder.setOrderNumber(orderDetails.getOrderId());
+            newOrder.setCustomerName(orderDetails.getCustomerName());
+            newOrder.setCustomerPhone(orderDetails.getCustomerPhone());
+            newOrder.setPickupDate(orderDetails.getPickupDate());
+            newOrder.setDeliveryDate(orderDetails.getDeliveryDate());
+            newOrder.setStatus(orderDetails.getStatus());
+            newOrder.setCreatedAt(new Date());
+            newOrder.setUpdatedAt(new Date());
+            
+            // Save the order first
+            Orders savedOrder = ordersRepository.save(newOrder);
+            log.info("Successfully saved order to database: orderId={}", savedOrder.getOrderId());
+            
+            // Create garments for this order
+            if (orderDetails.getGarments() != null) {
+                log.info("Creating {} garments for order {}", orderDetails.getGarments().size(), savedOrder.getOrderId());
+                for (CleanCloudOrderDetails.CleanCloudGarment garmentData : orderDetails.getGarments()) {
+                    try {
+                        createGarment(garmentData, savedOrder);
+                        log.debug("Successfully created garment: barcodeID={}", garmentData.getBarcodeID());
+                    } catch (Exception e) {
+                        log.error("Failed to create garment: barcodeID={}, error: {}", garmentData.getBarcodeID(), e.getMessage(), e);
+                        throw new RuntimeException("Failed to create garment " + garmentData.getBarcodeID() + ": " + e.getMessage(), e);
+                    }
+                }
+                log.info("Successfully created all {} garments for order {}", orderDetails.getGarments().size(), savedOrder.getOrderId());
+            } else {
+                log.warn("No garments provided for order {}", savedOrder.getOrderId());
+            }
+            
+            log.info("Created new order {} with {} garments", savedOrder.getOrderId(), 
+                    orderDetails.getGarments() != null ? orderDetails.getGarments().size() : 0);
+                    
+        } catch (Exception e) {
+            log.error("Error creating new order: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create new order: " + e.getMessage(), e);
         }
-        
-        log.info("Created new order {} with {} garments", savedOrder.getOrderId(), 
-                orderDetails.getGarments() != null ? orderDetails.getGarments().size() : 0);
     }
 
     private void updateExistingOrder(Orders existingOrder, CleanCloudOrderDetails orderDetails) {
@@ -393,26 +417,32 @@ public class CleanCloudServiceImpl implements CleanCloudService {
     }
 
     private void createGarment(CleanCloudOrderDetails.CleanCloudGarment garmentData, Orders order) {
-        log.info("Creating garment: barcodeID={}, garmentId={}, description={}", 
-                garmentData.getBarcodeID(), garmentData.getGarmentId(), garmentData.getDescription());
-        
-        Garments newGarment = new Garments();
-        // Use the actual barcodeID from CleanCloud, not the generated garmentId
-        newGarment.setCleanCloudGarmentId(garmentData.getBarcodeID());
-        newGarment.setOrder(order);
-        newGarment.setDescription(garmentData.getDescription());
-        newGarment.setType(garmentData.getType());
-        newGarment.setColor(garmentData.getColor());
-        newGarment.setSize(garmentData.getSize());
-        newGarment.setSpecialInstructions(garmentData.getSpecialInstructions());
-        newGarment.setDepartmentId(Departments.RECEPTION); // Default to reception
-        newGarment.setCreatedAt(new Date());
-        newGarment.setLastUpdate(new Date());
-        
-        log.info("About to save garment with order ID: {}", order.getOrderId());
-        Garments savedGarment = garmentRepository.save(newGarment);
-        log.info("Successfully created garment with ID: {} linked to order: {}", 
-                savedGarment.getGarmentId(), savedGarment.getOrder().getOrderId());
+        try {
+            log.info("Creating garment: barcodeID={}, garmentId={}, description={}", 
+                    garmentData.getBarcodeID(), garmentData.getGarmentId(), garmentData.getDescription());
+            
+            Garments newGarment = new Garments();
+            // Use the actual barcodeID from CleanCloud, not the generated garmentId
+            newGarment.setCleanCloudGarmentId(garmentData.getBarcodeID());
+            newGarment.setOrder(order);
+            newGarment.setDescription(garmentData.getDescription());
+            newGarment.setType(garmentData.getType());
+            newGarment.setColor(garmentData.getColor());
+            newGarment.setSize(garmentData.getSize());
+            newGarment.setSpecialInstructions(garmentData.getSpecialInstructions());
+            newGarment.setDepartmentId(Departments.RECEPTION); // Default to reception
+            newGarment.setCreatedAt(new Date());
+            newGarment.setLastUpdate(new Date());
+            
+            log.info("About to save garment with order ID: {}", order.getOrderId());
+            Garments savedGarment = garmentRepository.save(newGarment);
+            log.info("Successfully created garment with ID: {} linked to order: {}", 
+                    savedGarment.getGarmentId(), savedGarment.getOrder().getOrderId());
+                    
+        } catch (Exception e) {
+            log.error("Error creating garment: barcodeID={}, error: {}", garmentData.getBarcodeID(), e.getMessage(), e);
+            throw new RuntimeException("Failed to create garment " + garmentData.getBarcodeID() + ": " + e.getMessage(), e);
+        }
     }
 
     private void updateGarment(Garments existingGarment, CleanCloudOrderDetails.CleanCloudGarment garmentData) {

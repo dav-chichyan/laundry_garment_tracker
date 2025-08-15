@@ -20,10 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
 public class BarcodeScannerController {
+
+    private static final Logger log = LoggerFactory.getLogger(BarcodeScannerController.class);
 
     @Autowired
     private GarmentRepository garmentRepository;
@@ -40,16 +44,36 @@ public class BarcodeScannerController {
     @PostMapping("/scan")
     public ResponseEntity<?> scanBarcode(@RequestBody com.chich.maqoor.dto.ScanRequestDto request) {
         try {
+            log.info("Processing scan request: garmentId={}, userId={}, department={}", 
+                    request.getGarmentId(), request.getUserId(), request.getDepartment());
+            
             // Validate that the garment exists in the database by cleanCloudGarmentId
             Garments garment = garmentRepository.findByCleanCloudGarmentId(String.valueOf(request.getGarmentId()));
             if (garment == null) {
+                log.warn("Garment not found in database: cleanCloudGarmentId={}", request.getGarmentId());
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("message", "Garment ID " + request.getGarmentId() + " not found in database");
                 errorResponse.put("errorCode", "GARMENT_NOT_FOUND");
                 return ResponseEntity.badRequest().body(errorResponse);
             }
+            
+            log.info("Found garment: garmentId={}, cleanCloudGarmentId={}, currentDepartment={}", 
+                    garment.getGarmentId(), garment.getCleanCloudGarmentId(), garment.getDepartmentId());
+            
             User user = userRepository.findById(request.getUserId()).orElseThrow();
+            log.info("Found user: userId={}, name={}, department={}", 
+                    user.getId(), user.getName(), user.getDepartment());
+            
+            // Validate user exists
+            if (user == null) {
+                log.error("User not found: userId={}", request.getUserId());
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "User not found: " + request.getUserId());
+                errorResponse.put("errorCode", "USER_NOT_FOUND");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
 
             // NEW VALIDATION: Check if garment is already in the requested department
             if (garment.getDepartmentId() == request.getDepartment()) {
@@ -116,6 +140,7 @@ public class BarcodeScannerController {
 
             return ResponseEntity.ok(successResponse);
         } catch (Exception e) {
+            log.error("Error processing scan request", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", "Error processing scan: " + e.getMessage());
