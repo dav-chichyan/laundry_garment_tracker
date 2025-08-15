@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>All Users</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/main.css" rel="stylesheet">
     <style>
         body {
@@ -219,6 +220,53 @@
         .logo-container img:hover {
             transform: scale(1.05);
         }
+
+        /* Sortable table headers */
+        .sortable {
+            transition: background-color 0.2s ease;
+            user-select: none;
+        }
+        
+        .sortable:hover {
+            background-color: #e9ecef !important;
+        }
+        
+        .sortable i {
+            margin-left: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .sortable:hover i {
+            color: #003366 !important;
+        }
+        
+        .sortable i.fa-sort-up,
+        .sortable i.fa-sort-down {
+            color: #007B55 !important;
+        }
+
+        /* Sort info styling */
+        #sortInfo {
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+            font-size: 0.875rem;
+        }
+        
+        #currentSortInfo {
+            color: #007B55;
+            font-weight: 500;
+        }
+        
+        #currentSortInfo button {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        #currentSortInfo button:hover {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -326,15 +374,21 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle text-center">
+                        <table class="table table-bordered table-striped align-middle text-center" id="staffPerformanceTable">
                             <thead>
                             <tr style="background-color: #f8f9fa;">
-                                <th style="color: #003366;">Name</th>
-                                <th style="color: #003366;">Total Scans</th>
-                                <th th:each="dept : ${departments}" style="color: #003366;">
-                                    <span th:text="${dept}">Department</span>
+                                <th class="sortable" data-sort="name" style="color: #003366; cursor: pointer;" title="Click to sort by Name">
+                                    Name <i class="fa-solid fa-sort text-muted"></i>
                                 </th>
-                                <th style="color: #003366;">Returns</th>
+                                <th class="sortable" data-sort="totalScans" style="color: #003366; cursor: pointer;" title="Click to sort by Total Scans">
+                                    Total Scans <i class="fa-solid fa-sort text-muted"></i>
+                                </th>
+                                <th th:each="dept : ${departments}" class="sortable" th:data-sort="${'dept_' + dept}" style="color: #003366; cursor: pointer;" th:title="'Click to sort by ' + ${dept}">
+                                    <span th:text="${dept}">Department</span> <i class="fa-solid fa-sort text-muted"></i>
+                                </th>
+                                <th class="sortable" data-sort="returns" style="color: #003366; cursor: pointer;" title="Click to sort by Returns">
+                                    Returns <i class="fa-solid fa-sort text-muted"></i>
+                                </th>
                                 <th style="color: #003366;">Actions</th>
                             </tr>
                             </thead>
@@ -368,6 +422,17 @@
                             </tr>
                             </tbody>
                         </table>
+                        <div class="mt-2 text-muted small" id="sortInfo">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Click on column headers to sort. 
+                            <span id="currentSortInfo" style="display: none;">
+                                Currently sorted by: <span id="sortColumnName"></span> 
+                                (<span id="sortDirection"></span>)
+                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="resetSort()" title="Reset sorting">
+                                    <i class="fas fa-times"></i> Reset
+                                </button>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -472,6 +537,148 @@
                 // Redirect with the filter parameters
                 window.location.href = `/admin/users?fromDate=${fromDate}&toDate=${toDate}`;
             }
+        }
+
+        // Table sorting functionality
+        let currentSort = { column: null, direction: 'asc' };
+
+        // Initialize sorting
+        document.addEventListener('DOMContentLoaded', function() {
+            setupTableSorting();
+        });
+
+        function setupTableSorting() {
+            const sortableHeaders = document.querySelectorAll('.sortable');
+            
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortKey = this.getAttribute('data-sort');
+                    handleSort(sortKey);
+                });
+            });
+        }
+
+        function handleSort(sortKey) {
+            const table = document.getElementById('staffPerformanceTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Update sort direction
+            if (currentSort.column === sortKey) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = sortKey;
+                currentSort.direction = 'asc';
+            }
+            
+            // Sort the rows
+            rows.sort((a, b) => {
+                let aValue, bValue;
+                
+                if (sortKey === 'name') {
+                    aValue = a.cells[0].textContent.trim();
+                    bValue = b.cells[0].textContent.trim();
+                    return currentSort.direction === 'asc' ? 
+                        aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                } else if (sortKey === 'totalScans') {
+                    aValue = parseInt(a.cells[1].querySelector('span').textContent) || 0;
+                    bValue = parseInt(b.cells[1].querySelector('span').textContent) || 0;
+                    return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+                } else if (sortKey === 'returns') {
+                    // Returns column - we'll sort by the button text or default to 0
+                    aValue = 0; // Default value for returns
+                    bValue = 0;
+                    return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+                } else if (sortKey.startsWith('dept_')) {
+                    // Department columns - get the department index
+                    const deptIndex = getDepartmentIndex(sortKey);
+                    if (deptIndex !== -1) {
+                        aValue = parseInt(a.cells[deptIndex + 2].textContent) || 0;
+                        bValue = parseInt(b.cells[deptIndex + 2].textContent) || 0;
+                        return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+                    }
+                }
+                
+                return 0;
+            });
+            
+            // Reorder the table
+            rows.forEach(row => tbody.appendChild(row));
+            
+            // Update sort indicators
+            updateSortIndicators(sortKey);
+        }
+
+        function getDepartmentIndex(sortKey) {
+            const deptName = sortKey.replace('dept_', '');
+            const headers = document.querySelectorAll('.sortable');
+            let deptIndex = -1;
+            
+            headers.forEach((header, index) => {
+                if (header.getAttribute('data-sort') === sortKey) {
+                    deptIndex = index - 2; // Adjust for Name and Total Scans columns
+                }
+            });
+            
+            return deptIndex;
+        }
+
+        function updateSortIndicators(sortKey) {
+            // Reset all sort indicators
+            document.querySelectorAll('.sortable i').forEach(icon => {
+                icon.className = 'fa-solid fa-sort text-muted';
+            });
+            
+            // Update the current sort indicator
+            const currentHeader = document.querySelector(`[data-sort="${sortKey}"]`);
+            if (currentHeader) {
+                const icon = currentHeader.querySelector('i');
+                if (currentSort.direction === 'asc') {
+                    icon.className = 'fa-solid fa-sort-up text-primary';
+                } else {
+                    icon.className = 'fa-solid fa-sort-down text-primary';
+                }
+            }
+            
+            // Update sort info display
+            updateSortInfoDisplay(sortKey);
+        }
+
+        function updateSortInfoDisplay(sortKey) {
+            const currentSortInfo = document.getElementById('currentSortInfo');
+            const sortColumnName = document.getElementById('sortColumnName');
+            const sortDirection = document.getElementById('sortDirection');
+            
+            if (sortKey) {
+                let columnDisplayName = '';
+                if (sortKey === 'name') columnDisplayName = 'Name';
+                else if (sortKey === 'totalScans') columnDisplayName = 'Total Scans';
+                else if (sortKey === 'returns') columnDisplayName = 'Returns';
+                else if (sortKey.startsWith('dept_')) {
+                    columnDisplayName = sortKey.replace('dept_', '');
+                }
+                
+                sortColumnName.textContent = columnDisplayName;
+                sortDirection.textContent = currentSort.direction === 'asc' ? 'Low to High' : 'High to Low';
+                currentSortInfo.style.display = 'inline';
+            } else {
+                currentSortInfo.style.display = 'none';
+            }
+        }
+
+        function resetSort() {
+            currentSort = { column: null, direction: 'asc' };
+            
+            // Reset all sort indicators
+            document.querySelectorAll('.sortable i').forEach(icon => {
+                icon.className = 'fa-solid fa-sort text-muted';
+            });
+            
+            // Hide sort info
+            document.getElementById('currentSortInfo').style.display = 'none';
+            
+            // Reset table to original order (reload the page to get original order)
+            window.location.reload();
         }
     </script>
 </body>
