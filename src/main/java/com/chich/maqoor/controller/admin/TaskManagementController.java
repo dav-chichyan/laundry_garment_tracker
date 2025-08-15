@@ -52,9 +52,15 @@ public class TaskManagementController {
     @GetMapping("/task-management")
     public String taskManagementPage(Model model) {
         List<TaskList> taskLists = taskListRepository.findAllByOrderByPositionAsc();
-        List<User> adminUsers = userService.findAll().stream()
+        List<User> allUsers = userService.findAll();
+        List<User> adminUsers = allUsers.stream()
                 .filter(user -> user.getRole() == Role.ADMIN)
                 .toList();
+        
+        // Debug logging
+        System.out.println("TASK MANAGEMENT DEBUG: Total users found: " + allUsers.size());
+        System.out.println("TASK MANAGEMENT DEBUG: Admin users found: " + adminUsers.size());
+        adminUsers.forEach(user -> System.out.println("TASK MANAGEMENT DEBUG: Admin user - ID: " + user.getId() + ", Name: " + user.getName() + ", Role: " + user.getRole()));
         
         // Add sample data if no lists exist
         if (taskLists.isEmpty()) {

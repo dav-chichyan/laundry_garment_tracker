@@ -7,6 +7,7 @@ import com.chich.maqoor.entity.Garments;
 import com.chich.maqoor.entity.GarmentReturn;
 import com.chich.maqoor.entity.User;
 import com.chich.maqoor.entity.constant.Departments;
+import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.repository.GarmentScanRepository;
 import com.chich.maqoor.repository.GarmentRepository;
 import com.chich.maqoor.repository.GarmentReturnRepository;
@@ -83,6 +84,10 @@ public class AdminController {
         }
 
         List<User> users = userService.findAll();
+        
+        // Debug logging
+        System.out.println("USERS DASHBOARD DEBUG: Total users found: " + users.size());
+        users.forEach(user -> System.out.println("USERS DASHBOARD DEBUG: User - ID: " + user.getId() + ", Name: " + user.getName() + ", Role: " + user.getRole() + ", Department: " + user.getDepartment()));
         
         // Get real-time department counts
         Map<Departments, Long> departmentCounts = new HashMap<>();
@@ -427,6 +432,115 @@ public class AdminController {
         userService.save(objectMapper.convertValue(registrationRequestDto, User.class));
         return "auth/login";
     }
+    
+    @PostMapping("/users/{userId}/update")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateUser(@PathVariable int userId, @RequestBody Map<String, Object> updates) {
+        try {
+            System.out.println("USER UPDATE DEBUG: Updating user ID: " + userId + " with updates: " + updates);
+            
+            // Debug: List all users first to see what IDs exist
+            List<User> allUsers = userService.findAll();
+            System.out.println("USER UPDATE DEBUG: All users in database:");
+            for (User u : allUsers) {
+                System.out.println("  - User ID: " + u.getId() + ", Name: " + u.getName() + ", Email: " + u.getEmail());
+            }
+            
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+            
+            System.out.println("USER UPDATE DEBUG: Found user: " + user.getName() + " (ID: " + user.getId() + ")");
+            
+            // Update user fields
+            if (updates.containsKey("name")) {
+                user.setName((String) updates.get("name"));
+                System.out.println("USER UPDATE DEBUG: Updated name to: " + updates.get("name"));
+            }
+            if (updates.containsKey("email")) {
+                user.setEmail((String) updates.get("email"));
+                System.out.println("USER UPDATE DEBUG: Updated email to: " + updates.get("email"));
+            }
+            if (updates.containsKey("role")) {
+                user.setRole(Role.valueOf((String) updates.get("role")));
+                System.out.println("USER UPDATE DEBUG: Updated role to: " + updates.get("role"));
+            }
+            if (updates.containsKey("department")) {
+                user.setDepartment(Departments.valueOf((String) updates.get("department")));
+                System.out.println("USER UPDATE DEBUG: Updated department to: " + updates.get("department"));
+            }
+            if (updates.containsKey("scheduleTimes")) {
+                @SuppressWarnings("unchecked")
+                List<String> scheduleTimes = (List<String>) updates.get("scheduleTimes");
+                user.setScheduleTimes(scheduleTimes);
+                System.out.println("USER UPDATE DEBUG: Updated schedule times to: " + scheduleTimes);
+            }
+            
+            userService.save(user);
+            System.out.println("USER UPDATE DEBUG: User saved successfully");
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "User updated successfully");
+            response.put("user", user);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.out.println("USER UPDATE DEBUG: Error updating user: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to update user: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PostMapping("/users/{userId}/reset-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> resetUserPassword(@PathVariable int userId, @RequestBody Map<String, String> request) {
+        try {
+            System.out.println("PASSWORD RESET DEBUG: Resetting password for user ID: " + userId + " with request: " + request);
+
+            // Debug: List all users first to see what IDs exist
+            List<User> allUsers = userService.findAll();
+            System.out.println("PASSWORD RESET DEBUG: All users in database:");
+            for (User u : allUsers) {
+                System.out.println("  - User ID: " + u.getId() + ", Name: " + u.getName() + ", Email: " + u.getEmail());
+            }
+
+            User user = userService.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+            
+            System.out.println("PASSWORD RESET DEBUG: Found user: " + user.getName() + " (ID: " + user.getId() + ")");
+            
+            String newPassword = request.get("newPassword");
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                throw new RuntimeException("New password is required");
+            }
+            
+            System.out.println("PASSWORD RESET DEBUG: Setting new password for user: " + user.getName());
+            
+            // Reset password - encode it properly
+            user.setPassword(newPassword);
+            userService.save(user);
+            
+            System.out.println("PASSWORD RESET DEBUG: Password reset successfully for user: " + user.getName());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Password reset successfully");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.out.println("PASSWORD RESET DEBUG: Error resetting password: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to reset password: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
     @GetMapping("/db-viewer")
     public ResponseEntity<Map<String, Object>> viewDatabase() {
@@ -499,6 +613,39 @@ public class AdminController {
             
         } catch (Exception e) {
             log.error("Error retrieving database contents: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/debug/users")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> debugUsers() {
+        log.info("Debug users endpoint accessed");
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            List<User> users = userService.findAll();
+            response.put("totalUsers", users.size());
+            response.put("users", users.stream().map(user -> {
+                Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("id", user.getId());
+                userInfo.put("name", user.getName());
+                userInfo.put("email", user.getEmail());
+                userInfo.put("role", user.getRole());
+                userInfo.put("department", user.getDepartment());
+                userInfo.put("state", user.getState());
+                return userInfo;
+            }).collect(Collectors.toList()));
+            
+            response.put("success", true);
+            response.put("message", "Users debug info retrieved successfully");
+            
+        } catch (Exception e) {
+            log.error("Error retrieving users debug info: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());
         }

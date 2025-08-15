@@ -38,6 +38,11 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("DataSeeder starting...");
+        log.info("Current user count: {}", userRepository.count());
+        log.info("Current order count: {}", ordersRepository.count());
+        log.info("Current garment count: {}", garmentRepository.count());
+        
         if (userRepository.count() > 0L || ordersRepository.count() > 0L || garmentRepository.count() > 0L) {
             log.info("Data already exists, skipping data seeding");
             return;

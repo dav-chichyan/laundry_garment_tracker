@@ -93,10 +93,10 @@
                 </div>
                 <div class="card-footer">
                     <div class="btn-group w-100" role="group">
-                        <button class="btn btn-outline-primary btn-sm" th:onclick="'editUser(' + ${user.id} + ')'">
+                        <button class="btn btn-outline-primary btn-sm edit-user-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn btn-outline-warning btn-sm" th:onclick="'resetPassword(' + ${user.id} + ')'">
+                        <button class="btn btn-outline-warning btn-sm reset-password-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}">
                             <i class="fas fa-key"></i> Reset
                         </button>
                         <button class="btn btn-outline-danger btn-sm" th:onclick="'deleteUser(' + ${user.id} + ')'">
@@ -362,58 +362,18 @@ function addEditScheduleInput() {
 }
 
 // Edit user
-function editUser(userId) {
-    // Find user data
-    const user = usersData.find(u => u.id === userId);
-    if (!user) {
-        alert('User data not found');
-        return;
-    }
+function editUser(userId, name, email, role, department) {
+    console.log('EDIT USER DEBUG: Function called with:', { userId, name, email, role, department });
     
-    // Populate edit form
-    document.getElementById('editUserId').value = user.id;
-    document.getElementById('editUserName').value = user.name;
-    document.getElementById('editUserEmail').value = user.email;
-    document.getElementById('editUserDepartment').value = user.department || '';
-    document.getElementById('editUserRole').value = user.role;
+    document.getElementById('editUserId').value = userId;
+    document.getElementById('editUserName').value = name;
+    document.getElementById('editUserEmail').value = email;
+    document.getElementById('editUserRole').value = role;
+    document.getElementById('editUserDepartment').value = department;
     
-    // Handle department field state based on role
-    const editDepartmentSelect = document.getElementById('editUserDepartment');
-    if (user.role === 'ADMIN') {
-        editDepartmentSelect.disabled = true;
-        editDepartmentSelect.style.opacity = '0.6';
-        editDepartmentSelect.style.cursor = 'not-allowed';
-        editDepartmentSelect.removeAttribute('required');
-    } else {
-        editDepartmentSelect.disabled = false;
-        editDepartmentSelect.style.opacity = '1';
-        editDepartmentSelect.style.cursor = 'pointer';
-        editDepartmentSelect.setAttribute('required', 'required');
-    }
-    
-    // Populate schedule times
-    const scheduleContainer = document.getElementById('editScheduleInputs');
-    scheduleContainer.innerHTML = '';
-    
-    if (user.scheduleTimes && user.scheduleTimes.length > 0) {
-        user.scheduleTimes.forEach(time => {
-            const newInput = document.createElement('div');
-            newInput.className = 'input-group mb-2';
-            newInput.innerHTML = `
-                <input type="time" class="form-control" name="scheduleTimes" value="${time}">
-                <button type="button" class="btn btn-outline-danger" onclick="removeScheduleInput(this)">
-                    <i class="fas fa-minus"></i>
-                </button>
-            `;
-            scheduleContainer.appendChild(newInput);
-        });
-    } else {
-        // Add one empty input
-        addEditScheduleInput();
-    }
-    
-    // Show modal
-    new bootstrap.Modal(document.getElementById('editUserModal')).show();
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    modal.show();
 }
 
 // Delete user
@@ -431,17 +391,17 @@ function deleteUser(userId) {
 }
 
 // Reset password
-function resetPassword(userId) {
-    const user = usersData.find(u => u.id === userId);
-    if (!user) {
-        alert('User data not found');
-        return;
-    }
+function resetPassword(userId, userName) {
+    console.log('RESET PASSWORD DEBUG: Function called with:', { userId, userName });
     
-    document.getElementById('resetPasswordUserId').value = userId;
-    document.getElementById('resetPasswordUserName').textContent = user.name;
+    document.getElementById('resetUserId').value = userId;
+    document.getElementById('resetUserName').value = userName;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
     
-    new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+    modal.show();
 }
 
 // Form validation
@@ -457,6 +417,8 @@ document.getElementById('createUserForm').addEventListener('submit', function(e)
 
 // Handle role change to disable/enable department selection
 document.addEventListener('DOMContentLoaded', function() {
+    // Setup user management event listeners
+    setupUserManagement();
     const roleSelect = document.querySelector('#createUserModal select[name="role"]');
     const departmentSelect = document.querySelector('#createUserModal select[name="department"]');
     const departmentHelp = document.getElementById('departmentHelp');
@@ -524,6 +486,182 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Save user changes
+function saveUserChanges() {
+    const userId = document.getElementById('editUserId').value;
+    const name = document.getElementById('editUserName').value;
+    const email = document.getElementById('editUserEmail').value;
+    const role = document.getElementById('editUserRole').value;
+    const department = document.getElementById('editUserDepartment').value;
+    
+    console.log('SAVE USER CHANGES DEBUG: Saving changes for user:', { userId, name, email, role, department });
+    
+    // Basic validation
+    if (!name.trim() || !email.trim()) {
+        showToast('Name and email are required!', 'error');
+        return;
+    }
+    
+    const updates = {
+        name: name,
+        email: email,
+        role: role,
+        department: department
+    };
+    
+    console.log('SAVE USER CHANGES DEBUG: Sending updates to backend:', updates);
+    
+    fetch(`/admin/users/${userId}/update`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates)
+    })
+    .then(response => {
+        console.log('SAVE USER CHANGES DEBUG: Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('SAVE USER CHANGES DEBUG: Response data:', data);
+        if (data.success) {
+            showToast('User updated successfully!', 'success');
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+            modal.hide();
+            // Reload page to show updated data
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast('Error updating user: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('SAVE USER CHANGES DEBUG: Error:', error);
+        showToast('Error updating user. Please try again.', 'error');
+    });
+}
+
+// Confirm password reset
+function confirmPasswordReset() {
+    const userId = document.getElementById('resetUserId').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    console.log('CONFIRM PASSWORD RESET DEBUG: Resetting password for user:', { userId, newPassword: '***', confirmPassword: '***' });
+    
+    if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match!', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters long!', 'error');
+        return;
+    }
+    
+    const request = {
+        newPassword: newPassword
+    };
+    
+    console.log('CONFIRM PASSWORD RESET DEBUG: Sending request to backend for user ID:', userId);
+    
+    fetch(`/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+    })
+    .then(response => {
+        console.log('CONFIRM PASSWORD RESET DEBUG: Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('CONFIRM PASSWORD RESET DEBUG: Response data:', data);
+        if (data.success) {
+            showToast('Password reset successfully!', 'success');
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal'));
+            modal.hide();
+        } else {
+            showToast('Error resetting password: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('CONFIRM PASSWORD RESET DEBUG: Error:', error);
+        showToast('Error resetting password. Please try again.', 'error');
+    });
+}
+
+// Setup user management event listeners
+function setupUserManagement() {
+    console.log('SETUP USER MANAGEMENT DEBUG: Setting up event listeners');
+    
+    // Edit user buttons
+    document.querySelectorAll('.edit-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            const userEmail = this.getAttribute('data-user-email');
+            const userRole = this.getAttribute('data-user-role');
+            const userDepartment = this.getAttribute('data-user-department');
+            
+            console.log('SETUP USER MANAGEMENT DEBUG: Edit button clicked for user:', { userId, userName, userEmail, userRole, userDepartment });
+            editUser(userId, userName, userEmail, userRole, userDepartment);
+        });
+    });
+    
+    // Reset password buttons
+    document.querySelectorAll('.reset-password-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            
+            console.log('SETUP USER MANAGEMENT DEBUG: Reset button clicked for user:', { userId, userName });
+            resetPassword(userId, userName);
+        });
+    });
+    
+    console.log('SETUP USER MANAGEMENT DEBUG: Event listeners attached successfully');
+}
+
+// Show toast notifications
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        // Create toast container if it doesn't exist
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    const toastId = 'toast-' + Date.now();
+    const toastHtml = `
+        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header ${type === 'error' ? 'bg-danger text-white' : type === 'success' ? 'bg-success text-white' : 'bg-info text-white'}">
+                <strong class="me-auto">${type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info'}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('toastContainer').insertAdjacentHTML('beforeend', toastHtml);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // Auto-remove toast after it's hidden
+    toastElement.addEventListener('hidden.bs.toast', function() {
+        this.remove();
+    });
+}
 </script>
 
 </body>

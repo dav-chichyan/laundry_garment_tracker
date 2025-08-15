@@ -95,6 +95,13 @@
             z-index: 1020;
         }
         
+
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .btn-info {
             background-color: #17a2b8;
             border-color: #17a2b8;
@@ -223,26 +230,37 @@
 
         /* Sortable table headers */
         .sortable {
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
             user-select: none;
         }
         
         .sortable:hover {
-            background-color: #e9ecef !important;
+            background-color: rgba(13, 110, 253, 0.1) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .sortable i {
-            margin-left: 5px;
             transition: all 0.2s ease;
+            font-size: 0.9rem;
         }
         
         .sortable:hover i {
-            color: #003366 !important;
+            color: #0d6efd !important;
+            transform: scale(1.1);
         }
         
-        .sortable i.fa-sort-up,
+        .sortable i.fa-sort-up {
+            color: #198754 !important;
+        }
+        
         .sortable i.fa-sort-down {
-            color: #007B55 !important;
+            color: #dc3545 !important;
+        }
+        
+        .sortable:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         /* Sort info styling */
@@ -368,26 +386,41 @@
     <!-- Staff Performance Table - Full Width -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card shadow">
                 <div class="card-header" style="background-color: #003366; color: white;">
-                    <h5 class="mb-0">Staff Performance</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Staff Performance
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle text-center" id="staffPerformanceTable">
+                        <table class="table table-bordered table-striped table-hover align-middle text-center shadow-sm" id="staffPerformanceTable">
                             <thead>
-                            <tr style="background-color: #f8f9fa;">
-                                <th class="sortable" data-sort="name" style="color: #003366; cursor: pointer;" title="Click to sort by Name">
-                                    Name <i class="fa-solid fa-sort text-muted"></i>
+                            <tr class="table-light">
+                                <th class="sortable position-relative" data-sort="name" style="color: #003366; cursor: pointer;" title="Click to sort by Name">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Name</span>
+                                        <i class="fa-solid fa-sort text-muted"></i>
+                                    </div>
                                 </th>
-                                <th class="sortable" data-sort="totalScans" style="color: #003366; cursor: pointer;" title="Click to sort by Total Scans">
-                                    Total Scans <i class="fa-solid fa-sort text-muted"></i>
+                                <th class="sortable position-relative" data-sort="totalScans" style="color: #003366; cursor: pointer;" title="Click to sort by Total Scans">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Total Scans</span>
+                                        <i class="fa-solid fa-sort text-muted"></i>
+                                    </div>
                                 </th>
-                                <th th:each="dept : ${departments}" class="sortable" th:data-sort="${'dept_' + dept}" style="color: #003366; cursor: pointer;" th:title="'Click to sort by ' + ${dept}">
-                                    <span th:text="${dept}">Department</span> <i class="fa-solid fa-sort text-muted"></i>
+                                <th th:each="dept : ${departments}" class="sortable position-relative" th:data-sort="${'dept_' + dept}" style="color: #003366; cursor: pointer;" th:title="'Click to sort by ' + ${dept}">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span th:text="${dept}">Department</span>
+                                        <i class="fa-solid fa-sort text-muted"></i>
+                                    </div>
                                 </th>
-                                <th class="sortable" data-sort="returns" style="color: #003366; cursor: pointer;" title="Click to sort by Returns">
-                                    Returns <i class="fa-solid fa-sort text-muted"></i>
+                                <th class="sortable position-relative" data-sort="returns" style="color: #003366; cursor: pointer;" title="Click to sort by Returns">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>Returns</span>
+                                        <i class="fa-solid fa-sort text-muted"></i>
+                                    </div>
                                 </th>
                                 <th style="color: #003366;">Actions</th>
                             </tr>
@@ -417,21 +450,48 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/users/' + ${user.id}}" style="border-color: #003366; color: #003366;">View</a>
+                                    <div class="btn-group" role="group">
+                                        <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/users/' + ${user.id}}" style="border-color: #003366; color: #003366;">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <button class="btn btn-outline-warning btn-sm edit-user-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}" style="border-color: #FFC107; color: #FFC107;">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm reset-password-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}" style="border-color: #DC3545; color: #DC3545;">
+                                            <i class="fas fa-key"></i> Reset
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
-                        <div class="mt-2 text-muted small" id="sortInfo">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Click on column headers to sort. 
-                            <span id="currentSortInfo" style="display: none;">
-                                Currently sorted by: <span id="sortColumnName"></span> 
-                                (<span id="sortDirection"></span>)
-                                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="resetSort()" title="Reset sorting">
-                                    <i class="fas fa-times"></i> Reset
-                                </button>
-                            </span>
+                        <div class="mt-3" id="sortInfo">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded">
+                                        <i class="fas fa-info-circle me-2 text-primary fs-5"></i>
+                                        <span class="fw-bold text-primary">Click on column headers to sort.</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="currentSortInfo" style="display: none;">
+                                    <div class="d-flex align-items-center justify-content-end h-100">
+                                        <div class="card border-success border-opacity-50 bg-success bg-opacity-10">
+                                            <div class="card-body py-2 px-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-sort me-2 text-success"></i>
+                                                    <span class="text-success fw-bold">
+                                                        Currently sorted by: <span id="sortColumnName"></span> 
+                                                        (<span id="sortDirection"></span>)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-outline-danger btn-sm ms-2" onclick="resetSort()" title="Reset sorting">
+                                            <i class="fas fa-times me-1"></i> Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -442,9 +502,12 @@
     <!-- Departments Section - Under Staff Performance -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card">
+            <div class="card shadow">
                 <div class="card-header" style="background-color: #007B55; color: white;">
-                    <h5 class="mb-0">Departments Overview</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        Departments Overview
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -471,7 +534,133 @@
         </div>
     </div>
     
-
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="successToastBody">
+                Operation completed successfully!
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="errorToastBody">
+                An error occurred!
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editUserName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="editUserName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editUserEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="editUserEmail" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="editUserRole" class="form-label">Role</label>
+                                <select class="form-select" id="editUserRole" required>
+                                    <option value="USER">User</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="editUserDepartment" class="form-label">Department</label>
+                                <select class="form-select" id="editUserDepartment" required>
+                                    <option value="RECEPTION">Reception</option>
+                                    <option value="EXAMINATION">Examination</option>
+                                    <option value="WASHING">Washing</option>
+                                    <option value="STAIN_REMOVAL">Stain Removal</option>
+                                    <option value="DRY_CLEANING">Dry Cleaning</option>
+                                    <option value="SHOES">Shoes</option>
+                                    <option value="IRONING">Ironing</option>
+                                    <option value="PACKAGING">Packaging</option>
+                                    <option value="DELIVERY">Delivery</option>
+                                    <option value="LOCKER">Locker</option>
+                                    <option value="ALTERATION">Alteration</option>
+                                    <option value="FINISHING">Finishing</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserSchedule" class="form-label">Schedule Times (comma separated)</label>
+                            <input type="text" class="form-control" id="editUserSchedule" placeholder="09:00, 13:00, 17:00">
+                            <small class="form-text text-muted">Enter times in 24-hour format, separated by commas (e.g., 09:00, 13:00, 17:00)</small>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Changes to user role and department will take effect immediately. Schedule times are optional.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="resetPasswordForm">
+                        <input type="hidden" id="resetUserId">
+                        <div class="mb-3">
+                            <label for="resetUserName" class="form-label">User</label>
+                            <input type="text" class="form-control" id="resetUserName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This will immediately change the user's password. Make sure to communicate the new password securely to the user.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmPasswordReset()">Reset Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -545,7 +734,72 @@
         // Initialize sorting
         document.addEventListener('DOMContentLoaded', function() {
             setupTableSorting();
+            setupUserManagement();
+            
+            // Initialize Bootstrap tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Set default sort to show the sorting message
+            // You can change this to any default column you want to sort by
+            const defaultSortColumn = 'dept_DRY_CLEANING';
+            if (document.querySelector(`[data-sort="${defaultSortColumn}"]`)) {
+                handleSort(defaultSortColumn);
+                // Set direction to desc for "High to Low" as requested
+                currentSort.direction = 'desc';
+                updateSortIndicators(defaultSortColumn);
+            }
         });
+        
+        function setupUserManagement() {
+            console.log('SETUP USER MANAGEMENT DEBUG: Setting up user management...');
+            
+            // Setup edit user buttons
+            const editButtons = document.querySelectorAll('.edit-user-btn');
+            console.log('SETUP USER MANAGEMENT DEBUG: Found', editButtons.length, 'edit buttons');
+            
+            editButtons.forEach((btn, index) => {
+                console.log('SETUP USER MANAGEMENT DEBUG: Setting up edit button', index, 'with data:', {
+                    userId: btn.getAttribute('data-user-id'),
+                    userName: btn.getAttribute('data-user-name'),
+                    userEmail: btn.getAttribute('data-user-email'),
+                    userRole: btn.getAttribute('data-user-role'),
+                    userDepartment: btn.getAttribute('data-user-department')
+                });
+                
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+                    const userEmail = this.getAttribute('data-user-email');
+                    const userRole = this.getAttribute('data-user-role');
+                    const userDepartment = this.getAttribute('data-user-department');
+                    
+                    console.log('SETUP USER MANAGEMENT DEBUG: Edit button clicked with data:', { userId, userName, userEmail, userRole, userDepartment });
+                    editUser(userId, userName, userEmail, userRole, userDepartment);
+                });
+            });
+            
+            // Setup reset password buttons
+            const resetButtons = document.querySelectorAll('.reset-password-btn');
+            console.log('SETUP USER MANAGEMENT DEBUG: Found', resetButtons.length, 'reset buttons');
+            
+            resetButtons.forEach((btn, index) => {
+                console.log('SETUP USER MANAGEMENT DEBUG: Setting up reset button', index, 'with data:', {
+                    userId: btn.getAttribute('data-user-id'),
+                    userName: btn.getAttribute('data-user-name')
+                });
+                
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+                    
+                    console.log('SETUP USER MANAGEMENT DEBUG: Reset button clicked with data:', { userId, userName });
+                    resetPassword(userId, userName);
+                });
+            });
+        }
 
         function setupTableSorting() {
             const sortableHeaders = document.querySelectorAll('.sortable');
@@ -562,6 +816,13 @@
             const table = document.getElementById('staffPerformanceTable');
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Add loading state
+            const loadingSpinner = document.createElement('div');
+            loadingSpinner.className = 'position-absolute top-50 start-50 translate-middle';
+            loadingSpinner.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            table.style.position = 'relative';
+            table.appendChild(loadingSpinner);
             
             // Update sort direction
             if (currentSort.column === sortKey) {
@@ -604,6 +865,13 @@
             
             // Reorder the table
             rows.forEach(row => tbody.appendChild(row));
+            
+            // Remove loading spinner
+            const spinner = table.querySelector('.spinner-border');
+            if (spinner) {
+                spinner.parentElement.remove();
+            }
+            table.style.position = '';
             
             // Update sort indicators
             updateSortIndicators(sortKey);
@@ -679,6 +947,153 @@
             
             // Reset table to original order (reload the page to get original order)
             window.location.reload();
+        }
+        
+        // User Management Functions
+        function showToast(message, type = 'success') {
+            const toastId = type === 'success' ? 'successToast' : 'errorToast';
+            const toastBodyId = type === 'success' ? 'successToastBody' : 'errorToastBody';
+            
+            document.getElementById(toastBodyId).textContent = message;
+            const toast = new bootstrap.Toast(document.getElementById(toastId));
+            toast.show();
+        }
+        
+        function editUser(userId, name, email, role, department) {
+            console.log('EDIT USER DEBUG: Function called with:', { userId, name, email, role, department });
+            
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editUserName').value = name;
+            document.getElementById('editUserEmail').value = email;
+            document.getElementById('editUserRole').value = role;
+            document.getElementById('editUserDepartment').value = department;
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+        
+        function saveUserChanges() {
+            const userId = document.getElementById('editUserId').value;
+            const name = document.getElementById('editUserName').value;
+            const email = document.getElementById('editUserEmail').value;
+            const role = document.getElementById('editUserRole').value;
+            const department = document.getElementById('editUserDepartment').value;
+            const schedule = document.getElementById('editUserSchedule').value;
+            
+            console.log('SAVE USER CHANGES DEBUG: Saving changes for user:', { userId, name, email, role, department, schedule });
+            
+            // Basic validation
+            if (!name.trim() || !email.trim()) {
+                showToast('Name and email are required!', 'error');
+                return;
+            }
+            
+            // Parse schedule times
+            const scheduleTimes = schedule ? schedule.split(',').map(s => s.trim()).filter(s => s) : [];
+            
+            const updates = {
+                name: name,
+                email: email,
+                role: role,
+                department: department,
+                scheduleTimes: scheduleTimes
+            };
+            
+            console.log('SAVE USER CHANGES DEBUG: Sending updates to backend:', updates);
+            
+            fetch(`/admin/users/${userId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updates)
+            })
+            .then(response => {
+                console.log('SAVE USER CHANGES DEBUG: Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('SAVE USER CHANGES DEBUG: Response data:', data);
+                if (data.success) {
+                    showToast('User updated successfully!', 'success');
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                    modal.hide();
+                    // Reload page to show updated data
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('Error updating user: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('SAVE USER CHANGES DEBUG: Error:', error);
+                showToast('Error updating user. Please try again.', 'error');
+            });
+        }
+        
+        function resetPassword(userId, userName) {
+            console.log('RESET PASSWORD DEBUG: Function called with:', { userId, userName });
+            
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUserName').value = userName;
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            modal.show();
+        }
+        
+        function confirmPasswordReset() {
+            const userId = document.getElementById('resetUserId').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            console.log('CONFIRM PASSWORD RESET DEBUG: Resetting password for user:', { userId, newPassword: '***', confirmPassword: '***' });
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+            
+            const request = {
+                newPassword: newPassword
+            };
+            
+            console.log('CONFIRM PASSWORD RESET DEBUG: Sending request to backend for user ID:', userId);
+            
+            fetch(`/admin/users/${userId}/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(request)
+            })
+            .then(response => {
+                console.log('CONFIRM PASSWORD RESET DEBUG: Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('CONFIRM PASSWORD RESET DEBUG: Response data:', data);
+                if (data.success) {
+                    showToast('Password reset successfully!', 'success');
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal'));
+                    modal.hide();
+                } else {
+                    showToast('Error resetting password: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('CONFIRM PASSWORD RESET DEBUG: Error:', error);
+                showToast('Error resetting password. Please try again.', 'error');
+            });
         }
     </script>
 </body>

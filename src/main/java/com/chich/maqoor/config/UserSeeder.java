@@ -26,6 +26,9 @@ public class UserSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("UserSeeder starting...");
+        log.info("Current user count: {}", userRepository.count());
+        
         // Only run if no users exist (to avoid duplicates)
         if (userRepository.count() > 0) {
             log.info("Users already exist, skipping user seeding");
