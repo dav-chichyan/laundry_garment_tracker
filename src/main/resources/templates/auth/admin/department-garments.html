@@ -32,6 +32,11 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        /* Compact filters */
+        .search-box .form-control,
+        .search-box .btn { height: 32px; padding: .25rem .5rem; font-size: .875rem; }
+        .date-range-group .form-control { min-width: 120px; }
+        .date-range-group .input-group-text { padding: .25rem .5rem; font-size: .75rem; }
     </style>
 </head>
 <body class="bg-light">
@@ -81,9 +86,6 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2><i class="fas fa-building me-2"></i><span th:text="${department}">IRONING</span> Department - Current Garments</h2>
             <div>
-                <a class="btn btn-outline-secondary me-2" th:href="@{/admin/department-garments}">
-                    <i class="fas fa-arrow-left me-2"></i>All Departments
-                </a>
                 <a class="btn btn-secondary" th:href="@{/admin/users}">
                     <i class="fas fa-home me-2"></i>Dashboard
                 </a>
@@ -92,21 +94,24 @@
 
         <!-- Search and Filter Section -->
         <div class="search-box">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" id="garmentSearch" class="form-control" placeholder="Search by Garment ID or Description...">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-md-6 col-lg-5">
+                    <input type="text" id="garmentSearch" class="form-control" placeholder="Search by Garment ID or Order ID...">
                 </div>
-                <div class="col-md-3">
-                    <select id="orderFilter" class="form-select">
-                        <option value="">All Orders</option>
-                        <option th:each="orderId : ${#objects.nullSafe(garments.![order.orderId], new java.util.ArrayList())}" 
-                                th:value="${orderId}" th:text="'Order ' + ${orderId}">Order 1001</option>
-                    </select>
+            </div>
+            <div class="row g-2 mt-2 align-items-center">
+                <div class="col-md-6 col-12">
+                    <div class="input-group input-group-sm date-range-group">
+                        <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                        <input type="date" id="fromDate" class="form-control" aria-label="From">
+                        <span class="input-group-text">→</span>
+                        <input type="date" id="toDate" class="form-control" aria-label="To">
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary" onclick="clearFilters()">Clear Filters</button>
+                <div class="col-auto">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">Clear</button>
                 </div>
-                <div class="col-md-3 text-end">
+                <div class="col-auto text-end">
                     <span class="badge bg-primary fs-6">Total: <span id="garmentCount" th:text="${garments != null ? garments.size() : 0}">0</span></span>
                 </div>
             </div>
@@ -125,6 +130,7 @@
                                 <th>Garment ID</th>
                                 <th>Description</th>
                                 <th>Order ID</th>
+                                <th>Staff</th>
                                 <th>Last Update</th>
                                 <th>Processing Status</th>
                                 <th>Actions</th>
@@ -141,16 +147,21 @@
                             <tr th:each="garment : ${garments}" class="garment-row" 
                                 th:data-garment-id="${garment.cleanCloudGarmentId}"
                                 th:data-description="${garment.description}"
-                                th:data-order-id="${garment.order.orderId}">
+                                th:data-order-id="${garment.order != null ? garment.order.cleanCloudOrderId : ''}">
                                 <td>
                                     <strong th:text="${garment.cleanCloudGarmentId}">101</strong>
                                 </td>
                                 <td th:text="${garment.description != null ? garment.description : 'No Description'}">White Shirt</td>
                                 <td>
-                                    <a th:href="@{'/admin/orders/search?orderId=' + ${garment.order.orderId}}" 
+                                    <a th:if="${garment.order != null and garment.order.cleanCloudOrderId != null}"
+                                       th:href="@{'/admin/orders/search?orderId=' + ${garment.order.cleanCloudOrderId}}"
                                        class="text-decoration-none">
-                                        <span th:text="${garment.order.orderId}">1001</span>
+                                        <span th:text="${garment.order.cleanCloudOrderId}">1001</span>
                                     </a>
+                                    <span th:if="${garment.order == null or garment.order.cleanCloudOrderId == null}" class="text-muted">N/A</span>
+                                </td>
+                                <td>
+                                    <span th:text="${staffByGarmentId != null && staffByGarmentId.get(garment.garmentId) != null ? staffByGarmentId.get(garment.garmentId) : 'N/A'}">N/A</span>
                                 </td>
                                 <td>
                                     <small class="text-muted" th:text="${garment.lastUpdate != null ? #dates.format(garment.lastUpdate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}">
@@ -163,11 +174,13 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a class="btn btn-outline-info" th:href="@{'/admin/garments/' + ${garment.cleanCloudGarmentId}}" 
+                                        <a class="btn btn-outline-info" th:href="@{'/admin/garments/' + ${garment.garmentId}}" 
                                            title="View History">
                                             <i class="fas fa-history"></i> History
                                         </a>
-                                        <a class="btn btn-outline-primary" th:href="@{'/admin/orders/search?orderId=' + ${garment.order.orderId}}" 
+                                        <a class="btn btn-outline-primary" 
+                                           th:if="${garment.order != null and garment.order.cleanCloudOrderId != null}"
+                                           th:href="@{'/admin/orders/search?orderId=' + ${garment.order.cleanCloudOrderId} + '&fromDept=' + ${department}}" 
                                            title="View Order">
                                             <i class="fas fa-list"></i> Order
                                         </a>
@@ -187,42 +200,47 @@
 // Only initialize search functionality if we're on the department detail page
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('garmentSearch');
-    const orderFilter = document.getElementById('orderFilter');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
     
-    if (searchInput && orderFilter) {
+    if (searchInput) {
         // Search functionality
         searchInput.addEventListener('input', function() {
             filterGarments();
         });
-
-        orderFilter.addEventListener('change', function() {
-            filterGarments();
-        });
+        if (fromDate) fromDate.addEventListener('change', filterGarments);
+        if (toDate) toDate.addEventListener('change', filterGarments);
     }
 });
 
 function filterGarments() {
-    const searchTerm = document.getElementById('garmentSearch').value.toLowerCase();
-    const orderFilter = document.getElementById('orderFilter').value;
+    const searchTermRaw = document.getElementById('garmentSearch').value.trim();
+    const searchTerm = searchTermRaw.toLowerCase();
+    const fromVal = document.getElementById('fromDate') ? document.getElementById('fromDate').value : '';
+    const toVal = document.getElementById('toDate') ? document.getElementById('toDate').value : '';
     const rows = document.querySelectorAll('#garmentsTableBody tr.garment-row');
     let visibleCount = 0;
 
     rows.forEach(row => {
-        const garmentId = row.getAttribute('data-garment-id');
-        const description = row.getAttribute('data-description') || '';
-        const orderId = row.getAttribute('data-order-id');
-        
-        const matchesSearch = garmentId.includes(searchTerm) || description.toLowerCase().includes(searchTerm);
-        const matchesOrder = !orderFilter || orderId === orderFilter;
-        
-        if (matchesSearch && matchesOrder) {
+        const garmentId = (row.getAttribute('data-garment-id') || '').toLowerCase();
+        const orderId = (row.getAttribute('data-order-id') || '').toLowerCase();
+        const lastUpdateCell = row.querySelector('td:nth-child(6) small');
+        const lastUpdateText = lastUpdateCell ? lastUpdateCell.innerText.trim() : '';
+        const rowDate = lastUpdateText ? new Date(lastUpdateText.replace(' ', 'T')) : null;
+
+        // Search must match garment ID or order ID
+        const matchesSearch = !searchTerm || garmentId.includes(searchTerm) || orderId.includes(searchTerm);
+        const withinFrom = !fromVal || (rowDate && rowDate >= new Date(fromVal));
+        const withinTo = !toVal || (rowDate && rowDate <= new Date(toVal + 'T23:59:59'));
+
+        if (matchesSearch && withinFrom && withinTo) {
             row.style.display = '';
             visibleCount++;
         } else {
             row.style.display = 'none';
         }
     });
-    
+
     const countElement = document.getElementById('garmentCount');
     if (countElement) {
         countElement.textContent = visibleCount;
@@ -231,10 +249,12 @@ function filterGarments() {
 
 function clearFilters() {
     const searchInput = document.getElementById('garmentSearch');
-    const orderFilter = document.getElementById('orderFilter');
+    const fromDate = document.getElementById('fromDate');
+    const toDate = document.getElementById('toDate');
     
     if (searchInput) searchInput.value = '';
-    if (orderFilter) orderFilter.value = '';
+    if (fromDate) fromDate.value = '';
+    if (toDate) toDate.value = '';
     
     filterGarments();
 }

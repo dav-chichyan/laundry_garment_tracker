@@ -59,11 +59,35 @@ public class AdminController {
     @GetMapping("/users")
     public String usersDashboard(Model model,
                                  @RequestParam(value = "fromDate", required = false) String fromDateStr,
-                                 @RequestParam(value = "toDate", required = false) String toDateStr) {
+                                 @RequestParam(value = "toDate", required = false) String toDateStr,
+                                 @RequestParam(value = "filter", required = false) String filter) {
         Date fromDate;
         Date toDate;
         
-        if (fromDateStr == null || toDateStr == null) {
+        // Handle quick filter buttons
+        if (filter != null) {
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
+            java.time.LocalDateTime endOfDay = now.toLocalDate().atTime(23, 59, 59);
+            
+            switch (filter) {
+                case "today":
+                    fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = java.util.Date.from(endOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    break;
+                case "yesterday":
+                    java.time.LocalDateTime yesterdayStart = startOfDay.minusDays(1);
+                    java.time.LocalDateTime yesterdayEnd = endOfDay.minusDays(1);
+                    fromDate = java.util.Date.from(yesterdayStart.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = java.util.Date.from(yesterdayEnd.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    break;
+                default:
+                    // Default to yesterday to today
+                    fromDate = java.util.Date.from(startOfDay.minusDays(1).atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = new java.util.Date();
+                    break;
+            }
+        } else if (fromDateStr == null || toDateStr == null) {
             // Default to yesterday to today
             java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(1).atStartOfDay();
             fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
@@ -115,10 +139,15 @@ public class AdminController {
             scansByUser.put(user.getId(), count);
         }
         
+        // Format dates for form inputs
+        java.time.LocalDateTime fromLocal = fromDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        java.time.LocalDateTime toLocal = toDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
+        
         model.addAttribute("users", users);
         model.addAttribute("departments", Departments.values());
-        model.addAttribute("from", fromDate.toString());
-        model.addAttribute("to", toDate.toString());
+        model.addAttribute("from", fromLocal.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+        model.addAttribute("to", toLocal.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+        model.addAttribute("currentFilter", filter);
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("userDeptCounts", userDeptCounts);
         model.addAttribute("scansByUser", scansByUser);
@@ -223,8 +252,26 @@ public class AdminController {
     @GetMapping("/departments/{department}")
     public String departmentGarments(@PathVariable Departments department, Model model) {
         List<Garments> garments = garmentRepository.findByDepartmentId(department);
+        // Build a map of garmentId -> last scanning staff name for this department
+        Map<Integer, String> staffByGarmentId = new HashMap<>();
+        for (Garments g : garments) {
+            try {
+                List<GarmentScan> scans = garmentScanRepository.findByGarment_GarmentId(g.getGarmentId());
+                Optional<GarmentScan> latestInDept = scans.stream()
+                        .filter(s -> s != null && s.getDepartment() == department)
+                        .filter(s -> s.getScannedAt() != null)
+                        .max(Comparator.comparing(GarmentScan::getScannedAt));
+                latestInDept.ifPresent(s -> {
+                    if (s.getUser() != null) {
+                        staffByGarmentId.put(g.getGarmentId(), s.getUser().getName());
+                    }
+                });
+                // If nothing found, leave null (will render as N/A)
+            } catch (Exception ignored) { }
+        }
         model.addAttribute("department", department);
         model.addAttribute("garments", garments);
+        model.addAttribute("staffByGarmentId", staffByGarmentId);
         return "auth/admin/department-garments";
     }
 
