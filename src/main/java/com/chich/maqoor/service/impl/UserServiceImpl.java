@@ -1,6 +1,8 @@
 package com.chich.maqoor.service.impl;
 
 import com.chich.maqoor.entity.User;
+import com.chich.maqoor.repository.GarmentReturnRepository;
+import com.chich.maqoor.repository.GarmentScanRepository;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.entity.constant.UserState;
 import com.chich.maqoor.repository.UserRepository;
@@ -22,6 +24,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private GarmentScanRepository garmentScanRepository;
+
+    @Autowired
+    private GarmentReturnRepository garmentReturnRepository;
 
     @Override
     public List<User> findAll() {
@@ -55,6 +63,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(int userId) {
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void deleteUserAndAssociations(int userId) {
+        // delete dependent rows first to satisfy FK constraints
+        garmentScanRepository.deleteByUser_Id(userId);
+        garmentReturnRepository.deleteByUser_Id(userId);
         userRepository.deleteById(userId);
     }
 }

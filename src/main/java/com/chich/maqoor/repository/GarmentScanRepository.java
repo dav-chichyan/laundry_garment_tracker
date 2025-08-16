@@ -15,6 +15,8 @@ public interface GarmentScanRepository extends JpaRepository<GarmentScan, Intege
 
     List<GarmentScan> findByUser_Id(int userId);
 
+    void deleteByUser_Id(int userId);
+
     List<GarmentScan> findByUser_IdAndScannedAtBetweenOrderByScannedAtDesc(int userId, Date fromDate, Date toDate);
 
     List<GarmentScan> findByGarment_GarmentId(int garmentId);

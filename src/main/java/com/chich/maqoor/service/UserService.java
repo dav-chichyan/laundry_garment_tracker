@@ -11,6 +11,7 @@ public interface UserService {
     List<User> findAll();
     void save(User user);
     void deleteById(int userId);
+    void deleteUserAndAssociations(int userId);
 
     Optional<User> findById(int userId);
     Optional<User> findByEmail(String email);

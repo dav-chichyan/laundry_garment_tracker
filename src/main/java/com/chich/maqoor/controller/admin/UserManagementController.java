@@ -7,7 +7,6 @@ import com.chich.maqoor.entity.User;
 import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -157,7 +156,8 @@ public class UserManagementController {
                 return "redirect:/admin/users-management";
             }
 
-            userService.deleteById(userId);
+            // Remove dependent records first to avoid FK violations
+            userService.deleteUserAndAssociations(userId);
             redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully");
             
         } catch (Exception e) {

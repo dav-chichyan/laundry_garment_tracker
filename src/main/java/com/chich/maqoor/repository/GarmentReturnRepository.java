@@ -17,6 +17,7 @@ public interface GarmentReturnRepository extends JpaRepository<GarmentReturn, In
      * Find returns by user
      */
     List<GarmentReturn> findByUser_Id(int userId);
+    void deleteByUser_Id(int userId);
     
     /**
      * Find returns by department
