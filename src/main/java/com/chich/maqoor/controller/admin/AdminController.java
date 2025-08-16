@@ -122,7 +122,8 @@ public class AdminController {
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("userDeptCounts", userDeptCounts);
         model.addAttribute("scansByUser", scansByUser);
-        return "auth/admin/users-management";
+        // Use the new staff performance dashboard template
+        return "auth/admin/staff-dashboard";
     }
     
     @GetMapping("/users/{id}")
