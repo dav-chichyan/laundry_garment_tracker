@@ -393,14 +393,22 @@ function deleteUser(userId) {
 // Reset password
 function resetPassword(userId, userName) {
     console.log('RESET PASSWORD DEBUG: Function called with:', { userId, userName });
+    const modalEl = document.getElementById('resetPasswordModal');
     
-    document.getElementById('resetUserId').value = userId;
-    document.getElementById('resetUserName').value = userName;
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
+    // Populate modal fields (IDs in template: resetPasswordUserId, resetPasswordUserName)
+    const idInput = document.getElementById('resetPasswordUserId');
+    const nameStrong = document.getElementById('resetPasswordUserName');
+    if (idInput) idInput.value = userId;
+    if (nameStrong) nameStrong.textContent = userName;
+    
+    // Clear password inputs by name within the modal
+    const newPwdInput = modalEl.querySelector('input[name="newPassword"]');
+    const confirmPwdInput = modalEl.querySelector('input[name="confirmPassword"]');
+    if (newPwdInput) newPwdInput.value = '';
+    if (confirmPwdInput) confirmPwdInput.value = '';
     
     // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+    const modal = new bootstrap.Modal(modalEl);
     modal.show();
 }
 
@@ -544,9 +552,10 @@ function saveUserChanges() {
 
 // Confirm password reset
 function confirmPasswordReset() {
-    const userId = document.getElementById('resetUserId').value;
-    const newPassword = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    const modalEl = document.getElementById('resetPasswordModal');
+    const userId = document.getElementById('resetPasswordUserId').value;
+    const newPassword = modalEl.querySelector('input[name="newPassword"]').value;
+    const confirmPassword = modalEl.querySelector('input[name="confirmPassword"]').value;
     
     console.log('CONFIRM PASSWORD RESET DEBUG: Resetting password for user:', { userId, newPassword: '***', confirmPassword: '***' });
     

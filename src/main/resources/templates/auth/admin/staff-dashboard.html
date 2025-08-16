@@ -1034,14 +1034,17 @@
         
         function resetPassword(userId, userName) {
             console.log('RESET PASSWORD DEBUG: Function called with:', { userId, userName });
-            
-            document.getElementById('resetUserId').value = userId;
-            document.getElementById('resetUserName').value = userName;
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-            
-            // Show the modal
-            const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            const modalEl = document.getElementById('resetPasswordModal');
+            // Populate fields (ensure these IDs exist)
+            const idInput = document.getElementById('resetUserId') || document.getElementById('resetPasswordUserId');
+            const nameInput = document.getElementById('resetUserName') || document.getElementById('resetPasswordUserName');
+            if (idInput) idInput.value = userId;
+            if (nameInput) nameInput.value ? nameInput.value = userName : nameInput.textContent = userName;
+            const newPwdInput = modalEl.querySelector('#newPassword') || modalEl.querySelector('input[name="newPassword"]');
+            const confirmPwdInput = modalEl.querySelector('#confirmPassword') || modalEl.querySelector('input[name="confirmPassword"]');
+            if (newPwdInput) newPwdInput.value = '';
+            if (confirmPwdInput) confirmPwdInput.value = '';
+            const modal = new bootstrap.Modal(modalEl);
             modal.show();
         }
         
