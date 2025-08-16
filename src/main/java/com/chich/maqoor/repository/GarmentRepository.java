@@ -33,4 +33,8 @@ public interface GarmentRepository extends JpaRepository<Garments, Integer> {
     void deleteByOrder_OrderId(int orderId);
 
     List<Garments> findAllByOrder_OrderId(int orderId);
+    
+    // Add missing method for finding garments by order ID
+    @Query("SELECT g FROM Garments g WHERE g.order.orderId = :orderId")
+    List<Garments> findByOrderId(@Param("orderId") int orderId);
 }

@@ -56,4 +56,8 @@ public interface GarmentReturnRepository extends JpaRepository<GarmentReturn, In
      */
     @Query("SELECT r FROM GarmentReturn r JOIN FETCH r.garment g JOIN FETCH r.user u ORDER BY r.returnTime DESC")
     List<GarmentReturn> findAllWithDetails();
+    
+    // Add missing method for finding returns by user ID
+    @Query("SELECT r FROM GarmentReturn r WHERE r.user.id = :userId")
+    List<GarmentReturn> findByUserId(@Param("userId") int userId);
 }

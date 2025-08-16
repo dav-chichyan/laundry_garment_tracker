@@ -2,678 +2,521 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Task Management - Kanban Board</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Task Management - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f4f4f4;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: .875rem;
         }
         
-        h2 {
-            color: #267fd7;
+        .feather {
+            width: 16px;
+            height: 16px;
+            vertical-align: text-bottom;
         }
         
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            width: 16.666667%; /* col-md-2 equivalent */
         }
         
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-            color: white;
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
-        .btn-info {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-            color: white;
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.125rem 0.5rem;
         }
         
-        .btn-info:hover {
-            background-color: #138496;
-            border-color: #117a8b;
-            color: white;
+        .sidebar .nav-link:hover {
+            background-color: rgba(0, 123, 255, 0.1);
         }
         
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #212529;
+        .sidebar .nav-link.active {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
         }
         
-        .btn-warning:hover {
-            background-color: #e0a800;
-            border-color: #d39e00;
-            color: #212529;
+        .sidebar .nav-link .feather {
+            margin-right: 4px;
+            color: #727272;
         }
         
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: white;
+        .sidebar .nav-link:hover .feather,
+        .sidebar .nav-link.active .feather {
+            color: inherit;
         }
         
-        .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
-            color: white;
+        .sidebar-heading {
+            font-size: .75rem;
+            text-transform: uppercase;
         }
         
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
+        /* Navbar */
+        .navbar-brand {
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, .25);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
         }
         
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-            color: white;
+        .navbar .navbar-toggler {
+            top: .25rem;
+            right: 1rem;
         }
         
-        .btn-outline-secondary {
-            background-color: transparent;
-            border-color: #6c757d;
-            color: #6c757d;
+        .navbar .form-control {
+            padding: .75rem 1rem;
+            border-width: 0;
+            border-radius: 0;
         }
         
-        .btn-outline-secondary:hover {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: white;
+        .form-control-dark {
+            color: #fff;
+            background-color: rgba(255, 255, 255, .1);
+            border-color: rgba(255, 255, 255, .1);
         }
         
+        .form-control-dark:focus {
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+        }
+        
+        /* Main content */
+        .main {
+            padding-top: 1.5rem;
+            margin-left: 16.666667%; /* Match sidebar width */
+            min-height: calc(100vh - 48px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+            }
+            .main {
+                margin-left: 0;
+            }
+        }
+        
+        /* Cards */
+        .card {
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        /* Kanban Board */
         .kanban-board {
             display: flex;
             gap: 20px;
             overflow-x: auto;
             padding-bottom: 20px;
+            margin-top: 1rem;
         }
         
         .task-list {
-            background: #f8f9fa;
-            border-radius: 8px;
-            min-width: 300px;
-            max-width: 300px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-            border: 1px solid #e9ecef;
-        }
-        
-        .task-list-header {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             background: #ffffff;
-            border-radius: 8px 8px 0 0;
+            border-radius: 12px;
+            min-width: 320px;
+            max-width: 380px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
         }
         
-        .task-list-title {
-            font-weight: 600;
-            color: #495057;
-            margin: 0;
-            font-size: 16px;
-        }
-        
-        .task-list-count {
-            background: #6c757d;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .task-list-content {
-            padding: 10px;
-            min-height: 100px;
-        }
-        
-        .task-card {
-            background: white;
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            cursor: grab;
-            transition: all 0.2s ease;
-            user-select: none;
-            border: 1px solid #e9ecef;
-        }
-        
-        .task-card:hover {
+        .task-list:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            border-color: #007bff;
         }
         
-        .task-card:active {
-            cursor: grabbing;
+        /* List header layout/alignment */
+        .task-list-header { padding: 20px; border-bottom: 1px solid #e9ecef; font-weight: 600; color: #495057; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px 12px 0 0; display: flex; align-items: center; }
+        .task-list-header .task-list-title { margin: 0; }
+        .task-list-header .actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+        .task-list-header .task-count, .task-list-header .task-list-count { background: #007bff; color: #fff; border-radius: 999px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; box-shadow: 0 2px 6px rgba(0,123,255,.25); }
+        .task-list-header .btn-icon { height: 32px; width: 32px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border-radius: 8px; }
+        .task-item { display:none; }
+        .task-card { background: #ffffff; margin: 12px; padding: 16px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: box-shadow 0.2s ease, transform 0.2s ease; }
+        .task-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.12); transform: translateY(-2px); }
+        .task-title { font-weight: 700; color: #212529; margin-bottom: 6px; font-size: 1rem; }
+        .task-description { color: #6c757d; margin-bottom: 10px; font-size: 0.925rem; }
+        .task-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .priority-badge { padding: 4px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+        .priority-badge.priority-high { background: rgba(220, 53, 69, 0.12); color: #b02a37; }
+        .priority-badge.priority-medium { background: rgba(255, 193, 7, 0.18); color: #856404; }
+        .priority-badge.priority-low { background: rgba(40, 167, 69, 0.12); color: #0f5132; }
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: #f1f3f5; color: #495057; }
+        .assignee-avatar { width: 28px; height: 28px; border-radius: 50%; background: #0d6efd; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-right: 6px; }
+        .task-labels { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .task-label { background: #e9ecef; color: #495057; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; }
+        .task-list-content { padding-bottom: 8px; }
+        .btn-add-card, .add-task-btn { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: calc(100% - 24px); margin: 12px; font-weight: 500; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2); }
+        .btn-add-card:hover, .add-task-btn:hover { background: linear-gradient(135deg, #5a6268 0%, #495057 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3); }
+        
+        .task-item.priority-high {
+            border-left-color: #dc3545;
         }
         
-        .task-card.dragging {
-            opacity: 0.5;
-            transform: rotate(5deg);
+        .task-item.priority-medium {
+            border-left-color: #ffc107;
         }
         
-        .task-list.drag-over {
-            background: #e3f2fd;
-            border: 2px dashed #2196f3;
+        .task-item.priority-low {
+            border-left-color: #28a745;
         }
         
-        .task-title {
+        .task-item.status-pending {
+            border-left-color: #6c757d;
+        }
+        
+        .task-item.status-in-progress {
+            border-left-color: #17a2b8;
+        }
+        
+        .task-item.status-completed {
+            border-left-color: #28a745;
+        }
+        
+        .task-item.status-cancelled {
+            border-left-color: #dc3545;
+        }
+        
+        .task-item .task-title {
             font-weight: 600;
             color: #212529;
             margin-bottom: 8px;
-            font-size: 14px;
+            font-size: 1rem;
         }
         
-        .task-description {
+        .task-item .task-description {
             color: #6c757d;
-            font-size: 13px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
             line-height: 1.4;
         }
         
-        .task-meta {
+        .task-item .task-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .task-item .task-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
+        .task-item .task-priority.high {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .task-item .task-priority.medium {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404; 
+        }
+        
+        .task-item .task-priority.low {
+            background: rgba(40, 167, 69, 0.1);
+            color: #155724;
         }
         
         .task-priority {
-            font-size: 11px;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
             font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
-        .priority-low { 
-            background: #d1ecf1; 
-            color: #0c5460; 
-            border: 1px solid #bee5eb;
+        .priority-high {
+            background-color: #f8d7da;
+            color: #721c24;
         }
-        .priority-medium { 
-            background: #fff3cd; 
-            color: #856404; 
-            border: 1px solid #ffeaa7;
+        
+        .priority-medium {
+            background-color: #fff3cd;
+            color: #856404;
         }
-        .priority-high { 
-            background: #f8d7da; 
-            color: #721c24; 
-            border: 1px solid #f5c6cb;
+        
+        .priority-low {
+            background-color: #d4edda;
+            color: #155724;
         }
-        .priority-urgent { 
-            background: #f5c6cb; 
-            color: #721c24; 
-            font-weight: bold; 
-            border: 1px solid #f1b0b7;
+        
+        .task-status {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #e2e3e5;
+            color: #383d41; 
+        }
+        
+        .status-in-progress {
+            background-color: #cce7ff;
+            color: #004085; 
+        }
+        
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724; 
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
         }
         
         .task-assignee {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 8px;
         }
         
-        .assignee-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #007bff;
+        .task-due-date {
+            font-size: 0.75rem;
+            color: #dc3545;
+            margin-top: 5px;
+        }
+        
+        .task-overdue {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                top: 5rem;
+            }
+            
+            .kanban-board {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .task-list {
+                min-width: auto;
+                max-width: none;
+            }
+        }
+        
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+        
+        /* Enhanced Button Styling */
+        .btn-add-task {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        
-        .task-labels {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-        
-        .task-label {
-            background: #e1e5e9;
-            color: #172b4d;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 500;
-        }
-        
-        .add-task-btn {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            color: #6c757d;
-            padding: 12px;
-            border-radius: 6px;
-            width: 100%;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-        
-        .add-task-btn:hover {
-            background: #e9ecef;
-            border-color: #007bff;
-            color: #007bff;
-            transform: translateY(-1px);
-        }
-        
-        .add-list-btn {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            color: #6c757d;
-            padding: 15px 30px;
+            border: none;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-weight: 500;
-            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
         }
         
-        .add-list-btn:hover {
-            background: #e9ecef;
-            border-color: #007bff;
-            color: #007bff;
+        .btn-add-task:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
         
-        .header-section {
-            background: white;
+        .btn-add-list {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2);
+            margin-top: 20px;
+        }
+        
+        .btn-add-list:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-delete-list {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            box-shadow: 0 1px 3px rgba(220, 53, 69, 0.2);
+        }
+        
+        .btn-delete-list:hover {
+            background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-add-card {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+            border: none;
+            padding: 10px 16px;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: calc(100% - 24px);
+            margin: 12px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
         }
         
-        .header-section h1 {
-            color: #003366;
-            margin: 0;
+        .btn-add-card:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+        
+        /* Page Header Enhancement */
+        .page-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .page-header h1 {
+            color: #212529;
+            margin-bottom: 8px;
             font-weight: 700;
         }
         
-        .header-section p {
+        .page-header p {
             color: #6c757d;
-            margin: 5px 0 0 0;
-        }
-        
-        .btn-modern {
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .btn-primary-modern {
-            background: #007bff;
-            color: white;
-        }
-        
-        .btn-success-modern {
-            background: #007B55;
-            color: white;
-        }
-        
-        .btn-outline-modern {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-outline-modern:hover {
-            background: #5a6268;
-            color: white;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border: 1px solid #e9ecef;
-        }
-        
-        .close {
-            color: #6c757d;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-        
-        .close:hover {
-            color: #495057;
-        }
-        
-        .modal h4 {
-            color: #212529;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        
-        .form-label {
-            color: #495057;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        .form-control, .form-select {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            padding: 10px 12px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-            outline: none;
-        }
-        
-        .comment-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-        }
-        
-        .comment {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .comment-author {
-            font-weight: 600;
-            color: #495057;
-            font-size: 14px;
-        }
-        
-        .comment-time {
-            color: #6c757d;
-            font-size: 12px;
-        }
-        
-        .comment-content {
-            color: #212529;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-        
-        .task-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .status-badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .status-todo { 
-            background: #e2e3e5; 
-            color: #383d41; 
-            border: 1px solid #d6d8db;
-        }
-        .status-in_progress { 
-            background: #cce5ff; 
-            color: #004085; 
-            border: 1px solid #b3d7ff;
-        }
-        .status-review { 
-            background: #fff3cd; 
-            color: #856404; 
-            border: 1px solid #ffeaa7;
-        }
-        .status-done { 
-            background: #d4edda; 
-            color: #155724; 
-            border: 1px solid #c3e6cb;
-        }
-        
-        .collaboration-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 25px;
-            font-size: 14px;
-            z-index: 1001;
-            display: none;
-        }
-        
-        .collaboration-indicator.show {
-            display: block;
-        }
-        
-        /* Notification styles */
-        .notification-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1002;
-            display: none;
-            max-width: 300px;
-            animation: slideInRight 0.3s ease-out;
-        }
-        
-        .notification-toast.show {
-            display: block;
-        }
-        
-        .notification-toast.info {
-            background: #17a2b8;
-        }
-        
-        .notification-toast.warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        .notification-toast.danger {
-            background: #dc3545;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .notification-toast .close {
-            float: right;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        
-        .notification-toast .close:hover {
-            opacity: 0.7;
-        }
-        
-        /* File upload styling */
-        .file-preview-item {
-            background-color: #f8f9fa;
-            transition: all 0.2s ease;
-        }
-        
-        .file-preview-item:hover {
-            background-color: #e9ecef;
-        }
-        
-        .file-preview-item .file-info {
-            min-width: 120px;
-        }
-        
-        .file-preview-item .preview-content {
-            min-width: 60px;
-            text-align: center;
-        }
-        
-        .file-preview-item img {
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        
-        /* Enhanced button styling for delete list */
-        .btn-outline-danger {
-            border-color: #fd7e14;
-            color: #fd7e14;
-        }
-        
-        .btn-outline-danger:hover {
-            background-color: #fd7e14;
-            border-color: #fd7e14;
-            color: white;
-        }
-        
-        /* Order and Garment info styling */
-        .task-order-garment {
-            border-top: 1px solid #e9ecef;
-            padding-top: 8px;
-        }
-        
-        .task-order-garment small {
-            font-size: 11px;
-            font-weight: 500;
-        }
-        
-        .task-order-garment .text-info {
-            color: #17a2b8 !important;
-        }
-        
-        .task-order-garment .text-warning {
-            color: #ffc107 !important;
-        }
-        
-        /* List header alignment */
-        .task-list-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .task-list-header .d-flex {
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .task-list-count {
-            background-color: #6c757d;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
+            margin-bottom: 0;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-
-<!-- Collaboration Indicator -->
-<div id="collaborationIndicator" class="collaboration-indicator">
-    <i class="fas fa-users"></i> Real-time collaboration active
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-2 me-0 px-3" href="/admin">Maqoor Admin</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-nav">
+            <div class="nav-item text-nowrap">
+                <a class="nav-link px-3" href="/auth/logout">Sign out</a>
 </div>
+        </div>
+    </nav>
 
-<!-- Notification Toast -->
-<div id="notificationToast" class="notification-toast">
-    <span class="close" onclick="closeNotification()">&times;</span>
-    <div id="notificationContent"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users-management">
+                                <i class="fas fa-users me-2"></i>
+                                User Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/task-management">
+                                <i class="fas fa-tasks me-2"></i>
+                                Task Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/scanned-garments">
+                                <i class="fas fa-barcode me-2"></i>
+                                Scanned Garments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/returns-dashboard">
+                                <i class="fas fa-undo me-2"></i>
+                                Returns Dashboard
+                            </a>
+                        </li>
+                        
+                    </ul>
 </div>
+            </nav>
 
-<div class="container py-5">
-    <!-- Header Section -->
-    <div class="header-section">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1>Task Management</h1>
-                <p>Kanban Board with Real-time Collaboration</p>
+            <!-- Main Content Area -->
+            <main role="main" class="col-md-10 px-md-4 main">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                        <div class="col">
+                            <h1 class="h2">Task Management</h1>
+                            <p class="text-muted">Manage and track tasks across all departments</p>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-modern btn-success-modern" onclick="showTaskModal()">
-                    <i class="fas fa-plus"></i> Add Task
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button class="btn btn-sm btn-primary btn-add-list" data-bs-toggle="modal" data-bs-target="#listModal">
+                                    <i class="fas fa-plus"></i> Add List
                 </button>
-                <button class="btn btn-modern btn-primary-modern" onclick="showListModal()">
-                    <i class="fas fa-columns"></i> Add List
-                </button>
-                <a href="/admin/users" class="btn btn-modern btn-outline-modern">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
+                            </div>
             </div>
         </div>
     </div>
@@ -690,18 +533,30 @@
     </div>
 
     <!-- Add List Button -->
-    <div class="text-center mt-4">
-        <button class="add-list-btn" onclick="showListModal()">
-            <i class="fas fa-plus"></i> Add Another List
-        </button>
+    
+
+    <!-- Collaboration Indicator -->
+    <div id="collaborationIndicator" class="position-fixed top-0 end-0 m-3 p-3 bg-success text-white rounded shadow" style="display: none; z-index: 1050;">
+        <i class="fas fa-users"></i> Real-time collaboration active
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="position-fixed top-0 end-0 m-3 p-3 bg-info text-white rounded shadow" style="display: none; z-index: 1050; max-width: 300px;">
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="notificationContent"></span>
+            <button type="button" class="btn-close btn-close-white" onclick="closeNotification()"></button>
     </div>
 </div>
 
 <!-- Task Modal -->
-<div id="taskModal" class="modal">
+    <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
     <div class="modal-content">
-        <span class="close" onclick="closeTaskModal()">&times;</span>
-        <h4>Create New Task</h4>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskModalLabel">Create New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
         <form id="taskForm">
             <div class="mb-3">
                 <label for="taskTitle" class="form-label">Task Title</label>
@@ -774,41 +629,51 @@
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success">Create Task</button>
-                <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </form>
+                </div>
+            </div>
     </div>
 </div>
 
 <!-- Task Edit Modal -->
-<div id="taskEditModal" class="modal">
+    <div class="modal fade" id="taskEditModal" tabindex="-1" aria-labelledby="taskEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
     <div class="modal-content">
-        <span class="close" onclick="closeTaskEditModal()">&times;</span>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskEditModalLabel">Edit Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
         <div id="taskEditContent">
             <!-- Task edit content will be populated here -->
+                    </div>
+                </div>
         </div>
     </div>
 </div>
 
 <!-- List Modal -->
-<div id="listModal" class="modal">
+    <div class="modal fade" id="listModal" tabindex="-1" aria-labelledby="listModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
     <div class="modal-content">
-        <span class="close" onclick="closeListModal()">&times;</span>
-        <h4>Create New List</h4>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="listModalLabel">Create New List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
         <form id="listForm">
             <div class="mb-3">
                 <label for="listName" class="form-label">List Name</label>
                 <input type="text" class="form-control" id="listName" required>
             </div>
-            <div class="mb-3">
-                <label for="listDescription" class="form-label">Description</label>
-                <textarea class="form-control" id="listDescription" rows="3"></textarea>
-            </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Create List</button>
-                <button type="button" class="btn btn-secondary" onclick="closeListModal()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </form>
+            </div>
     </div>
 </div>
 
@@ -1132,21 +997,20 @@ function createListElement(list) {
     
     listDiv.innerHTML = `
         <div class="task-list-header">
-            <div class="d-flex justify-content-between align-items-center">
                 <h6 class="task-list-title">${list.name}</h6>
-                <div class="d-flex gap-2">
+            <div class="actions">
                     <span class="task-list-count">${list.tasks.length}</span>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteList(${list.id})" title="Delete List">
+                <button class="btn btn-outline-primary btn-icon" onclick="showTaskModal(${list.id})" title="Add Card">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-icon" onclick="deleteList(${list.id})" title="Delete List">
                         <i class="fas fa-trash"></i>
                     </button>
-                </div>
             </div>
         </div>
         <div class="task-list-content">
             ${list.tasks.map(task => createTaskElement(task)).join('')}
-            <button class="add-task-btn" onclick="showTaskModal()">
-                <i class="fas fa-plus"></i> Add a card
-            </button>
+            
         </div>
     `;
     
@@ -1223,26 +1087,41 @@ function handleDragEnd(e) {
 }
 
 // Show task modal
-function showTaskModal() {
+function showTaskModal(listId) {
     console.log('Showing task modal');
-    document.getElementById('taskModal').style.display = 'block';
+        const modal = new bootstrap.Modal(document.getElementById('taskModal'));
+        modal.show();
+        // Preselect list if provided
+        if (typeof listId !== 'undefined' && listId !== null) {
+            const select = document.getElementById('taskList');
+            if (select) {
+                select.value = String(listId);
+            }
+        }
 }
 
 // Close task modal
 function closeTaskModal() {
-    document.getElementById('taskModal').style.display = 'none';
+        const modal = bootstrap.Modal.getInstance(document.getElementById('taskModal'));
+        if (modal) {
+            modal.hide();
+        }
     document.getElementById('taskForm').reset();
 }
 
 // Show list modal
 function showListModal() {
     console.log('Showing list modal');
-    document.getElementById('listModal').style.display = 'block';
+        const modal = new bootstrap.Modal(document.getElementById('listModal'));
+        modal.show();
 }
 
 // Close list modal
 function closeListModal() {
-    document.getElementById('listModal').style.display = 'none';
+        const modal = bootstrap.Modal.getInstance(document.getElementById('listModal'));
+        if (modal) {
+            modal.hide();
+        }
     document.getElementById('listForm').reset();
 }
 
@@ -1352,7 +1231,7 @@ function editTask(taskId) {
                 <button type="button" class="btn btn-danger" onclick="deleteTask(${task.id})">
                     <i class="fas fa-trash"></i> Delete Task
                 </button>
-                <button type="button" class="btn btn-secondary" onclick="closeTaskEditModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
         </form>
     `;
@@ -1366,12 +1245,16 @@ function editTask(taskId) {
     // Setup file input listeners for edit modal
     setTimeout(setupEditModalFileListeners, 100);
     
-    modal.style.display = 'block';
+        const modalInstance = new bootstrap.Modal(document.getElementById('taskEditModal'));
+        modalInstance.show();
 }
 
 // Close task edit modal
 function closeTaskEditModal() {
-    document.getElementById('taskEditModal').style.display = 'none';
+        const modal = bootstrap.Modal.getInstance(document.getElementById('taskEditModal'));
+        if (modal) {
+            modal.hide();
+        }
 }
 
 // Save task changes
@@ -1775,7 +1658,6 @@ document.getElementById('listForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const name = document.getElementById('listName').value;
-    const description = document.getElementById('listDescription').value;
     
     if (!name) {
         alert('Please enter a list name');
@@ -1785,7 +1667,6 @@ document.getElementById('listForm').addEventListener('submit', function(e) {
     const newList = {
         id: Date.now(),
         name: name,
-        description: description,
         status: 'TODO',
         tasks: []
     };

@@ -163,8 +163,29 @@ public class AdminController {
         return "auth/admin/user-detail";
     }
 
+    @GetMapping("/department-garments")
+    public String departmentGarmentsPage(Model model) {
+        model.addAttribute("departments", Departments.values());
+        return "auth/admin/department-garments";
+    }
+
     @GetMapping("/orders/search")
-    public String searchOrder(@RequestParam("orderId") int orderId, Model model) {
+    public String orderSearchPage(@RequestParam(value = "orderId", required = false) String orderIdParam, Model model) {
+        if (orderIdParam != null) {
+            String trimmed = orderIdParam.trim();
+            if (!trimmed.isEmpty()) {
+                try {
+                    int orderId = Integer.parseInt(trimmed);
+                    return searchOrder(orderId, model);
+                } catch (NumberFormatException ex) {
+                    model.addAttribute("error", "Please enter a valid numeric Order ID.");
+                }
+            }
+        }
+        return "auth/admin/order-search";
+    }
+
+    private String searchOrder(int orderId, Model model) {
         System.out.println("Searching for order: " + orderId);
         try {
             // First, find the order by cleanCloudOrderId
@@ -172,7 +193,9 @@ public class AdminController {
             if (!order.isPresent()) {
                 System.out.println("Order with cleanCloudOrderId " + orderId + " not found");
                 model.addAttribute("error", "Order not found with ID: " + orderId);
-                return "redirect:/admin/users";
+                // Keep the entered value so the user sees what they searched
+                model.addAttribute("orderId", orderId);
+                return "auth/admin/order-search";
             }
             
             // Then get garments for that order
@@ -186,13 +209,14 @@ public class AdminController {
             model.addAttribute("orderId", orderId);
             model.addAttribute("order", order.get());
             model.addAttribute("garments", garments);
-            System.out.println("Returning template: auth/admin/order-detail");
-            return "auth/admin/order-detail";
+            System.out.println("Returning template: auth/admin/order-search (inline results)");
+            return "auth/admin/order-search";
         } catch (Exception e) {
             System.err.println("Error searching order: " + e.getMessage());
             e.printStackTrace();
             model.addAttribute("error", "Order not found: " + e.getMessage());
-            return "redirect:/admin/users";
+            model.addAttribute("orderId", orderId);
+            return "auth/admin/order-search";
         }
     }
 
@@ -275,75 +299,124 @@ public class AdminController {
                                      @RequestParam(value = "fromDate", required = false) String fromDateStr,
                                      @RequestParam(value = "toDate", required = false) String toDateStr,
                                      Model model) {
-        Date fromDate;
-        Date toDate;
-        
-        if (fromDateStr == null || toDateStr == null) {
-            // Default to last 7 days
-            java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(7).atStartOfDay();
-            fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
-            toDate = new java.util.Date();
-        } else {
-            try {
-                java.time.LocalDateTime from = java.time.LocalDateTime.parse(fromDateStr);
-                java.time.LocalDateTime to = java.time.LocalDateTime.parse(toDateStr);
-                fromDate = java.util.Date.from(from.atZone(java.time.ZoneId.systemDefault()).toInstant());
-                toDate = java.util.Date.from(to.atZone(java.time.ZoneId.systemDefault()).toInstant());
-            } catch (Exception e) {
+        try {
+            Date fromDate;
+            Date toDate;
+            
+            if (fromDateStr == null || toDateStr == null) {
+                // Default to last 7 days
                 java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(7).atStartOfDay();
                 fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
                 toDate = new java.util.Date();
+            } else {
+                try {
+                    java.time.LocalDateTime from = java.time.LocalDateTime.parse(fromDateStr);
+                    java.time.LocalDateTime to = java.time.LocalDateTime.parse(toDateStr);
+                    fromDate = java.util.Date.from(from.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = java.util.Date.from(to.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                } catch (Exception e) {
+                    java.time.LocalDateTime startOfDay = java.time.LocalDate.now().minusDays(7).atStartOfDay();
+                    fromDate = java.util.Date.from(startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant());
+                    toDate = new java.util.Date();
+                }
             }
-        }
-        
-        List<GarmentScan> scans;
-        if (userId != null && department != null) {
-            // Filter by specific user and department
-            scans = garmentScanRepository.findByUser_IdAndDepartmentAndScannedAtBetweenOrderByScannedAtDesc(userId, department, fromDate, toDate);
-            User user = userService.findById(userId).orElse(null);
-            model.addAttribute("filteredUser", user);
-            model.addAttribute("filteredDepartment", department);
-        } else if (userId != null) {
-            // Filter by specific user only
-            scans = garmentScanRepository.findByUser_IdAndScannedAtBetweenOrderByScannedAtDesc(userId, fromDate, toDate);
-            User user = userService.findById(userId).orElse(null);
-            model.addAttribute("filteredUser", user);
-        } else if (department != null) {
-            // Filter by specific department only
-            scans = garmentScanRepository.findByDepartmentAndScannedAtBetweenOrderByScannedAtDesc(department, fromDate, toDate);
-            model.addAttribute("filteredDepartment", department);
-        } else {
-            // Show all scans
-            scans = garmentScanRepository.findByScannedAtBetweenOrderByScannedAtDesc(fromDate, toDate);
-        }
-        
-        // Get summary statistics
-        Map<Departments, Long> scansByDepartment = new HashMap<>();
-        Map<Integer, Long> scansByUser = new HashMap<>();
-        
-        for (Departments dept : Departments.values()) {
-            long count = scans.stream()
-                .filter(scan -> scan.getDepartment() == dept)
+            
+            List<GarmentScan> scans;
+            try {
+                if (userId != null && department != null) {
+                    // Filter by specific user and department
+                    scans = garmentScanRepository.findByUser_IdAndDepartmentAndScannedAtBetweenOrderByScannedAtDesc(userId, department, fromDate, toDate);
+                    User user = userService.findById(userId).orElse(null);
+                    model.addAttribute("filteredUser", user);
+                    model.addAttribute("filteredDepartment", department);
+                } else if (userId != null) {
+                    // Filter by specific user only
+                    scans = garmentScanRepository.findByUser_IdAndScannedAtBetweenOrderByScannedAtDesc(userId, fromDate, toDate);
+                    User user = userService.findById(userId).orElse(null);
+                    model.addAttribute("filteredUser", user);
+                } else if (department != null) {
+                    // Filter by specific department only
+                    scans = garmentScanRepository.findByDepartmentAndScannedAtBetweenOrderByScannedAtDesc(department, fromDate, toDate);
+                    model.addAttribute("filteredDepartment", department);
+                } else {
+                    // Show all scans
+                    scans = garmentScanRepository.findByScannedAtBetweenOrderByScannedAtDesc(fromDate, toDate);
+                }
+            } catch (Exception e) {
+                log.error("Error fetching scans from database", e);
+                scans = new ArrayList<>();
+            }
+            
+            // Filter out any scans with null users, garments, or timestamps to prevent template errors
+            if (scans != null) {
+                scans = scans.stream()
+                    .filter(scan -> scan != null
+                        && scan.getUser() != null
+                        && scan.getGarment() != null
+                        && scan.getScannedAt() != null)
+                    .collect(Collectors.toList());
+            } else {
+                scans = new ArrayList<>();
+            }
+            
+            // Get summary statistics safely
+            Map<Departments, Long> scansByDepartment = new HashMap<>();
+            Map<Integer, Long> scansByUser = new HashMap<>();
+            
+            for (Departments dept : Departments.values()) {
+                long count = scans.stream()
+                    .filter(scan -> scan.getDepartment() == dept)
+                    .count();
+                scansByDepartment.put(dept, count);
+            }
+            
+            List<User> allUsers = new ArrayList<>();
+            try {
+                allUsers = userService.findAll();
+            } catch (Exception e) {
+                log.error("Error fetching users", e);
+            }
+            
+            for (User user : allUsers) {
+                long count = scans.stream()
+                    .filter(scan -> scan.getUser() != null && scan.getUser().getId() == user.getId())
+                    .count();
+                scansByUser.put(user.getId(), count);
+            }
+            
+            // Distinct counts for template (avoid complex Thymeleaf expressions)
+            long distinctDepartmentsCount = scans.stream()
+                .map(GarmentScan::getDepartment)
+                .filter(Objects::nonNull)
+                .distinct()
                 .count();
-            scansByDepartment.put(dept, count);
-        }
-        
-        for (User user : userService.findAll()) {
-            long count = scans.stream()
-                .filter(scan -> scan.getUser().getId() == user.getId())
+            long uniqueGarmentsCount = scans.stream()
+                .map(scan -> scan.getGarment() != null ? scan.getGarment().getCleanCloudGarmentId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
                 .count();
-            scansByUser.put(user.getId(), count);
+            
+            model.addAttribute("scans", scans);
+            model.addAttribute("from", fromDate);
+            model.addAttribute("to", toDate);
+            model.addAttribute("users", allUsers);
+            model.addAttribute("scansByDepartment", scansByDepartment);
+            model.addAttribute("scansByUser", scansByUser);
+            model.addAttribute("distinctDepartmentsCount", distinctDepartmentsCount);
+            model.addAttribute("uniqueGarmentsCount", uniqueGarmentsCount);
+            
+            log.info("Scanned garments page loaded successfully with {} scans", scans.size());
+            
+            return "auth/admin/scanned-garments";
+        } catch (Exception e) {
+            log.error("Error loading scanned garments page", e);
+            model.addAttribute("error", "Error loading scanned garments data: " + e.getMessage());
+            model.addAttribute("scans", new ArrayList<>());
+            model.addAttribute("users", new ArrayList<>());
+            model.addAttribute("scansByDepartment", new HashMap<>());
+            model.addAttribute("scansByUser", new HashMap<>());
+            return "auth/admin/scanned-garments";
         }
-        
-        model.addAttribute("scans", scans);
-        model.addAttribute("from", fromDate);
-        model.addAttribute("to", toDate);
-        // model.addAttribute("departments", Departments.values());
-        model.addAttribute("users", userService.findAll());
-        // model.addAttribute("scansByDepartment", scansByDepartment);
-        // model.addAttribute("scansByUser", scansByUser);
-        
-        return "auth/admin/scanned-garments";
     }
 
     @GetMapping("/returns-dashboard")

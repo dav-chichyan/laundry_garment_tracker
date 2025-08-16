@@ -5,38 +5,361 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanned Garments - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            width: 16.666667%; /* col-md-2 equivalent */
+        }
+        
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.125rem 0.5rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: #007bff;
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        
+        .sidebar .nav-link .feather {
+            margin-right: 4px;
+            color: #727272;
+        }
+        
+        .sidebar .nav-link:hover .feather,
+        .sidebar .nav-link.active .feather {
+            color: inherit;
+        }
+        
+        .sidebar-heading {
+            font-size: .75rem;
+            text-transform: uppercase;
+        }
+        
+        /* Navbar */
+        .navbar-brand {
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, .25);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+        }
+        
+        .navbar .navbar-toggler {
+            top: .25rem;
+            right: 1rem;
+        }
+        
+        .navbar .form-control {
+            padding: .75rem 1rem;
+            border-width: 0;
+            border-radius: 0;
+        }
+        
+        .form-control-dark {
+            color: #fff;
+            background-color: rgba(255, 255, 255, .1);
+            border-color: rgba(255, 255, 255, .1);
+        }
+        
+        .form-control-dark:focus {
+            border-color: transparent;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+        }
+        
+        /* Main content */
+        .main {
+            padding-top: 1.5rem;
+            margin-left: 16.666667%; /* Match sidebar width */
+            min-height: calc(100vh - 48px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+            }
+            .main {
+                margin-left: 0;
+            }
+        }
+        
+        /* Cards */
+        .card {
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+        }
+        
+        /* Page Header Enhancement */
+        .page-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .page-header h1 {
+            color: #212529;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .page-header p {
+            color: #6c757d;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Cards */
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card .card-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stats-card .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-card .stats-label {
+            color: #6c757d;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        
+        /* Tables */
+        .table-responsive {
+            margin-bottom: 1rem;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            background-color: #f8f9fa;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        /* Back Button */
+        .btn-back {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+        }
+        
+        .btn-back:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+            color: white;
+        }
+        
+        /* Scan Status Badges */
+        .scan-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .scan-status.recent {
+            background: rgba(40, 167, 69, 0.1);
+            color: #155724;
+        }
+        
+        .scan-status.older {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid mt-4">
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-2 me-0 px-3" href="/admin">Maqoor Admin</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-nav">
+            <div class="nav-item text-nowrap">
+                <a class="nav-link px-3" href="/auth/logout">Sign out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-12">
-                <h2>Scanned Garments Dashboard</h2>
-                <a href="/admin/users" class="btn btn-outline-secondary">Back to Users</a>
-                
-                <!-- Simple Stats -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h4 th:text="${#lists.size(scans)}">0</h4>
-                                <p class="mb-0">Total Scans</p>
-                            </div>
+            <!-- Sidebar Navigation -->
+            <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users-management">
+                                <i class="fas fa-users me-2"></i>
+                                User Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/task-management">
+                                <i class="fas fa-tasks me-2"></i>
+                                Task Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/scanned-garments">
+                                <i class="fas fa-barcode me-2"></i>
+                                Scanned Garments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/department-garments">
+                                <i class="fas fa-tshirt me-2"></i>
+                                Department Garments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/returns-dashboard">
+                                <i class="fas fa-undo me-2"></i>
+                                Returns Dashboard
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main role="main" class="col-md-10 px-md-4 main">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                        <div class="col">
+                            <h1 class="h2">Scanned Garments Dashboard</h1>
+                            <p class="text-muted">Track and monitor all garment scanning activities across departments</p>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <h4 th:text="${#lists.size(users)}">0</h4>
-                                <p class="mb-0">Active Staff</p>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <a href="/admin/users" class="btn btn-back">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Simple Table -->
+                <!-- Error Display -->
+                <div th:if="${error != null}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}">Error message</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="stats-number" th:text="${#lists.size(scans)}">0</div>
+                                <div class="stats-label">Total Scans</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="stats-number" th:text="${#lists.size(users)}">0</div>
+                                <div class="stats-label">Active Staff</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="stats-number" th:text="${distinctDepartmentsCount}">0</div>
+                                <div class="stats-label">Departments</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="stats-number" th:text="${uniqueGarmentsCount}">0</div>
+                                <div class="stats-label">Unique Garments</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan History Table -->
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">Scan History</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Scan History
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -48,19 +371,43 @@
                                         <th>Staff Member</th>
                                         <th>Department</th>
                                         <th>Scanned At</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="scan : ${scans}">
-                                        <td th:text="${scan.id}">1</td>
-                                        <td th:text="${scan.garment.cleanCloudGarmentId}">123</td>
-                                        <td th:text="${scan.user.name}">Staff Name</td>
-                                        <td th:text="${scan.department}">Department</td>
-                                        <td th:text="${#dates.format(scan.scannedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                                    <tr th:each="scan : ${scans}" th:if="${scan.user != null and scan.garment != null and scan.scannedAt != null}">
+                                        <td>
+                                            <span class="badge bg-primary" th:text="${scan.id}">1</span>
+                                        </td>
+                                        <td>
+                                            <strong th:text="${scan.garment.cleanCloudGarmentId}">123</strong>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle me-2" style="width: 32px; height: 32px; background: #007bff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem;" th:text="${(scan.user != null && scan.user.name != null && scan.user.name.length() >= 2) ? #strings.substring(scan.user.name,0,2).toUpperCase() : (scan.user != null && scan.user.name != null && scan.user.name.length() == 1) ? scan.user.name.toUpperCase() : 'NA'}">ST</div>
+                                                <span th:text="${scan.user.name}">Staff Name</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${scan.department}">Department</span>
+                                        </td>
+                                        <td>
+                                            <i class="fas fa-clock me-1 text-muted"></i>
+                                            <span th:text="${#dates.format(scan.scannedAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
+                                        </td>
+                                        <td>
+                                            <span class="scan-status" 
+                                                  th:class="${#dates.createNow().time - scan.scannedAt.time < 86400000 ? 'recent' : 'older'}"
+                                                  th:text="${#dates.createNow().time - scan.scannedAt.time < 86400000 ? 'Recent' : 'Older'}">Recent</span>
+                                        </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(scans)}">
-                                        <td colspan="5" class="text-center text-muted py-4">
-                                            <p>No scans found for the selected criteria</p>
+                                        <td colspan="6" class="text-center text-muted py-5">
+                                            <div class="py-4">
+                                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                                <p class="h5">No scans found</p>
+                                                <p class="text-muted">There are no garment scans recorded for the selected criteria.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -68,7 +415,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 

@@ -1,43 +1,104 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>User Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f4f4f4;
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            width: 16.666667%;
         }
-        .user-card {
-            transition: all 0.3s ease;
-            border: 1px solid #dee2e6;
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
-        .user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #333;
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            margin: 0.125rem 0.5rem;
         }
-        .schedule-time {
-            background-color: #e3f2fd;
-            border: 1px solid #2196f3;
-            border-radius: 4px;
-            padding: 4px 8px;
-            margin: 2px;
-            font-size: 0.85rem;
+        .sidebar .nav-link:hover { background-color: rgba(0, 123, 255, 0.1); }
+        .sidebar .nav-link.active { color: #007bff; background-color: rgba(0, 123, 255, 0.1); }
+        .sidebar .nav-link .feather { margin-right: 4px; color: #727272; }
+        .sidebar-heading { font-size: .75rem; text-transform: uppercase; }
+
+        /* Navbar */
+        .navbar-brand {
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, .25);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
         }
-        .modal-header {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-close {
-            filter: invert(1);
-        }
+
+        /* Main */
+        .main { padding-top: 1.5rem; margin-left: 16.666667%; min-height: calc(100vh - 48px); }
+        @media (max-width: 767.98px) { .sidebar{ width:100%; position:relative;} .main{ margin-left:0; } }
+
+        /* Cards */
+        .card { margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.125); }
+        .card-header { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; font-weight: 600; }
+        .user-card { transition: all 0.3s ease; }
+        .user-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .schedule-time { background-color: #e3f2fd; border: 1px solid #2196f3; border-radius: 4px; padding: 4px 8px; margin: 2px; font-size: 0.85rem; }
+
+        /* Page header */
+        .page-header { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 20px; margin-bottom: 1.25rem; border: 1px solid rgba(0,0,0,0.08); }
+        .page-header h1 { font-weight: 700; margin-bottom: 8px; }
+
+        /* Search bar */
+        .search-form .form-control, .search-form .form-select { min-width: 220px; }
     </style>
 </head>
 <body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-2 me-0 px-3" href="/admin">Maqoor Admin</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item text-nowrap">
+                <a class="nav-link px-3" href="/auth/logout">Sign out</a>
+            </div>
+        </div>
+    </nav>
 
-<div class="container py-5">
-    <!-- Success/Error Messages -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/admin/users-management"><i class="fas fa-users me-2"></i> User Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/task-management"><i class="fas fa-tasks me-2"></i> Task Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/scanned-garments"><i class="fas fa-barcode me-2"></i> Scanned Garments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/department-garments"><i class="fas fa-tshirt me-2"></i> Department Garments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/returns-dashboard"><i class="fas fa-undo me-2"></i> Returns Dashboard</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main -->
+            <main role="main" class="col-md-10 px-md-4 main">
+                <!-- Messages -->
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -47,23 +108,30 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+                <!-- Page Header + Search -->
+                <div class="page-header">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
         <div>
-            <h1 class="h3 mb-0">User Management</h1>
-            <p class="text-muted">Manage system users, roles, and schedules</p>
+                            <h1 class="h2 mb-1">User Management</h1>
+                            <p class="text-muted mb-0">Manage system users, roles, and schedules</p>
         </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        <form class="search-form d-flex flex-wrap gap-2" method="get" action="/admin/users-management">
+                            <input type="text" class="form-control" name="q" placeholder="Search by name or email" th:value="${q}">
+                            <select class="form-select" name="department">
+                                <option value="">All Departments</option>
+                                <option th:each="dept : ${departments}" th:value="${dept}" th:selected="${departmentFilter == dept}" th:text="${dept}">Department</option>
+                            </select>
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i> Search</button>
+                            <a class="btn btn-outline-secondary" href="/admin/users-management">Reset</a>
+                            <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#createUserModal">
                 <i class="fas fa-plus"></i> Add New User
             </button>
-            <a href="/admin/users" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
-            </a>
+                            <a href="/admin/users" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+                        </form>
         </div>
     </div>
 
-    <!-- Users Grid -->
+                <!-- Users Grid (Admins first by controller sort) -->
     <div class="row" th:if="${users != null and !users.empty}">
         <div class="col-md-6 col-lg-4 mb-3" th:each="user : ${users}">
             <div class="card user-card h-100">
@@ -73,16 +141,11 @@
                           th:text="${user.role}">Role</span>
                 </div>
                 <div class="card-body">
-                    <div class="mb-2">
-                        <strong>Email:</strong> <span th:text="${user.email}">email@example.com</span>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Department:</strong> <span th:text="${user.department}">Department</span>
-                    </div>
+                                <div class="mb-2"><strong>Email:</strong> <span th:text="${user.email}">email@example.com</span></div>
+                                <div class="mb-2"><strong>Department:</strong> <span th:text="${user.department}">Department</span></div>
                     <div class="mb-2">
                         <strong>Status:</strong> 
-                        <span class="badge" th:classappend="${user.status == T(com.chich.maqoor.entity.constant.UserStatus).ACTIVE ? 'bg-success' : 'bg-warning'}" 
-                              th:text="${user.status}">Status</span>
+                                    <span class="badge" th:classappend="${user.status == T(com.chich.maqoor.entity.constant.UserStatus).ACTIVE ? 'bg-success' : 'bg-warning'}" th:text="${user.status}">Status</span>
                     </div>
                     <div class="mb-3" th:if="${user.scheduleTimes != null and !user.scheduleTimes.empty}">
                         <strong>Schedule:</strong>
@@ -93,32 +156,24 @@
                 </div>
                 <div class="card-footer">
                     <div class="btn-group w-100" role="group">
-                        <button class="btn btn-outline-primary btn-sm edit-user-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn btn-outline-warning btn-sm reset-password-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}">
-                            <i class="fas fa-key"></i> Reset
-                        </button>
-                        <button class="btn btn-outline-danger btn-sm" th:onclick="'deleteUser(' + ${user.id} + ')'">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
+                                    <button class="btn btn-outline-primary btn-sm edit-user-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn btn-outline-warning btn-sm reset-password-btn" th:data-user-id="${user.id}" th:data-user-name="${user.name}"><i class="fas fa-key"></i> Reset</button>
+                                    <button class="btn btn-outline-danger btn-sm" th:onclick="'deleteUser(' + ${user.id} + ')'"><i class="fas fa-trash"></i> Delete</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- No Users Message -->
+                <!-- No Users -->
     <div class="text-center py-5" th:if="${users == null or users.empty}">
         <i class="fas fa-users fa-3x text-muted mb-3"></i>
         <h4 class="text-muted">No users found</h4>
-        <p class="text-muted">Start by adding your first user</p>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-            <i class="fas fa-plus"></i> Add User
-        </button>
-    </div>
+                    <p class="text-muted">Adjust your filters or create a new user</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="fas fa-plus"></i> Add User</button>
 </div>
 
+                <!-- Existing Modals (kept as-is) -->
 <!-- Create User Modal -->
 <div class="modal fade" id="createUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -183,9 +238,7 @@
                         <div class="schedule-inputs">
                             <div class="input-group mb-2">
                                 <input type="time" class="form-control" name="scheduleTimes">
-                                <button type="button" class="btn btn-outline-secondary" onclick="addScheduleInput()">
-                                    <i class="fas fa-plus"></i>
-                                </button>
+                                                <button type="button" class="btn btn-outline-secondary" onclick="addScheduleInput()"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -246,12 +299,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Schedule Times</label>
-                        <div class="schedule-inputs" id="editScheduleInputs">
-                            <!-- Dynamic schedule inputs will be populated here -->
-                        </div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addEditScheduleInput()">
-                            <i class="fas fa-plus"></i> Add Time
-                        </button>
+                                        <div class="schedule-inputs" id="editScheduleInputs"></div>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addEditScheduleInput()"><i class="fas fa-plus"></i> Add Time</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -313,6 +362,9 @@
                 </div>
             </form>
         </div>
+                    </div>
+                </div>
+            </main>
     </div>
 </div>
 
@@ -323,355 +375,70 @@ let usersData = [];
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    // Load users data from Thymeleaf
     usersData = /*[[${users}]]*/ [];
-    console.log('Loaded users:', usersData);
+            setupUserManagement();
 });
 
-// Add schedule input field
 function addScheduleInput() {
     const container = document.querySelector('.schedule-inputs');
-    const newInput = document.createElement('div');
-    newInput.className = 'input-group mb-2';
-    newInput.innerHTML = `
-        <input type="time" class="form-control" name="scheduleTimes">
-        <button type="button" class="btn btn-outline-danger" onclick="removeScheduleInput(this)">
-            <i class="fas fa-minus"></i>
-        </button>
-    `;
-    container.appendChild(newInput);
-}
-
-// Remove schedule input field
-function removeScheduleInput(button) {
-    button.closest('.input-group').remove();
-}
-
-// Add schedule input for edit modal
+            const el = document.createElement('div');
+            el.className = 'input-group mb-2';
+            el.innerHTML = `<input type="time" class="form-control" name="scheduleTimes"><button type="button" class="btn btn-outline-danger" onclick="removeScheduleInput(this)"><i class="fas fa-minus"></i></button>`;
+            container.appendChild(el);
+        }
+        function removeScheduleInput(btn) { btn.closest('.input-group').remove(); }
 function addEditScheduleInput() {
     const container = document.getElementById('editScheduleInputs');
-    const newInput = document.createElement('div');
-    newInput.className = 'input-group mb-2';
-    newInput.innerHTML = `
-        <input type="time" class="form-control" name="scheduleTimes">
-        <button type="button" class="btn btn-outline-danger" onclick="removeScheduleInput(this)">
-            <i class="fas fa-minus"></i>
-        </button>
-    `;
-    container.appendChild(newInput);
-}
+            const el = document.createElement('div');
+            el.className = 'input-group mb-2';
+            el.innerHTML = `<input type="time" class="form-control" name="scheduleTimes"><button type="button" class="btn btn-outline-danger" onclick="removeScheduleInput(this)"><i class="fas fa-minus"></i></button>`;
+            container.appendChild(el);
+        }
 
-// Edit user
 function editUser(userId, name, email, role, department) {
-    console.log('EDIT USER DEBUG: Function called with:', { userId, name, email, role, department });
-    
     document.getElementById('editUserId').value = userId;
     document.getElementById('editUserName').value = name;
     document.getElementById('editUserEmail').value = email;
     document.getElementById('editUserRole').value = role;
     document.getElementById('editUserDepartment').value = department;
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
-    modal.show();
+            new bootstrap.Modal(document.getElementById('editUserModal')).show();
 }
-
-// Delete user
 function deleteUser(userId) {
-    const user = usersData.find(u => u.id === userId);
-    if (!user) {
-        alert('User data not found');
-        return;
-    }
-    
+            const u = usersData.find(u => u.id === userId);
     document.getElementById('deleteUserId').value = userId;
-    document.getElementById('deleteUserName').textContent = user.name;
-    
+            document.getElementById('deleteUserName').textContent = u ? u.name : '';
     new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
 }
-
-// Reset password
-function resetPassword(userId, userName) {
-    console.log('RESET PASSWORD DEBUG: Function called with:', { userId, userName });
-    const modalEl = document.getElementById('resetPasswordModal');
-    
-    // Populate modal fields (IDs in template: resetPasswordUserId, resetPasswordUserName)
-    const idInput = document.getElementById('resetPasswordUserId');
-    const nameStrong = document.getElementById('resetPasswordUserName');
-    if (idInput) idInput.value = userId;
-    if (nameStrong) nameStrong.textContent = userName;
-    
-    // Clear password inputs by name within the modal
-    const newPwdInput = modalEl.querySelector('input[name="newPassword"]');
-    const confirmPwdInput = modalEl.querySelector('input[name="confirmPassword"]');
-    if (newPwdInput) newPwdInput.value = '';
-    if (confirmPwdInput) confirmPwdInput.value = '';
-    
-    // Show the modal
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
-}
-
-// Form validation
-document.getElementById('createUserForm').addEventListener('submit', function(e) {
-    const password = this.querySelector('input[name="password"]').value;
-    const confirmPassword = this.querySelector('input[name="confirmPassword"]').value;
-    
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Passwords do not match!');
-    }
-});
-
-// Handle role change to disable/enable department selection
-document.addEventListener('DOMContentLoaded', function() {
-    // Setup user management event listeners
-    setupUserManagement();
-    const roleSelect = document.querySelector('#createUserModal select[name="role"]');
-    const departmentSelect = document.querySelector('#createUserModal select[name="department"]');
-    const departmentHelp = document.getElementById('departmentHelp');
-    
-    if (roleSelect && departmentSelect) {
-        roleSelect.addEventListener('change', function() {
-            if (this.value === 'ADMIN') {
-                departmentSelect.disabled = true;
-                departmentSelect.value = '';
-                departmentSelect.style.opacity = '0.6';
-                departmentSelect.style.cursor = 'not-allowed';
-                departmentSelect.removeAttribute('required');
-                if (departmentHelp) {
-                    departmentHelp.textContent = 'Not required for admin users';
-                    departmentHelp.className = 'text-info';
-                }
-            } else {
-                departmentSelect.disabled = false;
-                departmentSelect.style.opacity = '1';
-                departmentSelect.style.cursor = 'pointer';
-                departmentSelect.setAttribute('required', 'required');
-                if (departmentHelp) {
-                    departmentHelp.textContent = 'Required for non-admin users';
-                    departmentHelp.className = 'text-muted';
-                }
-            }
+        document.getElementById('createUserForm').addEventListener('submit', function(e){
+            const pwd = this.querySelector('input[name="password"]').value;
+            const cpwd = this.querySelector('input[name="confirmPassword"]').value;
+            if (pwd !== cpwd) { e.preventDefault(); alert('Passwords do not match!'); }
         });
-    }
-});
-
-document.getElementById('editUserForm').addEventListener('submit', function(e) {
-    // Add any edit form validation here
-});
-
-// Password reset form validation
-document.querySelector('#resetPasswordModal form').addEventListener('submit', function(e) {
-    const password = this.querySelector('input[name="newPassword"]').value;
-    const confirmPassword = this.querySelector('input[name="confirmPassword"]').value;
-    
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Passwords do not match!');
-    }
-});
-
-// Handle role change in edit modal to disable/enable department selection
-document.addEventListener('DOMContentLoaded', function() {
-    const editRoleSelect = document.querySelector('#editUserModal select[name="role"]');
-    const editDepartmentSelect = document.querySelector('#editUserModal select[name="department"]');
-    
-    if (editRoleSelect && editDepartmentSelect) {
-        editRoleSelect.addEventListener('change', function() {
-            if (this.value === 'ADMIN') {
-                editDepartmentSelect.disabled = true;
-                editDepartmentSelect.value = '';
-                editDepartmentSelect.style.opacity = '0.6';
-                editDepartmentSelect.style.cursor = 'not-allowed';
-                editDepartmentSelect.removeAttribute('required');
-            } else {
-                editDepartmentSelect.disabled = false;
-                editDepartmentSelect.style.opacity = '1';
-                editDepartmentSelect.style.cursor = 'pointer';
-                editDepartmentSelect.setAttribute('required', 'required');
-            }
+        document.querySelector('#resetPasswordModal form').addEventListener('submit', function(e){
+            const pwd = this.querySelector('input[name="newPassword"]').value;
+            const cpwd = this.querySelector('input[name="confirmPassword"]').value;
+            if (pwd !== cpwd) { e.preventDefault(); alert('Passwords do not match!'); }
         });
-    }
-});
-
-// Save user changes
-function saveUserChanges() {
-    const userId = document.getElementById('editUserId').value;
-    const name = document.getElementById('editUserName').value;
-    const email = document.getElementById('editUserEmail').value;
-    const role = document.getElementById('editUserRole').value;
-    const department = document.getElementById('editUserDepartment').value;
-    
-    console.log('SAVE USER CHANGES DEBUG: Saving changes for user:', { userId, name, email, role, department });
-    
-    // Basic validation
-    if (!name.trim() || !email.trim()) {
-        showToast('Name and email are required!', 'error');
-        return;
-    }
-    
-    const updates = {
-        name: name,
-        email: email,
-        role: role,
-        department: department
-    };
-    
-    console.log('SAVE USER CHANGES DEBUG: Sending updates to backend:', updates);
-    
-    fetch(`/admin/users/${userId}/update`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates)
-    })
-    .then(response => {
-        console.log('SAVE USER CHANGES DEBUG: Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('SAVE USER CHANGES DEBUG: Response data:', data);
-        if (data.success) {
-            showToast('User updated successfully!', 'success');
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
-            modal.hide();
-            // Reload page to show updated data
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            showToast('Error updating user: ' + data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('SAVE USER CHANGES DEBUG: Error:', error);
-        showToast('Error updating user. Please try again.', 'error');
-    });
-}
-
-// Confirm password reset
-function confirmPasswordReset() {
-    const modalEl = document.getElementById('resetPasswordModal');
-    const userId = document.getElementById('resetPasswordUserId').value;
-    const newPassword = modalEl.querySelector('input[name="newPassword"]').value;
-    const confirmPassword = modalEl.querySelector('input[name="confirmPassword"]').value;
-    
-    console.log('CONFIRM PASSWORD RESET DEBUG: Resetting password for user:', { userId, newPassword: '***', confirmPassword: '***' });
-    
-    if (newPassword !== confirmPassword) {
-        showToast('Passwords do not match!', 'error');
-        return;
-    }
-    
-    if (newPassword.length < 6) {
-        showToast('Password must be at least 6 characters long!', 'error');
-        return;
-    }
-    
-    const request = {
-        newPassword: newPassword
-    };
-    
-    console.log('CONFIRM PASSWORD RESET DEBUG: Sending request to backend for user ID:', userId);
-    
-    fetch(`/admin/users/${userId}/reset-password`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request)
-    })
-    .then(response => {
-        console.log('CONFIRM PASSWORD RESET DEBUG: Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('CONFIRM PASSWORD RESET DEBUG: Response data:', data);
-        if (data.success) {
-            showToast('Password reset successfully!', 'success');
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal'));
-            modal.hide();
-        } else {
-            showToast('Error resetting password: ' + data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('CONFIRM PASSWORD RESET DEBUG: Error:', error);
-        showToast('Error resetting password. Please try again.', 'error');
-    });
-}
-
-// Setup user management event listeners
-function setupUserManagement() {
-    console.log('SETUP USER MANAGEMENT DEBUG: Setting up event listeners');
-    
-    // Edit user buttons
-    document.querySelectorAll('.edit-user-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const userName = this.getAttribute('data-user-name');
-            const userEmail = this.getAttribute('data-user-email');
-            const userRole = this.getAttribute('data-user-role');
-            const userDepartment = this.getAttribute('data-user-department');
-            
-            console.log('SETUP USER MANAGEMENT DEBUG: Edit button clicked for user:', { userId, userName, userEmail, userRole, userDepartment });
-            editUser(userId, userName, userEmail, userRole, userDepartment);
+        function setupUserManagement(){
+            document.querySelectorAll('.edit-user-btn').forEach(btn=>{
+                btn.addEventListener('click', function(){
+                    editUser(
+                        parseInt(this.getAttribute('data-user-id')),
+                        this.getAttribute('data-user-name'),
+                        this.getAttribute('data-user-email'),
+                        this.getAttribute('data-user-role'),
+                        this.getAttribute('data-user-department')
+                    );
         });
     });
-    
-    // Reset password buttons
-    document.querySelectorAll('.reset-password-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = this.getAttribute('data-user-id');
-            const userName = this.getAttribute('data-user-name');
-            
-            console.log('SETUP USER MANAGEMENT DEBUG: Reset button clicked for user:', { userId, userName });
-            resetPassword(userId, userName);
+            document.querySelectorAll('.reset-password-btn').forEach(btn=>{
+                btn.addEventListener('click', function(){
+                    document.getElementById('resetPasswordUserId').value = this.getAttribute('data-user-id');
+                    document.getElementById('resetPasswordUserName').textContent = this.getAttribute('data-user-name');
+                    new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
         });
-    });
-    
-    console.log('SETUP USER MANAGEMENT DEBUG: Event listeners attached successfully');
-}
-
-// Show toast notifications
-function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) {
-        // Create toast container if it doesn't exist
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-    }
-    
-    const toastId = 'toast-' + Date.now();
-    const toastHtml = `
-        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header ${type === 'error' ? 'bg-danger text-white' : type === 'success' ? 'bg-success text-white' : 'bg-info text-white'}">
-                <strong class="me-auto">${type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info'}</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('toastContainer').insertAdjacentHTML('beforeend', toastHtml);
-    
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
-    
-    // Auto-remove toast after it's hidden
-    toastElement.addEventListener('hidden.bs.toast', function() {
-        this.remove();
     });
 }
 </script>
-
 </body>
 </html>

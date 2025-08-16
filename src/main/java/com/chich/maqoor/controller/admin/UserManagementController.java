@@ -28,11 +28,50 @@ public class UserManagementController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/users-management")
-    public String userManagementPage(Model model) {
+    public String userManagementPage(
+            Model model,
+            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "department", required = false) Departments departmentFilter) {
+
         List<User> users = userService.findAll();
+
+        // Filter by search query (name, email, username)
+        if (query != null && !query.trim().isEmpty()) {
+            final String q = query.trim().toLowerCase();
+            users = users.stream()
+                    .filter(u ->
+                            (u.getName() != null && u.getName().toLowerCase().contains(q)) ||
+                            (u.getEmail() != null && u.getEmail().toLowerCase().contains(q)) ||
+                            (u.getUsername() != null && u.getUsername().toLowerCase().contains(q)))
+                    .toList();
+        }
+
+        // Filter by department if provided (admins typically have null department)
+        if (departmentFilter != null) {
+            final Departments dept = departmentFilter;
+            users = users.stream()
+                    .filter(u -> u.getDepartment() == dept)
+                    .toList();
+        }
+
+        // Sort: Admins first, then by name (case-insensitive)
+        users = users.stream()
+                .sorted((a, b) -> {
+                    boolean aIsAdmin = a.getRole() == Role.ADMIN;
+                    boolean bIsAdmin = b.getRole() == Role.ADMIN;
+                    if (aIsAdmin && !bIsAdmin) return -1;
+                    if (!aIsAdmin && bIsAdmin) return 1;
+                    String an = a.getName() != null ? a.getName() : "";
+                    String bn = b.getName() != null ? b.getName() : "";
+                    return an.compareToIgnoreCase(bn);
+                })
+                .toList();
+
         model.addAttribute("users", users);
         model.addAttribute("departments", Departments.values());
         model.addAttribute("roles", Role.values());
+        model.addAttribute("q", query);
+        model.addAttribute("departmentFilter", departmentFilter);
         return "auth/admin/user-management";
     }
 

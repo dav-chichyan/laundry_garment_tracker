@@ -75,6 +75,12 @@ public class TaskManagementController {
         return "auth/admin/task-management";
     }
     
+    @GetMapping("/tasks")
+    public String tasksListPage() {
+        // Redirect to the existing task management page
+        return "redirect:/admin/task-management";
+    }
+    
     private List<TaskList> createSampleData() {
         List<TaskList> sampleLists = new ArrayList<>();
         

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskListRepository extends JpaRepository<TaskList, Long> {
@@ -16,4 +17,10 @@ public interface TaskListRepository extends JpaRepository<TaskList, Long> {
     Integer findMaxPosition();
     
     List<TaskList> findByNameContainingIgnoreCase(String name);
+    
+    // Add missing method for finding by name
+    Optional<TaskList> findByName(String name);
+    
+    // Add missing method for finding by ID
+    Optional<TaskList> findById(Long id);
 }
