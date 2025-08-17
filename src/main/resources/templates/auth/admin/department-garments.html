@@ -134,7 +134,6 @@
                                 <th>Staff</th>
                                 <th>Last Update</th>
                                 <th>Processing Status</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="garmentsTableBody">
@@ -150,7 +149,9 @@
                                 th:data-description="${garment.description}"
                                 th:data-order-id="${garment.order != null ? garment.order.cleanCloudOrderId : ''}">
                                 <td>
-                                    <strong th:text="${garment.cleanCloudGarmentId}">101</strong>
+                                    <a th:href="@{'/admin/garments/' + ${garment.garmentId}}" class="text-decoration-none fw-semibold">
+                                        <span th:text="${garment.cleanCloudGarmentId}">101</span>
+                                    </a>
                                 </td>
                                 <td th:text="${garment.description != null ? garment.description : 'No Description'}">White Shirt</td>
                                 <td th:text="${garment.type != null ? garment.type : 'N/A'}">Type</td>
@@ -173,20 +174,6 @@
                                 <td>
                                     <span th:if="${garment.departmentId == 'DELIVERY'}" class="badge bg-success status-badge">Ready for Delivery</span>
                                     <span th:if="${garment.departmentId != 'DELIVERY'}" class="badge bg-warning status-badge">In Processing</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a class="btn btn-outline-info" th:href="@{'/admin/garments/' + ${garment.garmentId}}" 
-                                           title="View History">
-                                            <i class="fas fa-history"></i> History
-                                        </a>
-                                        <a class="btn btn-outline-primary" 
-                                           th:if="${garment.order != null and garment.order.cleanCloudOrderId != null}"
-                                           th:href="@{'/admin/orders/search?orderId=' + ${garment.order.cleanCloudOrderId} + '&fromDept=' + ${department}}" 
-                                           title="View Order">
-                                            <i class="fas fa-list"></i> Order
-                                        </a>
-                                    </div>
                                 </td>
                             </tr>
                         </tbody>

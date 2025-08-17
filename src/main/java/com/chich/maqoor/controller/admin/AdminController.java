@@ -11,6 +11,9 @@ import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.repository.GarmentScanRepository;
 import com.chich.maqoor.repository.GarmentRepository;
 import com.chich.maqoor.repository.GarmentReturnRepository;
+import com.chich.maqoor.repository.ProblemRepository;
+import com.chich.maqoor.entity.Problem;
+import com.chich.maqoor.entity.constant.ProblemStatus;
 import com.chich.maqoor.service.UserService;
 import com.chich.maqoor.service.GarmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +66,9 @@ public class AdminController {
     // new: CleanCloud service
     @Autowired
     private CleanCloudService cleanCloudService;
+
+    @Autowired
+    private ProblemRepository problemRepository;
 
     @GetMapping("/users")
     public String usersDashboard(Model model,
@@ -121,9 +127,9 @@ public class AdminController {
         System.out.println("USERS DASHBOARD DEBUG: Total users found: " + users.size());
         users.forEach(user -> System.out.println("USERS DASHBOARD DEBUG: User - ID: " + user.getId() + ", Name: " + user.getName() + ", Role: " + user.getRole() + ", Department: " + user.getDepartment()));
         
-        // Get real-time department counts
+        // Get real-time department counts (exclude hidden departments)
         Map<Departments, Long> departmentCounts = new HashMap<>();
-        for (Departments dept : Departments.values()) {
+        for (Departments dept : getVisibleDepartments()) {
             long count = garmentRepository.countByDepartmentId(dept);
             departmentCounts.put(dept, count);
         }
@@ -132,7 +138,7 @@ public class AdminController {
         Map<Integer, Map<Departments, Long>> userDeptCounts = new HashMap<>();
         for (User user : users) {
             Map<Departments, Long> userCounts = new HashMap<>();
-            for (Departments dept : Departments.values()) {
+            for (Departments dept : getVisibleDepartments()) {
                 long count = garmentScanRepository.countByUser_IdAndDepartmentAndScannedAtBetween(
                     user.getId(), dept, fromDate, toDate);
                 userCounts.put(dept, count);
@@ -146,19 +152,27 @@ public class AdminController {
             long count = garmentScanRepository.countByUser_IdAndScannedAtBetween(user.getId(), fromDate, toDate);
             scansByUser.put(user.getId(), count);
         }
+        // Compute returns per user within the selected range
+        Map<Integer, Long> returnsByUser = new HashMap<>();
+        for (User user : users) {
+            long rcount = garmentReturnRepository.countReturnsByUserBetween(user.getId(), fromDate, toDate);
+            returnsByUser.put(user.getId(), rcount);
+        }
         
         // Format dates for form inputs
         java.time.LocalDateTime fromLocal = fromDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
         java.time.LocalDateTime toLocal = toDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
         
         model.addAttribute("users", users);
-        model.addAttribute("departments", Departments.values());
+        model.addAttribute("departments", getVisibleDepartments());
         model.addAttribute("from", fromLocal.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         model.addAttribute("to", toLocal.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
         model.addAttribute("currentFilter", filter);
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("userDeptCounts", userDeptCounts);
         model.addAttribute("scansByUser", scansByUser);
+        model.addAttribute("returnsByUser", returnsByUser);
+        
         // Use the new staff performance dashboard template
         return "auth/admin/staff-dashboard";
     }
@@ -202,8 +216,155 @@ public class AdminController {
 
     @GetMapping("/department-garments")
     public String departmentGarmentsPage(Model model) {
-        model.addAttribute("departments", Departments.values());
+        model.addAttribute("departments", getVisibleDepartments());
         return "auth/admin/department-garments";
+    }
+
+    @GetMapping("/departments")
+    public String departmentsOverview(Model model) {
+        // Build counts per department for overview cards
+        Map<Departments, Long> departmentCounts = new HashMap<>();
+        Map<String, Long> departmentCountsByName = new HashMap<>();
+        for (Departments dept : Departments.values()) {
+            long count = 0L;
+            try {
+                Integer c = garmentRepository.countByDepartmentIdInteger(dept);
+                log.info("Department {} - Repository count: {}", dept, c);
+                if (c != null) count = c.longValue();
+            } catch (Exception e) {
+                log.error("Error getting count for department {}: {}", dept, e.getMessage());
+            }
+            // Fallback: if garments table has 0 for a department, try scan counts overall
+            if (count == 0L) {
+                try {
+                    // Count total scans ever recorded for this department as an approximate indicator
+                    Date epochStart = new Date(0L);
+                    Date now = new Date();
+                    long scans = garmentScanRepository.countByDepartmentAndScannedAtBetween(dept, epochStart, now);
+                    log.info("Department {} - Fallback scan count: {}", dept, scans);
+                    if (scans > 0L) count = scans; // show scans if garments missing
+                } catch (Exception e) {
+                    log.error("Error getting scan count for department {}: {}", dept, e.getMessage());
+                }
+            }
+            log.info("Department {} - Final count: {}", dept, count);
+            departmentCounts.put(dept, count);
+            departmentCountsByName.put(dept.name(), count);
+        }
+        long totalGarments = departmentCounts.values().stream().mapToLong(Long::longValue).sum();
+        Departments[] visible = getVisibleDepartments();
+        model.addAttribute("departments", visible);
+        model.addAttribute("departmentCounts", departmentCounts);
+        model.addAttribute("departmentCountsByName", departmentCountsByName);
+        model.addAttribute("totalGarments", totalGarments);
+        model.addAttribute("numDepartments", visible.length);
+        return "auth/admin/departments-overview";
+    }
+
+    // Problems list page
+    @GetMapping("/problems")
+    public String problemsPage(Model model,
+                               @RequestParam(value = "status", required = false) ProblemStatus status,
+                               @RequestParam(value = "department", required = false) Departments dept) {
+        List<Problem> problems;
+        if (status != null) {
+            problems = problemRepository.findByStatus(status);
+        } else if (dept != null) {
+            problems = problemRepository.findByDepartment(dept);
+        } else {
+            problems = problemRepository.findAll();
+        }
+        model.addAttribute("problems", problems);
+        model.addAttribute("departments", getVisibleDepartments());
+        model.addAttribute("statuses", ProblemStatus.values());
+        try {
+            // Load all non-admin users for staff dropdown
+            List<User> allUsers = userService.findAll();
+            List<User> staffOnly = allUsers == null ? java.util.Collections.emptyList() :
+                    allUsers.stream()
+                            .filter(u -> u != null && u.getRole() != null && u.getRole() == Role.USER)
+                            .toList();
+            model.addAttribute("users", staffOnly);
+        } catch (Exception ignored) {
+            model.addAttribute("users", java.util.Collections.emptyList());
+        }
+        return "auth/admin/problems";
+    }
+
+    // Create a new problem
+    @PostMapping("/problems")
+    public String createProblem(@RequestParam("orderId") Integer orderId,
+                                @RequestParam("department") Departments department,
+                                @RequestParam("userId") Integer userId,
+                                @RequestParam(value = "status", required = false) ProblemStatus status,
+                                @RequestParam(value = "notes", required = false) String notes,
+                                @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
+                                @RequestParam(value = "type", required = false) com.chich.maqoor.entity.constant.AttachmentType type,
+                                Model model) {
+        Orders order = ordersRepository.findById(orderId).orElse(null);
+        User user = userService.findById(userId).orElse(null);
+        if (order == null || user == null) {
+            model.addAttribute("error", "Invalid order or user");
+            return "redirect:/admin/problems";
+        }
+        Problem p = new Problem();
+        p.setOrder(order);
+        p.setDepartment(department);
+        p.setUser(user);
+        if (status != null) p.setStatus(status); else p.setStatus(ProblemStatus.OPEN);
+        p.setNotes(notes);
+        p.setCreatedAt(new Date());
+        p.setUpdatedAt(new Date());
+        p = problemRepository.save(p);
+
+        // If a file was attached in the modal, save it under /static/uploads and store a simple note with the path
+        try {
+            if (file != null && !file.isEmpty()) {
+                String uploadsDir = "src/main/resources/static/uploads";
+                java.nio.file.Files.createDirectories(java.nio.file.Path.of(uploadsDir));
+                String ext = org.springframework.util.StringUtils.getFilenameExtension(file.getOriginalFilename());
+                String filename = "problem-" + p.getId() + "-" + System.currentTimeMillis() + (ext != null ? ("." + ext) : "");
+                java.nio.file.Path dest = java.nio.file.Path.of(uploadsDir, filename);
+                file.transferTo(dest.toFile());
+                // Append quick link to notes
+                String link = "/uploads/" + filename;
+                String updatedNotes = (p.getNotes() != null ? p.getNotes() + "\n" : "") + "Attachment (" + (type != null ? type.name() : "FILE") + "): " + link;
+                p.setNotes(updatedNotes);
+                problemRepository.save(p);
+            }
+        } catch (Exception ignored) { }
+        return "redirect:/admin/problems";
+    }
+
+    // Helper: Exclude departments not needed for UI (e.g., PACKAGING, LOCKER)
+    private Departments[] getVisibleDepartments() {
+        return java.util.Arrays.stream(Departments.values())
+                .filter(d -> d != Departments.PACKAGING && d != Departments.LOCKER)
+                .toArray(Departments[]::new);
+    }
+
+    @GetMapping("/debug/department-counts")
+    @ResponseBody
+    public Map<String, Object> debugDepartmentCounts() {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Long> counts = new HashMap<>();
+        
+        for (Departments dept : Departments.values()) {
+            long count = 0L;
+            try {
+                Integer c = garmentRepository.countByDepartmentIdInteger(dept);
+                log.info("DEBUG: Department {} - Repository count: {}", dept, c);
+                if (c != null) count = c.longValue();
+            } catch (Exception e) {
+                log.error("DEBUG: Error getting count for department {}: {}", dept, e.getMessage());
+            }
+            counts.put(dept.name(), count);
+        }
+        
+        result.put("counts", counts);
+        result.put("totalGarments", garmentRepository.count());
+        
+        return result;
     }
 
     @GetMapping("/orders/search")
@@ -877,5 +1038,69 @@ public class AdminController {
         }
         
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/debug/add-reception-120")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> addReceptionTester() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // 1) Ensure a test user exists
+            User tester = userService.findAll().stream()
+                    .filter(u -> "Reception Tester".equals(u.getName()))
+                    .findFirst()
+                    .orElse(null);
+            if (tester == null) {
+                tester = new User();
+                tester.setName("Reception Tester");
+                tester.setEmail("reception.tester@example.com");
+                tester.setRole(Role.USER);
+                tester.setDepartment(Departments.RECEPTION);
+                tester.setStatus(com.chich.maqoor.entity.constant.UserStatus.ACTIVE);
+                userService.save(tester);
+            }
+
+            // 2) Ensure there is at least one garment to attach scans to
+            Garments garment = garmentRepository.findAll().stream().findFirst().orElse(null);
+            if (garment == null) {
+                Orders order = new Orders();
+                order.setOrderNumber("TEST-RECEP-120");
+                order.setCustomerName("Test Customer");
+                order.setStatus("PENDING");
+                order.setCreatedAt(new Date());
+                order.setUpdatedAt(new Date());
+                order = ordersRepository.save(order);
+
+                garment = new Garments();
+                garment.setOrder(order);
+                garment.setCleanCloudGarmentId("TEST-G-1");
+                garment.setDescription("Test Garment");
+                garment.setDepartmentId(Departments.RECEPTION);
+                garment.setCreatedAt(new Date());
+                garment.setLastUpdate(new Date());
+                garment = garmentRepository.save(garment);
+            }
+
+            // 3) Create 120 scans in RECEPTION within the current day
+            Date now = new Date();
+            for (int i = 0; i < 120; i++) {
+                GarmentScan scan = new GarmentScan();
+                scan.setGarment(garment);
+                scan.setUser(tester);
+                scan.setDepartment(Departments.RECEPTION);
+                // Stagger timestamps backward by 2 minutes each
+                scan.setScannedAt(new Date(now.getTime() - (long) i * 120_000L));
+                garmentScanRepository.save(scan);
+            }
+
+            response.put("success", true);
+            response.put("message", "Created/updated Reception Tester with 120 RECEPTION scans");
+            response.put("userId", tester.getId());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }

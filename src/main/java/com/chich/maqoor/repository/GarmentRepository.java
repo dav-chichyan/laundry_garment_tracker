@@ -26,6 +26,9 @@ public interface GarmentRepository extends JpaRepository<Garments, Integer> {
     @Query("SELECT COUNT(g) FROM Garments g WHERE g.departmentId = :department")
     long countByDepartmentId(@Param("department") Departments department);
 
+    @Query("SELECT COUNT(g) FROM Garments g WHERE g.departmentId = :department")
+    Integer countByDepartmentIdInteger(@Param("department") Departments department);
+
     Garments findByCleanCloudGarmentId(String cleanCloudGarmentId);
 
     Garments findByCleanCloudGarmentIdAndOrder_OrderId(String cleanCloudGarmentId, int orderId);

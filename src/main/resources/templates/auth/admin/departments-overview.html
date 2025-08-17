@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Department Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-size: .875rem; }
+        .dept-card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+        .dept-card:hover { transform: translateY(-2px); transition: .2s; box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+        .dept-badge { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 6px 14px rgba(13,110,253,.25); }
+        .sidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; padding: 48px 0 0; box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1); width: 16.666667%; }
+        .sidebar-sticky { position: relative; top: 0; height: calc(100vh - 48px); padding-top: .5rem; overflow-x: hidden; overflow-y: auto; }
+        .sidebar .nav-link { font-weight: 500; color: #333; padding: 0.75rem 1rem; border-radius: 0.25rem; margin: 0.125rem 0.5rem; }
+        .sidebar .nav-link:hover { background-color: rgba(0,123,255,.1); }
+        .sidebar .nav-link.active { color: #0d6efd; background-color: rgba(0,123,255,.1); }
+        .main { padding-top: 1.5rem; margin-left: 16.666667%; min-height: calc(100vh - 48px); }
+        /* Stats cards (match dashboard) */
+        .stats-card { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); transition: all .3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+        .stats-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .stats-number { font-size: 2.5rem; font-weight: 700; color: #007bff; margin-bottom: .5rem; }
+        .stats-label { color: #6c757d; font-size: 1rem; font-weight: 500; margin-bottom: 0; }
+        @media (max-width: 767.98px) { .sidebar{ width:100%; position:relative;} .main{ margin-left:0; } }
+    </style>
+    </head>
+<body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-2 me-0 px-3" href="javascript:void(0)">Maqoor Admin</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item text-nowrap">
+                <a class="nav-link px-3" href="/auth/logout">Sign out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar">
+                <div class="sidebar-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/orders/search"><i class="fas fa-search me-2"></i>Order Search</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/users-management"><i class="fas fa-users me-2"></i>User Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/task-management"><i class="fas fa-tasks me-2"></i>Task Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/scanned-garments"><i class="fas fa-barcode me-2"></i>Scanned Garments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/returns-dashboard"><i class="fas fa-undo me-2"></i>Returns Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/problems"><i class="fas fa-exclamation-triangle me-2"></i>Problems</a></li>
+                        <li class="nav-link active nav-item"><a class="nav-link active" href="/admin/departments"><i class="fas fa-building me-2"></i>Department Details</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main -->
+            <main role="main" class="col-md-10 px-md-4 main">
+                <div class="page-header mb-3">
+                    <h2 class="h3">Department Details</h2>
+                </div>
+
+
+
+                <div class="row g-3">
+                    <div class="col-md-6" th:each="dept : ${departments}">
+                        <div class="card dept-card h-100 p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1" th:text="${dept}">RECEPTION</h5>
+                                    <p class="text-muted mb-2">Total garments in this department</p>
+                                    <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/departments/' + ${dept}}"><i class="fas fa-eye me-1"></i>View Details</a>
+                                </div>
+                                <div class="dept-badge" th:text="${departmentCounts != null && departmentCounts[dept] != null ? departmentCounts[dept] : 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

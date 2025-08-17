@@ -39,6 +39,9 @@ public interface GarmentScanRepository extends JpaRepository<GarmentScan, Intege
     @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.user.id = :userId AND gs.scannedAt BETWEEN :fromDate AND :toDate")
     long countByUser_IdAndScannedAtBetween(@Param("userId") int userId, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 
+    @Query("SELECT COUNT(gs) FROM GarmentScan gs WHERE gs.department = :department AND gs.scannedAt BETWEEN :fromDate AND :toDate")
+    long countByDepartmentAndScannedAtBetween(@Param("department") Departments department, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
     @Query("SELECT gs FROM GarmentScan gs WHERE gs.garment.garmentId = :garmentId AND gs.user.id = :userId AND gs.department = :department AND gs.scannedAt > :scannedAtAfter")
     List<GarmentScan> findByGarment_GarmentIdAndUser_IdAndDepartmentAndScannedAtAfter(
         @Param("garmentId") int garmentId, 
