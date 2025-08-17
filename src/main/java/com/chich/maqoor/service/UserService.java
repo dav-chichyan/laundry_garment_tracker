@@ -15,4 +15,10 @@ public interface UserService {
 
     Optional<User> findById(int userId);
     Optional<User> findByEmail(String email);
+    
+    // Enhanced methods for multiple departments
+    void addUserDepartment(User user, String department);
+    void removeUserDepartment(User user, String department);
+    List<String> getUserDepartments(User user);
+    void updateUserDepartments(User user, List<String> departments);
 }
