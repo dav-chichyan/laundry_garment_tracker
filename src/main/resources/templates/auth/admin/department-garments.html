@@ -129,6 +129,7 @@
                             <tr>
                                 <th>Garment ID</th>
                                 <th>Description</th>
+                                <th>Type</th>
                                 <th>Order ID</th>
                                 <th>Staff</th>
                                 <th>Last Update</th>
@@ -152,6 +153,7 @@
                                     <strong th:text="${garment.cleanCloudGarmentId}">101</strong>
                                 </td>
                                 <td th:text="${garment.description != null ? garment.description : 'No Description'}">White Shirt</td>
+                                <td th:text="${garment.type != null ? garment.type : 'N/A'}">Type</td>
                                 <td>
                                     <a th:if="${garment.order != null and garment.order.cleanCloudOrderId != null}"
                                        th:href="@{'/admin/orders/search?orderId=' + ${garment.order.cleanCloudOrderId}}"

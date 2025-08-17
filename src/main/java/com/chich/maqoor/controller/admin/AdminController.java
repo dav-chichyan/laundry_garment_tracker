@@ -29,6 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import java.util.stream.Collectors;
 
+// add import
+import com.chich.maqoor.service.CleanCloudService;
+import com.chich.maqoor.dto.CleanCloudOrderDetails;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -55,6 +59,10 @@ public class AdminController {
 
     @Autowired
     private OrdersRepository ordersRepository;
+
+    // new: CleanCloud service
+    @Autowired
+    private CleanCloudService cleanCloudService;
 
     @GetMapping("/users")
     public String usersDashboard(Model model,
@@ -227,8 +235,58 @@ public class AdminController {
                 return "auth/admin/order-search";
             }
             
-            // Then get garments for that order
+            // Then get garments for that order from DB
             List<Garments> garments = garmentService.listByOrderId(order.get().getOrderId());
+
+            // Enrich garment type from CleanCloud summary (getOrder)
+            try {
+                System.out.println("DEBUG: Starting CleanCloud enrichment for order " + orderId);
+                CleanCloudOrderDetails cc = cleanCloudService.getOrder(orderId);
+                System.out.println("DEBUG: CleanCloud order details for " + orderId + ": " + (cc != null ? "found" : "null"));
+                if (cc != null) {
+                    System.out.println("DEBUG: Summary from CleanCloud: '" + cc.getSummary() + "'");
+                }
+                if (cc != null && cc.getSummary() != null && garments != null && !garments.isEmpty()) {
+                    List<String> summaryTypes = parseTypesFromSummary(cc.getSummary());
+                    System.out.println("DEBUG: Parsed summary types: " + summaryTypes);
+                    if (!summaryTypes.isEmpty()) {
+                        // sort DB garments by ascending CleanCloud garment ID (numeric if possible)
+                        List<Garments> sorted = new ArrayList<>(garments);
+                        sorted.sort((a,b) -> {
+                            try {
+                                int ia = Integer.parseInt(a.getCleanCloudGarmentId());
+                                int ib = Integer.parseInt(b.getCleanCloudGarmentId());
+                                return Integer.compare(ia, ib);
+                            } catch (Exception e) {
+                                return String.valueOf(a.getCleanCloudGarmentId()).compareTo(String.valueOf(b.getCleanCloudGarmentId()));
+                            }
+                        });
+                        System.out.println("DEBUG: Sorted garments by CleanCloud ID: " + 
+                            sorted.stream().map(g -> g.getCleanCloudGarmentId() + ":" + g.getType()).collect(Collectors.toList()));
+                        int n = Math.min(summaryTypes.size(), sorted.size());
+                        for (int i=0;i<n;i++) {
+                            String t = summaryTypes.get(i);
+                            if (t != null && !t.isBlank()) {
+                                Garments g = sorted.get(i);
+                                System.out.println("DEBUG: Mapping type '" + t + "' to garment ID " + g.getCleanCloudGarmentId() + " (current type: '" + g.getType() + "')");
+                                if (g.getType() == null || g.getType().isBlank() || "Unknown".equalsIgnoreCase(g.getType())) {
+                                    g.setType(t.trim());
+                                    try { 
+                                        garmentRepository.save(g); 
+                                        System.out.println("DEBUG: Successfully saved garment " + g.getCleanCloudGarmentId() + " with type '" + g.getType() + "'");
+                                    } catch(Exception ex) {
+                                        System.err.println("DEBUG: Failed to save garment " + g.getCleanCloudGarmentId() + ": " + ex.getMessage());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to enrich garment types from CleanCloud for order " + orderId + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+            
             System.out.println("Found " + garments.size() + " garments for order " + orderId);
             if (garments != null) {
                 for (Garments g : garments) {
@@ -247,6 +305,23 @@ public class AdminController {
             model.addAttribute("orderId", orderId);
             return "auth/admin/order-search";
         }
+    }
+
+    private List<String> parseTypesFromSummary(String summary) {
+        List<String> result = new ArrayList<>();
+        if (summary == null || summary.isBlank()) return result;
+        String normalized = summary.replace("<br />", "<br>").replace("<br/>", "<br>").replace("\r\n", "\n").replace("\r", "\n");
+        String[] items = normalized.split("<br>");
+        java.util.regex.Pattern qtyPattern = java.util.regex.Pattern.compile("(?i)\\bx\\s*\\d+");
+        for (String part : items) {
+            if (part == null) continue;
+            String line = part.trim();
+            if (line.isEmpty()) continue;
+            java.util.regex.Matcher m = qtyPattern.matcher(line);
+            String name = m.find() ? line.substring(0, m.start()).trim() : line.trim();
+            if (!name.isEmpty()) result.add(name);
+        }
+        return result;
     }
 
     @GetMapping("/departments/{department}")

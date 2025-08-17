@@ -222,6 +222,41 @@ public class CleanCloudServiceImpl implements CleanCloudService {
                     orderDetails.getSummary(),
                     orderDetails.getGarments() != null ? orderDetails.getGarments().size() : 0);
             
+            // Map garment type from order summary to garments (ascending by garment ID)
+            try {
+                if (orderDetails != null && orderDetails.getSummary() != null && orderDetails.getGarments() != null) {
+                    java.util.List<String> summaryTypes = parseTypesFromSummary(orderDetails.getSummary());
+                    if (!summaryTypes.isEmpty()) {
+                        java.util.List<CleanCloudOrderDetails.CleanCloudGarment> sorted = new java.util.ArrayList<>(orderDetails.getGarments());
+                        sorted.sort((a, b) -> {
+                            try {
+                                int ia = Integer.parseInt(a.getGarmentId());
+                                int ib = Integer.parseInt(b.getGarmentId());
+                                return Integer.compare(ia, ib);
+                            } catch (Exception e) {
+                                return String.valueOf(a.getGarmentId()).compareTo(String.valueOf(b.getGarmentId()));
+                            }
+                        });
+                        int n = Math.min(summaryTypes.size(), sorted.size());
+                        for (int i = 0; i < n; i++) {
+                            String t = summaryTypes.get(i);
+                            if (t != null && !t.isBlank()) {
+                                sorted.get(i).setType(t.trim());
+                            }
+                        }
+                        // Fallback: if there's exactly one summary item and no types were set, set the first garment's type
+                        if (summaryTypes.size() == 1 && !sorted.isEmpty()) {
+                            if (sorted.get(0).getType() == null || sorted.get(0).getType().isBlank() || "Unknown".equalsIgnoreCase(sorted.get(0).getType())) {
+                                String t = summaryTypes.get(0);
+                                if (t != null && !t.isBlank()) sorted.get(0).setType(t.trim());
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to map garment types from summary: {}", e.getMessage());
+            }
+
             if (orderDetails.getGarments() != null) {
                 for (CleanCloudOrderDetails.CleanCloudGarment g : orderDetails.getGarments()) {
                     log.info("Garment in order details: barcodeID={}, garmentId={}, description={}", 
@@ -499,5 +534,41 @@ public class CleanCloudServiceImpl implements CleanCloudService {
         garment.setCustomStatus(garmentData.getCustomStatus());
         garment.setConveyorLocation(garmentData.getConveyorLocation());
         return garment;
+    }
+
+    // Helper: parse summary lines to type labels
+    private java.util.List<String> parseTypesFromSummary(String summary) {
+        java.util.List<String> result = new java.util.ArrayList<>();
+        if (summary == null || summary.isBlank()) return result;
+
+        // Normalize line breaks and <br> variants
+        String normalized = summary
+                .replace("<br />", "<br>")
+                .replace("<br/>", "<br>")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n");
+
+        // Split items by <br>
+        String[] items = normalized.split("<br>");
+        java.util.regex.Pattern qtyPattern = java.util.regex.Pattern.compile("(?i)\\bx\\s*\\d+");
+
+        for (String part : items) {
+            if (part == null) continue;
+            String line = part.trim();
+            if (line.isEmpty()) continue;
+
+            // Find the 'x N' portion even if preceded by whitespace/newline
+            java.util.regex.Matcher m = qtyPattern.matcher(line);
+            String name;
+            if (m.find()) {
+                name = line.substring(0, m.start()).trim();
+            } else {
+                // If there is no explicit quantity, take the whole line
+                name = line;
+            }
+            name = name.replace("&amp;", "&").trim();
+            if (!name.isEmpty()) result.add(name);
+        }
+        return result;
     }
 }

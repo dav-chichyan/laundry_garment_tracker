@@ -189,6 +189,7 @@
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <p><strong>Description:</strong> <span th:text="${garment.description != null ? garment.description : 'N/A'}">White Shirt</span></p>
+                                                        <p><strong>Type:</strong> <span th:text="${garment.type != null ? garment.type : 'N/A'}">Sweater</span></p>
                                                         <p><strong>Current Department:</strong> 
                                                             <span class="badge bg-info" th:text="${garment.departmentId != null ? garment.departmentId : 'UNKNOWN'}">IRONING</span>
                                                         </p>
