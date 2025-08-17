@@ -527,6 +527,35 @@ public class AdminController {
             model.addAttribute("distinctDepartmentsCount", distinctDepartmentsCount);
             model.addAttribute("uniqueGarmentsCount", uniqueGarmentsCount);
             
+            // Add error scans data (placeholder for now - you can implement actual error logging)
+            List<Map<String, Object>> errorScans = new ArrayList<>();
+            
+            // TODO: Implement actual error scan logging from your system
+            // For demonstration, adding some sample error data
+            Map<String, Object> sampleError1 = new HashMap<>();
+            sampleError1.put("id", "E001");
+            sampleError1.put("garmentId", "20238");
+            sampleError1.put("userName", "John Doe");
+            sampleError1.put("department", "RECEPTION");
+            sampleError1.put("errorTime", new Date());
+            sampleError1.put("errorType", "Scan Failed");
+            sampleError1.put("errorMessage", "Barcode not recognized");
+            sampleError1.put("status", "Resolved");
+            errorScans.add(sampleError1);
+            
+            Map<String, Object> sampleError2 = new HashMap<>();
+            sampleError2.put("id", "E002");
+            sampleError2.put("garmentId", "20240");
+            sampleError2.put("userName", "Jane Smith");
+            sampleError2.put("department", "IRONING");
+            sampleError2.put("errorTime", new Date(System.currentTimeMillis() - 3600000)); // 1 hour ago
+            sampleError2.put("errorType", "Duplicate Scan");
+            sampleError2.put("errorMessage", "Garment already scanned in this department");
+            sampleError2.put("status", "Pending");
+            errorScans.add(sampleError2);
+            
+            model.addAttribute("errorScans", errorScans);
+            
             log.info("Scanned garments page loaded successfully with {} scans", scans.size());
             
             return "auth/admin/scanned-garments";
@@ -537,6 +566,7 @@ public class AdminController {
             model.addAttribute("users", new ArrayList<>());
             model.addAttribute("scansByDepartment", new HashMap<>());
             model.addAttribute("scansByUser", new HashMap<>());
+            model.addAttribute("errorScans", new ArrayList<>());
             return "auth/admin/scanned-garments";
         }
     }

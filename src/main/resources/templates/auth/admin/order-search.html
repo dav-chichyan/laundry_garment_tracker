@@ -61,6 +61,30 @@
 
         /* Search form */
         .search-form .form-control { min-width: 300px; }
+        
+        /* Department link styling */
+        .department-link {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .department-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+            background-color: #0056b3 !important;
+        }
+        
+        .department-link::after {
+            content: " →";
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            margin-left: 2px;
+        }
+        
+        .department-link:hover::after {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -83,13 +107,43 @@
             <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
                 <div class="sidebar-sticky pt-3">
                     <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="/admin/orders/search"><i class="fas fa-search me-2"></i> Order Search</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/users-management"><i class="fas fa-users me-2"></i> User Management</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/task-management"><i class="fas fa-tasks me-2"></i> Task Management</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/scanned-garments"><i class="fas fa-barcode me-2"></i> Scanned Garments</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/returns-dashboard"><i class="fas fa-undo me-2"></i> Returns Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/department-garments"><i class="fas fa-tshirt me-2"></i> Department Garments</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/orders/search">
+                                <i class="fas fa-search me-2"></i>
+                                Order Search
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users-management">
+                                <i class="fas fa-users me-2"></i>
+                                User Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/task-management">
+                                <i class="fas fa-tasks me-2"></i>
+                                Task Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/scanned-garments">
+                                <i class="fas fa-barcode me-2"></i>
+                                Scanned Garments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/returns-dashboard">
+                                <i class="fas fa-undo me-2"></i>
+                                Returns Dashboard
+                            </a>
+                        </li>
+                        
                     </ul>
                 </div>
             </nav>
@@ -129,23 +183,26 @@
                             </div>
                             <div class="card-body">
                                 <form th:action="@{/admin/orders/search}" method="get" class="search-form">
-                                    <div class="row g-3 align-items-end">
+                                    <div class="row g-3 align-items-start">
                                         <div class="col-md-6">
                                             <label for="orderId" class="form-label">CleanCloud Order ID</label>
-                                            <input type="number" class="form-control" id="orderId" name="orderId" 
-                                                   placeholder="Enter CleanCloud Order ID" required min="1" 
-                                                   th:value="${orderId != null ? orderId : ''}">
+                                            <div class="position-relative">
+                                                <input type="number" class="form-control pe-5" id="orderId" name="orderId" 
+                                                       placeholder="Enter CleanCloud Order ID" required min="1" 
+                                                       th:value="${orderId != null ? orderId : ''}">
+                                                <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted p-0 me-2" 
+                                                        onclick="clearSearch()" style="z-index: 10; border: none; background: none;">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
                                             <div class="form-text">Enter the CleanCloud Order ID to search for order details and garments</div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <button type="submit" class="btn btn-primary w-100">
-                                                <i class="fas fa-search me-2"></i>Search Order
-                                            </button>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button type="button" class="btn btn-outline-secondary w-100" onclick="clearSearch()">
-                                                <i class="fas fa-times me-2"></i>Clear
-                                            </button>
+                                        <div class="col-md-6">
+                                            <div class="d-flex gap-2" style="margin-top: 32px;">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-search me-2"></i>Search Order
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </form>
@@ -191,7 +248,9 @@
                                                         <p><strong>Description:</strong> <span th:text="${garment.description != null ? garment.description : 'N/A'}">White Shirt</span></p>
                                                         <p><strong>Type:</strong> <span th:text="${garment.type != null ? garment.type : 'N/A'}">Sweater</span></p>
                                                         <p><strong>Current Department:</strong> 
-                                                            <span class="badge bg-info" th:text="${garment.departmentId != null ? garment.departmentId : 'UNKNOWN'}">IRONING</span>
+                                                            <a th:href="@{'/admin/departments/' + ${garment.departmentId}}" 
+                                                               class="badge bg-info text-decoration-none department-link" 
+                                                               th:text="${garment.departmentId != null ? garment.departmentId : 'UNKNOWN'}">IRONING</a>
                                                         </p>
                                                     </div>
                                                     <div class="col-md-6">
@@ -207,7 +266,7 @@
                                                 </div>
                                                 <div class="mt-2">
                                                     <a class="btn btn-outline-info btn-sm" th:href="@{'/admin/garments/' + ${garment.garmentId}}">
-                                                        View Complete History
+                                                        View Garment History <i class="fas fa-arrow-right ms-2"></i>
                                                     </a>
                                                 </div>
                                             </div>
