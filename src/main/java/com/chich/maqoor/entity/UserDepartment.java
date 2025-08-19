@@ -24,7 +24,6 @@ public class UserDepartment implements Serializable {
     private User user;
     
     @Enumerated(EnumType.STRING)
-    @MapsId("departmentId")
     @JoinColumn(name = "department_id")
     private Departments department;
     
@@ -34,6 +33,6 @@ public class UserDepartment implements Serializable {
     @AllArgsConstructor
     public static class UserDepartmentId implements Serializable {
         private Integer userId;
-        private String departmentId;
+        private Departments departmentId;
     }
 }

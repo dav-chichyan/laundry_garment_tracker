@@ -132,6 +132,10 @@ public class UserManagementController {
                 if (selectedDepartments != null && !selectedDepartments.isEmpty()) {
                     for (Departments dept : selectedDepartments) {
                         UserDepartment userDept = new UserDepartment();
+                        UserDepartment.UserDepartmentId id = new UserDepartment.UserDepartmentId();
+                        id.setUserId(user.getId());
+                        id.setDepartmentId(dept);
+                        userDept.setId(id);
                         userDept.setUser(user);
                         userDept.setDepartment(dept);
                         userDepartmentRepository.save(userDept);
@@ -190,6 +194,10 @@ public class UserManagementController {
                 if (selectedDepartments != null && !selectedDepartments.isEmpty()) {
                     for (Departments dept : selectedDepartments) {
                         UserDepartment userDept = new UserDepartment();
+                        UserDepartment.UserDepartmentId id = new UserDepartment.UserDepartmentId();
+                        id.setUserId(existingUser.getId());
+                        id.setDepartmentId(dept);
+                        userDept.setId(id);
                         userDept.setUser(existingUser);
                         userDept.setDepartment(dept);
                         userDepartmentRepository.save(userDept);
