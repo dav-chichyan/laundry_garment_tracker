@@ -28,20 +28,18 @@ public class UserUpdateRequestDto {
     @NotNull(message = "Role is required")
     private Role role;
     
-    private List<String> departments;
     private List<String> scheduleTimes;
     
     // Constructors
     public UserUpdateRequestDto() {}
     
     public UserUpdateRequestDto(Integer id, String name, String email, Departments department, 
-                               Role role, List<String> departments, List<String> scheduleTimes) {
+                               Role role, List<String> scheduleTimes) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.department = department;
         this.role = role;
-        this.departments = departments;
         this.scheduleTimes = scheduleTimes;
     }
     
@@ -86,18 +84,10 @@ public class UserUpdateRequestDto {
         this.role = role;
     }
     
-        public List<String> getDepartments() {
-        return departments;
-    }
-
-    public void setDepartments(List<String> departments) {
-        this.departments = departments;
-    }
-
     public List<String> getScheduleTimes() {
         return scheduleTimes;
     }
-
+    
     public void setScheduleTimes(List<String> scheduleTimes) {
         this.scheduleTimes = scheduleTimes;
     }

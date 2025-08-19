@@ -121,12 +121,6 @@ public class UserManagementController {
             user.setScheduleTimes(scheduleTimes);
 
             userService.save(user);
-            
-            // Handle multiple departments after user is saved
-            if (requestDto.getDepartments() != null && !requestDto.getDepartments().isEmpty()) {
-                userService.updateUserDepartments(user, requestDto.getDepartments());
-            }
-            
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully");
             
         } catch (Exception e) {
@@ -160,7 +154,7 @@ public class UserManagementController {
             existingUser.setName(requestDto.getName());
             existingUser.setEmail(requestDto.getEmail());
             
-            // Set primary department based on role
+            // Set department based on role
             if (requestDto.getRole() == Role.ADMIN) {
                 // Admin users don't need a specific department
                 existingUser.setDepartment(null);
@@ -169,11 +163,6 @@ public class UserManagementController {
             }
             
             existingUser.setRole(requestDto.getRole());
-            
-            // Handle multiple departments
-            if (requestDto.getDepartments() != null && !requestDto.getDepartments().isEmpty()) {
-                userService.updateUserDepartments(existingUser, requestDto.getDepartments());
-            }
             
             // Handle schedule times from form
             List<String> scheduleTimes = requestDto.getScheduleTimes();
@@ -215,13 +204,6 @@ public class UserManagementController {
         }
 
         return "redirect:/admin/users-management";
-    }
-
-    @GetMapping("/users/api/{id}")
-    @ResponseBody
-    public User getUserById(@PathVariable Integer id) {
-        return userService.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @PostMapping("/users/reset-password")

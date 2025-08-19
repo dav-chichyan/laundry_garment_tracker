@@ -41,10 +41,7 @@ public class User  {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "department", nullable = true)
-    private Departments department; // Primary department (for backward compatibility)
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<UserDepartment> userDepartments;
+    private Departments department;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
