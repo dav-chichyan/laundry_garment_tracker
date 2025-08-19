@@ -23,7 +23,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #003366 0%, #007B55 100%);
+            background: linear-gradient(135deg, #FF8871 0%, #e67e5f 100%);
             color: white;
             padding: 15px 20px;
             border-radius: 12px;
@@ -42,10 +42,7 @@
             font-size: 16px;
         }
         
-        .user-department {
-            font-size: 14px;
-            opacity: 0.9;
-        }
+
         
         .daily-stats {
             text-align: center;
@@ -91,7 +88,7 @@
         }
         
         .scanner-header {
-            background: linear-gradient(135deg, #003366 0%, #007B55 100%);
+            background: linear-gradient(135deg, #FF8871 0%, #e67e5f 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -240,7 +237,6 @@
         <div class="user-info-header">
             <div class="user-details">
                 <span class="user-name" th:text="${userName}">Staff Name</span>
-                <span class="user-department" th:text="${userDepartment}">Department</span>
             </div>
             <div class="daily-stats">
                 <span class="scan-count">
@@ -255,13 +251,7 @@
             </div>
         </div>
         
-        <!-- DEBUG SECTION - Remove after fixing -->
-        <div class="alert alert-info" style="margin-bottom: 20px;">
-            <strong>DEBUG INFO:</strong><br>
-            userId: <span th:text="${userId}">NOT_SET</span><br>
-            userName: <span th:text="${userName}">NOT_SET</span><br>
-            userDepartment: <span th:text="${userDepartment}">NOT_SET</span>
-        </div>
+
         
         <!-- Scanner Box -->
         <div class="scanner-box">
