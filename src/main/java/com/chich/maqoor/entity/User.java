@@ -88,4 +88,20 @@ public class User  {
         }
         return "";
     }
+    
+    // Helper method to get all departments as a formatted string for display
+    public String getAllDepartmentsDisplay() {
+        if (department != null) {
+            return department.name();
+        }
+        return "No Department";
+    }
+    
+    // Helper method to get all departments as a comma-separated string for data attributes
+    public String getAllDepartmentsData() {
+        if (department != null) {
+            return department.name();
+        }
+        return "";
+    }
 }

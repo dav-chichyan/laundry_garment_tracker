@@ -144,6 +144,29 @@
             margin: -0.25rem;
         }
         
+        /* Department badges styling */
+        .department-badges {
+            margin-top: 0.25rem;
+        }
+        
+        .department-badges .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        
+        .department-badges .badge.bg-primary {
+            background-color: #6c757d !important;
+            color: white;
+        }
+        
+        .department-badges .badge.bg-secondary {
+            background-color: #6c757d !important;
+            color: white;
+            opacity: 0.7;
+        }
+        
         .sidebar-heading {
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -1006,11 +1029,11 @@
                     <span class="badge" th:classappend="${user.role == T(com.chich.maqoor.entity.constant.Role).ADMIN ? 'bg-danger' : 'bg-primary'}" 
                           th:text="${user.role}">Role</span>
                                     <div class="dropdown">
-                                        <button class="dots-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}">
+                                        <button class="dots-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${@userService.getUserDepartments(user.id)}">
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item edit-item edit-user-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-department="${user.department}" th:data-user-state="${user.state}"><i class="fas fa-edit"></i> Edit</a></li>
+                                            <li><a class="dropdown-item edit-item edit-user-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${@userService.getUserDepartments(user.id)}" th:data-user-state="${user.state}"><i class="fas fa-edit"></i> Edit</a></li>
                                             <li><a class="dropdown-item reset-item reset-password-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}"><i class="fas fa-key"></i> Reset Password</a></li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item delete-item" href="#" th:onclick="'deleteUser(' + ${user.id} + ')'"><i class="fas fa-trash"></i> Delete</a></li>
@@ -1020,7 +1043,14 @@
                 </div>
                 <div class="card-body">
                                 <div class="user-info mb-2"><strong>Email:</strong> <span th:text="${user.email}">email@example.com</span></div>
-                                <div class="user-info mb-2"><strong>Department:</strong> <span th:text="${user.department}">Department</span></div>
+                                <div class="user-info mb-2">
+                            <strong>Departments:</strong> 
+                            <div class="department-badges">
+                                <span th:if="${user.role == T(com.chich.maqoor.entity.constant.Role).ADMIN}" class="badge bg-secondary">No Department Required</span>
+                                <span th:if="${user.role != T(com.chich.maqoor.entity.constant.Role).ADMIN}" th:each="dept : ${@userService.getUserDepartments(user.id)}" 
+                                      th:text="${dept}" class="badge bg-primary me-1"></span>
+                            </div>
+                        </div>
                                 <div class="user-info mb-2">
                         <strong>Status:</strong> 
                                     <span class="status-badge" th:classappend="${user.status == T(com.chich.maqoor.entity.constant.UserStatus).ACTIVE ? 'bg-success' : 'bg-warning'}" th:text="${user.status}">Status</span>
@@ -1378,7 +1408,7 @@ function deleteUser(userId) {
                         this.getAttribute('data-user-name'),
                         this.getAttribute('data-user-email'),
                         this.getAttribute('data-user-role'),
-                        this.getAttribute('data-user-department'),
+                        this.getAttribute('data-user-departments'),
                         this.getAttribute('data-user-state')
                     );
         });

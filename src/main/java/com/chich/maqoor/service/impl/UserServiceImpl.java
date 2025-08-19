@@ -60,9 +60,14 @@ public class UserServiceImpl implements UserService {
             }
         }
         
-        return users;
+                return users;
     }
-
+    
+    @Override
+    public Set<Departments> getUserDepartments(int userId) {
+        return userDepartmentRepository.findDepartmentsByUserId(userId);
+    }
+    
     @Override
     public void save(User user) {
         // Only set default values if they're not already set
