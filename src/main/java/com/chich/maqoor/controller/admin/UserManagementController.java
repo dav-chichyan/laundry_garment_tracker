@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
 
 @Controller
 @RequestMapping("/admin")
@@ -72,7 +76,19 @@ public class UserManagementController {
                 })
                 .toList();
 
+        // Prepare department data for each user
+        Map<Integer, Set<Departments>> userDepartmentsMap = new HashMap<>();
+        for (User user : users) {
+            if (user.getRole() != Role.ADMIN) {
+                Set<Departments> userDepts = userDepartmentRepository.findDepartmentsByUserId(user.getId());
+                userDepartmentsMap.put(user.getId(), userDepts);
+            } else {
+                userDepartmentsMap.put(user.getId(), new HashSet<>());
+            }
+        }
+        
         model.addAttribute("users", users);
+        model.addAttribute("userDepartmentsMap", userDepartmentsMap);
         model.addAttribute("departments", Departments.values());
         model.addAttribute("roles", Role.values());
         model.addAttribute("q", query);

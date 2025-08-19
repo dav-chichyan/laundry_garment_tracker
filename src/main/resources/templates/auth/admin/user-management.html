@@ -1029,11 +1029,11 @@
                     <span class="badge" th:classappend="${user.role == T(com.chich.maqoor.entity.constant.Role).ADMIN ? 'bg-danger' : 'bg-primary'}" 
                           th:text="${user.role}">Role</span>
                                     <div class="dropdown">
-                                        <button class="dots-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${@userService.getUserDepartments(user.id)}">
+                                        <button class="dots-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${userDepartmentsMap.get(user.id)}">
                                             <i class="fas fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item edit-item edit-user-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${@userService.getUserDepartments(user.id)}" th:data-user-state="${user.state}"><i class="fas fa-edit"></i> Edit</a></li>
+                                            <li><a class="dropdown-item edit-item edit-user-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}" th:data-user-email="${user.email}" th:data-user-role="${user.role}" th:data-user-departments="${userDepartmentsMap.get(user.id)}" th:data-user-state="${user.state}"><i class="fas fa-edit"></i> Edit</a></li>
                                             <li><a class="dropdown-item reset-item reset-password-btn" href="#" th:data-user-id="${user.id}" th:data-user-name="${user.name}"><i class="fas fa-key"></i> Reset Password</a></li>
                                             <li><hr class="dropdown-divider"></li>
                                             <li><a class="dropdown-item delete-item" href="#" th:onclick="'deleteUser(' + ${user.id} + ')'"><i class="fas fa-trash"></i> Delete</a></li>
@@ -1047,7 +1047,7 @@
                             <strong>Departments:</strong> 
                             <div class="department-badges">
                                 <span th:if="${user.role == T(com.chich.maqoor.entity.constant.Role).ADMIN}" class="badge bg-secondary">No Department Required</span>
-                                <span th:if="${user.role != T(com.chich.maqoor.entity.constant.Role).ADMIN}" th:each="dept : ${@userService.getUserDepartments(user.id)}" 
+                                <span th:if="${user.role != T(com.chich.maqoor.entity.constant.Role).ADMIN}" th:each="dept : ${userDepartmentsMap.get(user.id)}" 
                                       th:text="${dept}" class="badge bg-primary me-1"></span>
                             </div>
                         </div>
@@ -1326,7 +1326,7 @@ function addEditScheduleInput() {
             container.appendChild(el);
         }
 
-function editUser(userId, name, email, role, department, state) {
+function editUser(userId, name, email, role, departments, state) {
     document.getElementById('editUserId').value = userId;
     document.getElementById('editUserName').value = name;
     document.getElementById('editUserEmail').value = email;
@@ -1339,8 +1339,16 @@ function editUser(userId, name, email, role, department, state) {
     });
     
     // Check the appropriate department checkboxes
-    if (department) {
-        const departmentArray = department.split(',').map(d => d.trim());
+    if (departments) {
+        // Handle both string format (for backward compatibility) and Set format
+        let departmentArray = [];
+        if (typeof departments === 'string') {
+            departmentArray = departments.split(',').map(d => d.trim());
+        } else if (departments.length > 0) {
+            // If it's a Set-like object, convert to array
+            departmentArray = Array.from(departments);
+        }
+        
         departmentArray.forEach(dept => {
             const checkbox = document.getElementById('edit-dept-' + dept);
             if (checkbox) {

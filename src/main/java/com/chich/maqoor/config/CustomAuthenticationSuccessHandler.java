@@ -1,8 +1,11 @@
 package com.chich.maqoor.config;
 
 import com.chich.maqoor.entity.User;
+import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.service.UserService;
+import com.chich.maqoor.repository.UserDepartmentRepository;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,12 +16,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
 
 @Component
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private UserDepartmentRepository userDepartmentRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, 
@@ -37,9 +44,21 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     setDefaultTargetUrl("/admin/users");
                 } else {
                     // Regular staff users go to their department scanner
-                    String department = user.getDepartment() != null ? 
-                        user.getDepartment().name().toLowerCase() : "reception";
-                    setDefaultTargetUrl("/department/scanner/" + department);
+                    Set<Departments> userDepartments = userDepartmentRepository.findDepartmentsByUserId(user.getId());
+                    
+                    if (!userDepartments.isEmpty()) {
+                        if (userDepartments.size() == 1) {
+                            // Single department - go directly to scanner
+                            String department = userDepartments.iterator().next().name().toLowerCase();
+                            setDefaultTargetUrl("/department/scanner/" + department);
+                        } else {
+                            // Multiple departments - go to selection page
+                            setDefaultTargetUrl("/department/select");
+                        }
+                    } else {
+                        // No departments assigned, redirect to login with error
+                        setDefaultTargetUrl("/auth/login?error=no_department");
+                    }
                 }
             } else {
                 // Fallback for admin dashboard
