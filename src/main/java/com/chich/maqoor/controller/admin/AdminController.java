@@ -222,37 +222,33 @@ public class AdminController {
 
     @GetMapping("/departments")
     public String departmentsOverview(Model model) {
-        // Build counts per department for overview cards
+        // Build counts per department for overview cards - only for visible departments
         Map<Departments, Long> departmentCounts = new HashMap<>();
         Map<String, Long> departmentCountsByName = new HashMap<>();
-        for (Departments dept : Departments.values()) {
+        
+        // Only count visible departments (same as what frontend displays)
+        Departments[] visible = getVisibleDepartments();
+        
+        for (Departments dept : visible) {
             long count = 0L;
             try {
-                Integer c = garmentRepository.countByDepartmentIdInteger(dept);
-                log.info("Department {} - Repository count: {}", dept, c);
-                if (c != null) count = c.longValue();
+                // Use the same method as individual department pages for consistency
+                List<Garments> garments = garmentRepository.findByDepartmentId(dept);
+                count = garments.size();
+                log.info("Department {} - Garment count: {}", dept, count);
             } catch (Exception e) {
                 log.error("Error getting count for department {}: {}", dept, e.getMessage());
             }
-            // Fallback: if garments table has 0 for a department, try scan counts overall
-            if (count == 0L) {
-                try {
-                    // Count total scans ever recorded for this department as an approximate indicator
-                    Date epochStart = new Date(0L);
-                    Date now = new Date();
-                    long scans = garmentScanRepository.countByDepartmentAndScannedAtBetween(dept, epochStart, now);
-                    log.info("Department {} - Fallback scan count: {}", dept, scans);
-                    if (scans > 0L) count = scans; // show scans if garments missing
-                } catch (Exception e) {
-                    log.error("Error getting scan count for department {}: {}", dept, e.getMessage());
-                }
-            }
-            log.info("Department {} - Final count: {}", dept, count);
             departmentCounts.put(dept, count);
             departmentCountsByName.put(dept.name(), count);
         }
+        
         long totalGarments = departmentCounts.values().stream().mapToLong(Long::longValue).sum();
-        Departments[] visible = getVisibleDepartments();
+        
+        // Debug logging
+        log.info("DEPARTMENTS OVERVIEW DEBUG: Visible departments: {}", java.util.Arrays.toString(visible));
+        log.info("DEPARTMENTS OVERVIEW DEBUG: Department counts: {}", departmentCounts);
+        
         model.addAttribute("departments", visible);
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("departmentCountsByName", departmentCountsByName);

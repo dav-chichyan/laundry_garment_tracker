@@ -71,7 +71,29 @@
                                     <p class="text-muted mb-2">Total garments in this department</p>
                                     <a class="btn btn-outline-primary btn-sm" th:href="@{'/admin/departments/' + ${dept}}"><i class="fas fa-eye me-1"></i>View Details</a>
                                 </div>
-                                <div class="dept-badge" th:text="${departmentCounts != null && departmentCounts[dept] != null ? departmentCounts[dept] : 0}">0</div>
+                                <div class="dept-badge" th:text="${departmentCounts != null && departmentCounts.get(dept) != null ? departmentCounts.get(dept) : 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Debug Information -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Debug Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Total Departments:</strong> <span th:text="${numDepartments}">0</span></p>
+                                <p><strong>Total Garments:</strong> <span th:text="${totalGarments}">0</span></p>
+                                <p><strong>Department Counts:</strong></p>
+                                <ul>
+                                    <li th:each="dept : ${departments}">
+                                        <span th:text="${dept}">Department</span>: 
+                                        <span th:text="${departmentCounts != null && departmentCounts.get(dept) != null ? departmentCounts.get(dept) : 'N/A'}">0</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
