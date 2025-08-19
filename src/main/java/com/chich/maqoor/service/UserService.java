@@ -9,6 +9,7 @@ import java.util.Optional;
 @Service
 public interface UserService {
     List<User> findAll();
+    List<User> findAllWithDepartments();
     void save(User user);
     void deleteById(int userId);
     void deleteUserAndAssociations(int userId);

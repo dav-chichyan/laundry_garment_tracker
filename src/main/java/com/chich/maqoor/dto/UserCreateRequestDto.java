@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
+import java.util.ArrayList;
 
 public class UserCreateRequestDto {
     
@@ -24,7 +26,8 @@ public class UserCreateRequestDto {
     @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
     
-    private Departments department;
+    private Departments department; // Keep for backward compatibility
+    private List<Departments> departments; // New field for multiple departments
     
     @NotNull(message = "Role is required")
     private Role role;
@@ -83,6 +86,31 @@ public class UserCreateRequestDto {
         this.department = department;
     }
     
+    public List<Departments> getDepartments() {
+        return departments;
+    }
+    
+    public void setDepartments(List<Departments> departments) {
+        this.departments = departments;
+    }
+    
+    // Helper method to get all departments (combines single and multiple)
+    public List<Departments> getAllDepartments() {
+        List<Departments> allDepts = new ArrayList<>();
+        
+        // Add single department if present
+        if (department != null) {
+            allDepts.add(department);
+        }
+        
+        // Add multiple departments if present
+        if (departments != null) {
+            allDepts.addAll(departments);
+        }
+        
+        return allDepts;
+    }
+    
     public Role getRole() {
         return role;
     }
@@ -101,16 +129,18 @@ public class UserCreateRequestDto {
     public boolean isValidDepartmentSelection() {
         System.out.println("DEBUG DTO: Role = " + role);
         System.out.println("DEBUG DTO: Department = " + department);
-        System.out.println("DEBUG DTO: Department class = " + (department != null ? department.getClass().getName() : "null"));
+        System.out.println("DEBUG DTO: Departments = " + departments);
         
         // Admin users don't need a department
         if (role == Role.ADMIN) {
             System.out.println("DEBUG DTO: Admin user - validation passed");
             return true;
         }
-        // Non-admin users must have a department
-        boolean isValid = department != null;
-        System.out.println("DEBUG DTO: Non-admin user - validation result: " + isValid);
+        
+        // Non-admin users must have at least one department
+        List<Departments> allDepts = getAllDepartments();
+        boolean isValid = allDepts != null && !allDepts.isEmpty();
+        System.out.println("DEBUG DTO: Non-admin user - departments count: " + (allDepts != null ? allDepts.size() : 0) + ", validation result: " + isValid);
         return isValid;
     }
 }

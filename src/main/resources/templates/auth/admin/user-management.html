@@ -97,6 +97,53 @@
             color: inherit;
         }
         
+        /* Department checkboxes styling */
+        .department-checkboxes {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .department-checkboxes.disabled {
+            background-color: #e9ecef;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .department-checkboxes .form-check {
+            margin-bottom: 0.5rem;
+        }
+        
+        .department-checkboxes .form-check-input:checked {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .department-checkboxes .form-check-input:focus {
+            border-color: #6c757d;
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+        }
+        
+        .department-checkboxes .form-check-label {
+            font-size: 0.875rem;
+            color: #495057;
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        
+        .department-checkboxes .form-check:hover .form-check-label {
+            color: #6c757d;
+        }
+        
+        .department-checkboxes .form-check:hover {
+            background-color: rgba(108, 117, 125, 0.05);
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+            margin: -0.25rem;
+        }
+        
         .sidebar-heading {
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -1034,10 +1081,18 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Department *</label>
-                                <select class="form-select" name="department" required>
-                                    <option value="">Select Department</option>
-                                    <option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}">Department</option>
-                                </select>
+                                <div class="department-checkboxes" id="createDepartmentCheckboxes">
+                                    <div class="row g-2">
+                                        <div class="col-6" th:each="dept : ${departments}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" th:name="departments" th:value="${dept}" th:id="'create-dept-' + ${dept}">
+                                                <label class="form-check-label" th:for="'create-dept-' + ${dept}" th:text="${dept}">
+                                                    Department
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <small class="text-muted" id="departmentHelp">Required for non-admin users</small>
                             </div>
                         </div>
@@ -1105,10 +1160,18 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Department *</label>
-                                <select class="form-select" name="department" id="editUserDepartment" required>
-                                    <option value="">Select Department</option>
-                                    <option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}">Department</option>
-                                </select>
+                                <div class="department-checkboxes" id="editDepartmentCheckboxes">
+                                    <div class="row g-2">
+                                        <div class="col-6" th:each="dept : ${departments}">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" th:name="departments" th:value="${dept}" th:id="'edit-dept-' + ${dept}">
+                                                <label class="form-check-label" th:for="'edit-dept-' + ${dept}" th:text="${dept}">
+                                                    Department
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <small class="text-muted" id="editDepartmentHelp">Required for non-admin users</small>
                             </div>
                         </div>
@@ -1238,8 +1301,24 @@ function editUser(userId, name, email, role, department, state) {
     document.getElementById('editUserName').value = name;
     document.getElementById('editUserEmail').value = email;
     document.getElementById('editUserRole').value = role;
-    document.getElementById('editUserDepartment').value = department;
     document.getElementById('editUserState').value = state;
+    
+    // Clear all department checkboxes first
+    document.querySelectorAll('#editDepartmentCheckboxes input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Check the appropriate department checkboxes
+    if (department) {
+        const departmentArray = department.split(',').map(d => d.trim());
+        departmentArray.forEach(dept => {
+            const checkbox = document.getElementById('edit-dept-' + dept);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
+    
     new bootstrap.Modal(document.getElementById('editUserModal')).show();
 }
 
@@ -1253,19 +1332,41 @@ function deleteUser(userId) {
         document.getElementById('createUserForm').addEventListener('submit', function(e){
             const pwd = this.querySelector('input[name="password"]').value;
             const cpwd = this.querySelector('input[name="confirmPassword"]').value;
-    if (pwd !== cpwd) { 
-        e.preventDefault(); 
-        alert('Passwords do not match!'); 
-    }
+            if (pwd !== cpwd) { 
+                e.preventDefault(); 
+                alert('Passwords do not match!'); 
+            }
+            
+            // Validate department selection for non-admin users
+            const role = this.querySelector('select[name="role"]').value;
+            if (role !== 'ADMIN') {
+                const selectedDepartments = this.querySelectorAll('input[name="departments"]:checked');
+                if (selectedDepartments.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one department for non-admin users!');
+                }
+            }
         });
 
         document.querySelector('#resetPasswordModal form').addEventListener('submit', function(e){
             const pwd = this.querySelector('input[name="newPassword"]').value;
             const cpwd = this.querySelector('input[name="confirmPassword"]').value;
-    if (pwd !== cpwd) { 
-        e.preventDefault(); 
-        alert('Passwords do not match!'); 
-    }
+            if (pwd !== cpwd) { 
+                e.preventDefault(); 
+                alert('Passwords do not match!'); 
+            }
+        });
+        
+        // Add validation for edit user form
+        document.getElementById('editUserForm').addEventListener('submit', function(e){
+            const role = this.querySelector('select[name="role"]').value;
+            if (role !== 'ADMIN') {
+                const selectedDepartments = this.querySelectorAll('input[name="departments"]:checked');
+                if (selectedDepartments.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one department for non-admin users!');
+                }
+            }
         });
 
         function setupUserManagement(){
@@ -1317,12 +1418,51 @@ function deleteUser(userId) {
             });
         }
     });
+    
+    // Clear department checkboxes when create user modal opens
+    const createUserModal = document.getElementById('createUserModal');
+    if (createUserModal) {
+        createUserModal.addEventListener('show.bs.modal', function() {
+            // Clear all department checkboxes
+            document.querySelectorAll('#createDepartmentCheckboxes input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+            });
+            // Remove disabled state
+            document.getElementById('createDepartmentCheckboxes').classList.remove('disabled');
+            // Reset help text
+            document.getElementById('departmentHelp').textContent = 'Required for non-admin users';
+            document.getElementById('departmentHelp').className = 'text-muted small';
+        });
+    }
+    
+    // Clear department checkboxes when edit user modal opens
+    const editUserModal = document.getElementById('editUserModal');
+    if (editUserModal) {
+        editUserModal.addEventListener('show.bs.modal', function() {
+            // Clear all department checkboxes first
+            document.querySelectorAll('#editDepartmentCheckboxes input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.disabled = false;
+            });
+            // Remove disabled state
+            document.getElementById('editDepartmentCheckboxes').classList.remove('disabled');
+            // Reset help text
+            document.getElementById('editDepartmentHelp').textContent = 'Required for non-admin users';
+            document.getElementById('editDepartmentHelp').className = 'text-muted small';
+        });
+    }
 }
 
 function resetSearch() {
     // Clear the search form
     document.querySelector('input[name="q"]').value = '';
-    document.querySelector('select[name="department"]').value = '';
+    
+    // Clear department filter dropdown (if it exists)
+    const departmentFilter = document.querySelector('select[name="department"]');
+    if (departmentFilter) {
+        departmentFilter.value = '';
+    }
     
     // Redirect to the base URL to clear search results
     window.location.href = '/admin/users-management';
@@ -1330,33 +1470,35 @@ function resetSearch() {
 
 function handleRoleChange(roleSelect, modalType) {
     const modalId = modalType === 'edit' ? 'editUserModal' : 'createUserModal';
-    const departmentField = document.querySelector(`#${modalId} select[name="department"]`);
+    const departmentCheckboxes = document.querySelector(`#${modalId} .department-checkboxes`);
     const departmentHelp = document.getElementById(modalType === 'edit' ? 'editDepartmentHelp' : 'departmentHelp');
-    
+
     console.log('DEBUG JS: Role changed to:', roleSelect.value);
     console.log('DEBUG JS: Modal type:', modalType);
-    console.log('DEBUG JS: Department field found:', departmentField);
-    
+    console.log('DEBUG JS: Department checkboxes found:', departmentCheckboxes);
+
     if (roleSelect.value === 'ADMIN') {
-        // Freeze department field for admin role
-        console.log('DEBUG JS: Setting department field to disabled for ADMIN');
-        departmentField.disabled = true;
-        departmentField.value = '';
-        departmentField.required = false;
-        departmentField.classList.add('form-control-disabled');
+        // Disable department checkboxes for admin role
+        console.log('DEBUG JS: Setting department checkboxes to disabled for ADMIN');
+        departmentCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.disabled = true;
+            checkbox.checked = false;
+        });
+        departmentCheckboxes.classList.add('disabled');
         departmentHelp.textContent = 'Department not required for admin users';
         departmentHelp.className = 'text-muted small';
     } else {
-        // Enable department field for other roles
-        console.log('DEBUG JS: Setting department field to enabled for non-ADMIN');
-        departmentField.disabled = false;
-        departmentField.required = true;
-        departmentField.classList.remove('form-control-disabled');
-        departmentHelp.textContent = 'Required for non-admin users';
+        // Enable department checkboxes for other roles
+        console.log('DEBUG JS: Setting department checkboxes to enabled for non-ADMIN');
+        departmentCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.disabled = false;
+        });
+        departmentCheckboxes.classList.remove('disabled');
+        departmentHelp.textContent = 'Select one or more departments for non-admin users';
         departmentHelp.className = 'text-muted small';
     }
-    
-    console.log('DEBUG JS: Final department field state - disabled:', departmentField.disabled, 'required:', departmentField.required);
+
+    console.log('DEBUG JS: Final department checkboxes state - disabled:', departmentCheckboxes.classList.contains('disabled'));
 }
 </script>
 </body>

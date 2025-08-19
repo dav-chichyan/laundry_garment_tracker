@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class UserUpdateRequestDto {
     
@@ -24,7 +25,8 @@ public class UserUpdateRequestDto {
     private String email;
     
     @NotNull(message = "Department is required")
-    private Departments department;
+    private Departments department; // Keep for backward compatibility
+    private List<Departments> departments; // New field for multiple departments
     
     @NotNull(message = "Role is required")
     private Role role;
@@ -76,6 +78,31 @@ public class UserUpdateRequestDto {
     
     public void setDepartment(Departments department) {
         this.department = department;
+    }
+    
+    public List<Departments> getDepartments() {
+        return departments;
+    }
+    
+    public void setDepartments(List<Departments> departments) {
+        this.departments = departments;
+    }
+    
+    // Helper method to get all departments (combines single and multiple)
+    public List<Departments> getAllDepartments() {
+        List<Departments> allDepts = new ArrayList<>();
+        
+        // Add single department if present
+        if (department != null) {
+            allDepts.add(department);
+        }
+        
+        // Add multiple departments if present
+        if (departments != null) {
+            allDepts.addAll(departments);
+        }
+        
+        return allDepts;
     }
     
     public Role getRole() {

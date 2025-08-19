@@ -6,6 +6,7 @@ import com.chich.maqoor.entity.constant.UserState;
 import com.chich.maqoor.entity.constant.UserStatus;
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.Set;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -70,5 +71,21 @@ public class User  {
 
     public void setScheduleTimes(List<String> scheduleTimes) {
         this.scheduleTimes = scheduleTimes;
+    }
+    
+    // Helper method to get department names for display
+    public String getDepartmentNames() {
+        if (department != null) {
+            return department.name();
+        }
+        return "No Department";
+    }
+    
+    // Helper method to get departments as a comma-separated string
+    public String getDepartmentsAsString() {
+        if (department != null) {
+            return department.name();
+        }
+        return "";
     }
 }

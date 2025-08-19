@@ -1,8 +1,11 @@
 package com.chich.maqoor.service.impl;
 
 import com.chich.maqoor.entity.User;
+import com.chich.maqoor.entity.UserDepartment;
 import com.chich.maqoor.repository.GarmentReturnRepository;
 import com.chich.maqoor.repository.GarmentScanRepository;
+import com.chich.maqoor.repository.UserDepartmentRepository;
+import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.entity.constant.UserState;
 import com.chich.maqoor.repository.UserRepository;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -32,10 +36,31 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GarmentReturnRepository garmentReturnRepository;
+    
+    @Autowired
+    private UserDepartmentRepository userDepartmentRepository;
 
     @Override
     public List<User> findAll() {
        return userRepository.findAll();
+    }
+    
+    @Override
+    public List<User> findAllWithDepartments() {
+        List<User> users = userRepository.findAll();
+        
+        // For each user, populate their departments from UserDepartment table
+        for (User user : users) {
+            if (user.getRole() != Role.ADMIN) {
+                Set<Departments> userDepartments = userDepartmentRepository.findDepartmentsByUserId(user.getId());
+                // Set the primary department (for backward compatibility)
+                if (!userDepartments.isEmpty()) {
+                    user.setDepartment(userDepartments.iterator().next());
+                }
+            }
+        }
+        
+        return users;
     }
 
     @Override

@@ -4,9 +4,11 @@ import com.chich.maqoor.dto.PasswordResetRequestDto;
 import com.chich.maqoor.dto.UserCreateRequestDto;
 import com.chich.maqoor.dto.UserUpdateRequestDto;
 import com.chich.maqoor.entity.User;
+import com.chich.maqoor.entity.UserDepartment;
 import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
 import com.chich.maqoor.service.UserService;
+import com.chich.maqoor.repository.UserDepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -26,6 +28,9 @@ public class UserManagementController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private UserDepartmentRepository userDepartmentRepository;
 
     @GetMapping("/users-management")
     public String userManagementPage(
@@ -33,7 +38,7 @@ public class UserManagementController {
             @RequestParam(value = "q", required = false) String query,
             @RequestParam(value = "department", required = false) Departments departmentFilter) {
 
-        List<User> users = userService.findAll();
+        List<User> users = userService.findAllWithDepartments();
 
         // Filter by search query (name, email, username)
         if (query != null && !query.trim().isEmpty()) {
@@ -46,11 +51,11 @@ public class UserManagementController {
                     .toList();
         }
 
-        // Filter by department if provided (admins typically have null department)
+        // Filter by department if provided (using the new UserDepartment relationship)
         if (departmentFilter != null) {
             final Departments dept = departmentFilter;
             users = users.stream()
-                    .filter(u -> u.getDepartment() == dept)
+                    .filter(u -> userDepartmentRepository.existsByUserIdAndDepartment(u.getId(), dept))
                     .toList();
         }
 
@@ -93,6 +98,7 @@ public class UserManagementController {
         // Validate department selection for USER role
         System.out.println("DEBUG: Role = " + requestDto.getRole());
         System.out.println("DEBUG: Department = " + requestDto.getDepartment());
+        System.out.println("DEBUG: Departments = " + requestDto.getDepartments());
         System.out.println("DEBUG: isValidDepartmentSelection = " + requestDto.isValidDepartmentSelection());
         
         if (!requestDto.isValidDepartmentSelection()) {
@@ -112,19 +118,26 @@ public class UserManagementController {
             user.setEmail(requestDto.getEmail());
             user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
             
-            // Set department based on role
-            if (requestDto.getRole() == Role.ADMIN) {
-                // Admin users don't need a specific department
-                user.setDepartment(null);
-            } else {
-                user.setDepartment(requestDto.getDepartment());
-            }
-            
+            // Set role and status
             user.setRole(requestDto.getRole());
             user.setStatus(com.chich.maqoor.entity.constant.UserStatus.ACTIVE);
             user.setState(com.chich.maqoor.entity.constant.UserState.ACTIVE);
 
+            // Save user first
             userService.save(user);
+            
+            // Handle department assignments for non-admin users
+            if (requestDto.getRole() != Role.ADMIN) {
+                List<Departments> selectedDepartments = requestDto.getAllDepartments();
+                if (selectedDepartments != null && !selectedDepartments.isEmpty()) {
+                    for (Departments dept : selectedDepartments) {
+                        UserDepartment userDept = new UserDepartment();
+                        userDept.setUser(user);
+                        userDept.setDepartment(dept);
+                        userDepartmentRepository.save(userDept);
+                    }
+                }
+            }
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully");
             
         } catch (Exception e) {
@@ -157,21 +170,32 @@ public class UserManagementController {
 
             existingUser.setName(requestDto.getName());
             existingUser.setEmail(requestDto.getEmail());
-            
-            // Set department based on role
-            if (requestDto.getRole() == Role.ADMIN) {
-                // Admin users don't need a specific department
-                existingUser.setDepartment(null);
-            } else {
-                existingUser.setDepartment(requestDto.getDepartment());
-            }
-            
             existingUser.setRole(requestDto.getRole());
-            
-            // Update user state
             existingUser.setState(requestDto.getState());
 
+            // Save user first
             userService.save(existingUser);
+            
+            // Handle department assignments
+            if (requestDto.getRole() == Role.ADMIN) {
+                // Remove all department assignments for admin users
+                userDepartmentRepository.deleteByUserId(existingUser.getId());
+            } else {
+                // Update department assignments for non-admin users
+                // First, remove existing assignments
+                userDepartmentRepository.deleteByUserId(existingUser.getId());
+                
+                // Then add new assignments
+                List<Departments> selectedDepartments = requestDto.getAllDepartments();
+                if (selectedDepartments != null && !selectedDepartments.isEmpty()) {
+                    for (Departments dept : selectedDepartments) {
+                        UserDepartment userDept = new UserDepartment();
+                        userDept.setUser(existingUser);
+                        userDept.setDepartment(dept);
+                        userDepartmentRepository.save(userDept);
+                    }
+                }
+            }
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully");
             
         } catch (Exception e) {
