@@ -216,48 +216,71 @@ public class AdminController {
 
     @GetMapping("/department-garments")
     public String departmentGarmentsPage(Model model) {
-        model.addAttribute("departments", getVisibleDepartments());
+        // Get visible departments
+        Departments[] visibleDepartments = getVisibleDepartments();
+        
+        // Get garment counts for each department
+        Map<Departments, Long> departmentCounts = new HashMap<>();
+        Map<String, Long> departmentCountsByName = new HashMap<>();
+        
+        log.info("DEBUG: Getting garment counts for {} visible departments", visibleDepartments.length);
+        
+        for (Departments dept : visibleDepartments) {
+            // Use the same approach as individual department pages - get actual garments and count them
+            List<Garments> garments = garmentRepository.findByDepartmentId(dept);
+            long count = garments.size();
+            log.info("DEBUG: Department {} - Found {} garments", dept, count);
+            departmentCounts.put(dept, count);
+            departmentCountsByName.put(dept.name(), count);
+        }
+        
+        long totalGarments = departmentCounts.values().stream().mapToLong(Long::longValue).sum();
+        log.info("DEBUG: Total garments across all departments: {}", totalGarments);
+        
+        model.addAttribute("departments", visibleDepartments);
+        model.addAttribute("departmentCounts", departmentCounts);
+        model.addAttribute("departmentCountsByName", departmentCountsByName);
+        model.addAttribute("totalGarments", totalGarments);
+        
         return "auth/admin/department-garments";
     }
 
+
+
     @GetMapping("/departments")
     public String departmentsOverview(Model model) {
-        // Build counts per department for overview cards
+        // Get visible departments first
+        Departments[] visibleDepartments = getVisibleDepartments();
+        
+        // Build counts per department for overview cards (only visible departments)
         Map<Departments, Long> departmentCounts = new HashMap<>();
         Map<String, Long> departmentCountsByName = new HashMap<>();
-        for (Departments dept : Departments.values()) {
+        
+        for (Departments dept : visibleDepartments) {
             long count = 0L;
             try {
-                Integer c = garmentRepository.countByDepartmentIdInteger(dept);
-                log.info("Department {} - Repository count: {}", dept, c);
-                if (c != null) count = c.longValue();
+                // Use the same approach as individual department pages - get actual garments and count them
+                List<Garments> garments = garmentRepository.findByDepartmentId(dept);
+                count = garments.size();
+                log.info("Department {} - Found {} garments", dept, count);
             } catch (Exception e) {
                 log.error("Error getting count for department {}: {}", dept, e.getMessage());
-            }
-            // Fallback: if garments table has 0 for a department, try scan counts overall
-            if (count == 0L) {
-                try {
-                    // Count total scans ever recorded for this department as an approximate indicator
-                    Date epochStart = new Date(0L);
-                    Date now = new Date();
-                    long scans = garmentScanRepository.countByDepartmentAndScannedAtBetween(dept, epochStart, now);
-                    log.info("Department {} - Fallback scan count: {}", dept, scans);
-                    if (scans > 0L) count = scans; // show scans if garments missing
-                } catch (Exception e) {
-                    log.error("Error getting scan count for department {}: {}", dept, e.getMessage());
-                }
             }
             log.info("Department {} - Final count: {}", dept, count);
             departmentCounts.put(dept, count);
             departmentCountsByName.put(dept.name(), count);
         }
+        
         long totalGarments = departmentCounts.values().stream().mapToLong(Long::longValue).sum();
-        Departments[] visible = getVisibleDepartments();
-        model.addAttribute("departments", visible);
+        
+        model.addAttribute("departments", visibleDepartments);
         model.addAttribute("departmentCounts", departmentCounts);
         model.addAttribute("departmentCountsByName", departmentCountsByName);
         model.addAttribute("totalGarments", totalGarments);
-        model.addAttribute("numDepartments", visible.length);
+        model.addAttribute("numDepartments", visibleDepartments.length);
+        
+        log.info("DEBUG: Sending {} visible departments with counts: {}", visibleDepartments.length, departmentCounts);
+        
         return "auth/admin/departments-overview";
     }
 
@@ -352,9 +375,10 @@ public class AdminController {
         for (Departments dept : Departments.values()) {
             long count = 0L;
             try {
-                Integer c = garmentRepository.countByDepartmentIdInteger(dept);
-                log.info("DEBUG: Department {} - Repository count: {}", dept, c);
-                if (c != null) count = c.longValue();
+                // Use the same approach as individual department pages - get actual garments and count them
+                List<Garments> garments = garmentRepository.findByDepartmentId(dept);
+                count = garments.size();
+                log.info("DEBUG: Department {} - Found {} garments", dept, count);
             } catch (Exception e) {
                 log.error("DEBUG: Error getting count for department {}: {}", dept, e.getMessage());
             }
@@ -363,6 +387,34 @@ public class AdminController {
         
         result.put("counts", counts);
         result.put("totalGarments", garmentRepository.count());
+        
+        return result;
+    }
+
+    @GetMapping("/test/department-counts")
+    @ResponseBody
+    public Map<String, Object> testDepartmentCounts() {
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Long> counts = new HashMap<>();
+        
+        log.info("TEST: Testing department counts with new method");
+        
+        for (Departments dept : Departments.values()) {
+            long count = 0L;
+            try {
+                // Use the same approach as individual department pages - get actual garments and count them
+                List<Garments> garments = garmentRepository.findByDepartmentId(dept);
+                count = garments.size();
+                log.info("TEST: Department {} - Found {} garments", dept, count);
+            } catch (Exception e) {
+                log.error("TEST: Error getting count for department {}: {}", dept, e.getMessage());
+            }
+            counts.put(dept.name(), count);
+        }
+        
+        result.put("counts", counts);
+        result.put("totalGarments", garmentRepository.count());
+        result.put("test", "This endpoint uses the new method");
         
         return result;
     }

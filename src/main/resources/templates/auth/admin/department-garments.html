@@ -58,6 +58,11 @@
                     </div>
                     <div class="card-body">
                         <p class="text-muted">Choose a department to view its current garments and processing status.</p>
+                        <!-- DEBUG: Show department counts map -->
+                        <div class="alert alert-info">
+                            <strong>DEBUG - Department Counts:</strong><br>
+                            <span th:each="entry : ${departmentCounts}" th:text="${entry.key + ': ' + entry.value + ', '}"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -71,9 +76,14 @@
                             <i class="fas fa-industry fa-3x text-primary"></i>
                         </div>
                         <h5 class="card-title" th:text="${dept}">Department</h5>
-                        <p class="card-text text-muted">View garments currently in this department</p>
+                        <p class="card-text text-muted">Total garments in this department</p>
+                        <div class="mb-3">
+                            <span class="badge bg-primary fs-4" th:text="${departmentCounts != null ? departmentCounts.get(dept) : 0}">0</span>
+                            <!-- DEBUG: Show raw values -->
+                            <small class="d-block text-muted" th:text="'DEBUG: ' + ${dept} + ' = ' + ${departmentCounts != null ? departmentCounts.get(dept) : 'NULL'}"></small>
+                        </div>
                         <a th:href="@{'/admin/departments/' + ${dept}}" class="btn btn-primary">
-                            <i class="fas fa-eye me-2"></i>View Garments
+                            <i class="fas fa-eye me-2"></i>View Details
                         </a>
                     </div>
                 </div>
