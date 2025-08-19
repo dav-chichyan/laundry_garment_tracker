@@ -2,6 +2,7 @@ package com.chich.maqoor.dto;
 
 import com.chich.maqoor.entity.constant.Departments;
 import com.chich.maqoor.entity.constant.Role;
+import com.chich.maqoor.entity.constant.UserState;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -28,19 +29,20 @@ public class UserUpdateRequestDto {
     @NotNull(message = "Role is required")
     private Role role;
     
-    private List<String> scheduleTimes;
+    @NotNull(message = "User State is required")
+    private UserState state;
     
     // Constructors
     public UserUpdateRequestDto() {}
     
     public UserUpdateRequestDto(Integer id, String name, String email, Departments department, 
-                               Role role, List<String> scheduleTimes) {
+                               Role role, UserState state) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.department = department;
         this.role = role;
-        this.scheduleTimes = scheduleTimes;
+        this.state = state;
     }
     
     // Getters and Setters
@@ -84,11 +86,13 @@ public class UserUpdateRequestDto {
         this.role = role;
     }
     
-    public List<String> getScheduleTimes() {
-        return scheduleTimes;
+    public UserState getState() {
+        return state;
     }
     
-    public void setScheduleTimes(List<String> scheduleTimes) {
-        this.scheduleTimes = scheduleTimes;
+    public void setState(UserState state) {
+        this.state = state;
     }
+    
+
 }

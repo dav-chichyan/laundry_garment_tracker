@@ -22,6 +22,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
+        // Check if user is locked
+        if (user.getState() == com.chich.maqoor.entity.constant.UserState.LOCKED) {
+            throw new UsernameNotFoundException("User account is locked: " + email);
+        }
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),

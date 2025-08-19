@@ -89,6 +89,16 @@ public class UserManagementController {
             redirectAttributes.addFlashAttribute("errorMessage", "Passwords do not match");
             return "redirect:/admin/users-management";
         }
+        
+        // Validate department selection for USER role
+        System.out.println("DEBUG: Role = " + requestDto.getRole());
+        System.out.println("DEBUG: Department = " + requestDto.getDepartment());
+        System.out.println("DEBUG: isValidDepartmentSelection = " + requestDto.isValidDepartmentSelection());
+        
+        if (!requestDto.isValidDepartmentSelection()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Users with role USER must have at least one department selected");
+            return "redirect:/admin/users-management";
+        }
 
         try {
             // Check if email already exists
@@ -112,13 +122,7 @@ public class UserManagementController {
             
             user.setRole(requestDto.getRole());
             user.setStatus(com.chich.maqoor.entity.constant.UserStatus.ACTIVE);
-            
-            // Handle schedule times from form
-            List<String> scheduleTimes = requestDto.getScheduleTimes();
-            if (scheduleTimes != null && !scheduleTimes.isEmpty()) {
-                scheduleTimes.removeIf(time -> time == null || time.trim().isEmpty());
-            }
-            user.setScheduleTimes(scheduleTimes);
+            user.setState(com.chich.maqoor.entity.constant.UserState.ACTIVE);
 
             userService.save(user);
             redirectAttributes.addFlashAttribute("successMessage", "User created successfully");
@@ -164,12 +168,8 @@ public class UserManagementController {
             
             existingUser.setRole(requestDto.getRole());
             
-            // Handle schedule times from form
-            List<String> scheduleTimes = requestDto.getScheduleTimes();
-            if (scheduleTimes != null && !scheduleTimes.isEmpty()) {
-                scheduleTimes.removeIf(time -> time == null || time.trim().isEmpty());
-            }
-            existingUser.setScheduleTimes(scheduleTimes);
+            // Update user state
+            existingUser.setState(requestDto.getState());
 
             userService.save(existingUser);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully");

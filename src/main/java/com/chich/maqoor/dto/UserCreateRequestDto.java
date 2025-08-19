@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.util.List;
-
 public class UserCreateRequestDto {
     
     @NotBlank(message = "Name is required")
@@ -26,26 +24,22 @@ public class UserCreateRequestDto {
     @NotBlank(message = "Confirm password is required")
     private String confirmPassword;
     
-    @NotNull(message = "Department is required")
     private Departments department;
     
     @NotNull(message = "Role is required")
     private Role role;
     
-    private List<String> scheduleTimes;
-    
     // Constructors
     public UserCreateRequestDto() {}
     
     public UserCreateRequestDto(String name, String email, String password, String confirmPassword, 
-                               Departments department, Role role, List<String> scheduleTimes) {
+                               Departments department, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
         this.department = department;
         this.role = role;
-        this.scheduleTimes = scheduleTimes;
     }
     
     // Getters and Setters
@@ -97,16 +91,26 @@ public class UserCreateRequestDto {
         this.role = role;
     }
     
-    public List<String> getScheduleTimes() {
-        return scheduleTimes;
-    }
+
     
-    public void setScheduleTimes(List<String> scheduleTimes) {
-        this.scheduleTimes = scheduleTimes;
-    }
-    
-    // Validation method
+    // Validation methods
     public boolean isPasswordMatching() {
         return password != null && password.equals(confirmPassword);
+    }
+    
+    public boolean isValidDepartmentSelection() {
+        System.out.println("DEBUG DTO: Role = " + role);
+        System.out.println("DEBUG DTO: Department = " + department);
+        System.out.println("DEBUG DTO: Department class = " + (department != null ? department.getClass().getName() : "null"));
+        
+        // Admin users don't need a department
+        if (role == Role.ADMIN) {
+            System.out.println("DEBUG DTO: Admin user - validation passed");
+            return true;
+        }
+        // Non-admin users must have a department
+        boolean isValid = department != null;
+        System.out.println("DEBUG DTO: Non-admin user - validation result: " + isValid);
+        return isValid;
     }
 }
