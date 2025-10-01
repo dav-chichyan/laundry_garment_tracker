@@ -2,14 +2,200 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <title>Problems</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Problems - Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-size: .875rem; }
-        .sidebar { position: fixed; top:0; bottom:0; left:0; z-index:100; padding:48px 0 0; box-shadow: inset -1px 0 0 rgba(0,0,0,.1); width:16.666667%; }
-        .sidebar-sticky { position:relative; top:0; height:calc(100vh - 48px); overflow-y:auto; }
-        .main { margin-left:16.666667%; padding-top:1.5rem; }
-        @media (max-width:767.98px) { .sidebar{width:100%; position:relative;} .main{margin-left:0;} }
+        :root {
+            --bs-primary: #6c757d;
+            --bs-primary-rgb: 108, 117, 125;
+            --bs-border-radius: 0.5rem;
+            --bs-box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --bs-box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        body { 
+            font-size: 0.875rem; 
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.5;
+        }
+        
+        .feather {
+            width: 16px;
+            height: 16px;
+            vertical-align: text-bottom;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 48px 0 0;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            width: 16.666667%;
+            background-color: #ffffff;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .sidebar-sticky {
+            position: relative;
+            top: 0;
+            height: calc(100vh - 48px);
+            padding-top: 1rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #6c757d;
+            padding: 0.75rem 1rem;
+            border-radius: var(--bs-border-radius);
+            margin: 0.25rem 0.5rem;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+            transform: translateX(3px);
+        }
+        
+        .sidebar .nav-link.active {
+            color: #495057;
+            background-color: #e9ecef;
+            font-weight: 600;
+        }
+        
+        .sidebar .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background-color: #6c757d;
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .sidebar .nav-link .feather {
+            margin-right: 0.5rem;
+            color: #6c757d;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .sidebar .nav-link:hover .feather,
+        .sidebar .nav-link.active .feather {
+            color: inherit;
+        }
+        
+        .sidebar-heading {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Navbar */
+        .navbar-brand {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            background-color: rgba(0, 0, 0, .25);
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+        }
+
+        .navbar .navbar-toggler {
+            top: 0.25rem;
+            right: 1rem;
+        }
+        
+        /* Main content */
+        .main {
+            padding-top: 1.5rem;
+            margin-left: 16.666667%;
+            min-height: calc(100vh - 48px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+            }
+            .main {
+                margin-left: 0;
+            }
+        }
+
+        /* Cards */
+        .card {
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: var(--bs-border-radius);
+            box-shadow: var(--bs-box-shadow);
+            transition: all 0.2s ease-in-out;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            box-shadow: var(--bs-box-shadow-lg);
+            transform: translateY(-2px);
+            border-color: #dee2e6;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease-in-out;
+            border: 1px solid transparent;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            letter-spacing: 0.025em;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
 
         .btn-create-problem {
           background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
@@ -24,6 +210,67 @@
           box-shadow: 0 6px 16px rgba(220,53,69,.35);
           color: #fff;
         }
+        
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        
+        /* Form Elements */
+        .form-control, .form-select {
+            border-radius: var(--bs-border-radius);
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease-in-out;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #6c757d;
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+            transform: translateY(-1px);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.375rem;
+            font-size: 0.875rem;
+        }
+        
+        /* Alerts */
+        .alert {
+            border-radius: var(--bs-border-radius);
+            border: 1px solid transparent;
+            padding: 0.75rem 1rem;
+        }
+        
+        .alert-success {
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+            color: #0f5132;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+            color: #842029;
+        }
+        
+        /* Badge styling */
+        .badge {
+            padding: 0.375rem 0.625rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            letter-spacing: 0.025em;
+        }
     </style>
 </head>
 <body>
@@ -32,24 +279,59 @@
     <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="navbar-nav ms-auto">
+    <div class="navbar-nav">
         <div class="nav-item text-nowrap"><a class="nav-link px-3" href="/auth/logout">Sign out</a></div>
     </div>
-    </nav>
+</nav>
 
 <div class="container-fluid">
   <div class="row">
-    <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar">
+    <!-- Sidebar Navigation -->
+    <nav id="sidebarMenu" class="col-md-2 d-md-block bg-light sidebar collapse">
       <div class="sidebar-sticky pt-3">
         <ul class="nav flex-column">
-          <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/orders/search"><i class="fas fa-search me-2"></i>Order Search</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/users-management"><i class="fas fa-users me-2"></i>User Management</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/task-management"><i class="fas fa-tasks me-2"></i>Task Management</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/scanned-garments"><i class="fas fa-barcode me-2"></i>Scanned Garments</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/returns-dashboard"><i class="fas fa-undo me-2"></i>Returns Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/departments"><i class="fas fa-building me-2"></i>Department Details</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/admin/problems"><i class="fas fa-exclamation-triangle me-2"></i>Problems</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/users">
+              <i class="fas fa-tachometer-alt me-2"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/orders/search">
+              <i class="fas fa-search me-2"></i>
+              Order Search
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/users-management">
+              <i class="fas fa-users me-2"></i>
+              User Management
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/task-management">
+              <i class="fas fa-tasks me-2"></i>
+              Task Management
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/scanned-garments">
+              <i class="fas fa-barcode me-2"></i>
+              Scanned Garments
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/returns-dashboard">
+              <i class="fas fa-undo me-2"></i>
+              Returns Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/admin/problems">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Problems
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
@@ -60,6 +342,76 @@
         <button class="btn btn-create-problem" data-bs-toggle="modal" data-bs-target="#createProblemModal">
           <i class="fas fa-plus"></i> Create Problem
         </button>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <!-- Filters and Search -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters & Search</h5>
+        </div>
+        <div class="card-body">
+          <form method="get" action="/admin/problems" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Search</label>
+              <input type="text" name="search" class="form-control" placeholder="Order ID or Notes..." th:value="${search}" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Date From</label>
+              <input type="date" name="dateFrom" class="form-control" th:value="${dateFrom}" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Date To</label>
+              <input type="date" name="dateTo" class="form-control" th:value="${dateTo}" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Department</label>
+              <select name="department" class="form-select">
+                <option value="">All Departments</option>
+                <option th:each="dept : ${departments}" 
+                        th:value="${dept}" 
+                        th:text="${dept}" 
+                        th:selected="${department == dept}">Department</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Staff Member</label>
+              <select name="staff" class="form-select">
+                <option value="">All Staff</option>
+                <option th:each="user : ${users}" 
+                        th:value="${user.id}" 
+                        th:text="${user.name}" 
+                        th:selected="${staff == user.id.toString()}">Staff Name</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Order</label>
+              <select name="sortOrder" class="form-select">
+                <option value="desc" th:selected="${sortOrder == 'desc'}">Descending</option>
+                <option value="asc" th:selected="${sortOrder == 'asc'}">Ascending</option>
+              </select>
+            </div>
+            <div class="col-md-9 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-search"></i> Filter
+              </button>
+              <a href="/admin/problems" class="btn btn-outline-secondary">
+                <i class="fas fa-times"></i> Clear
+              </a>
+            </div>
+          </form>
+        </div>
       </div>
 
       <!-- Create Problem Modal -->
@@ -115,30 +467,271 @@
 
       
 
-      <!-- Problems Cards Board (similar to task management) -->
-      <div class="row g-3">
-        <div class="col-md-4" th:each="p : ${problems}">
-          <div class="card h-100 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span>
-                <i class="fas fa-exclamation-circle me-1"></i>
-                <strong>#</strong><span th:text="${p.id}">1</span>
-              </span>
-              <span class="badge bg-secondary" th:text="${p.status}">OPEN</span>
+      <!-- Problems Table -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #dc3545 !important; color: white !important;">
+            <h5 class="mb-0" style="color: #ffffff !important;"><i class="fas fa-list me-2"></i>Problems List</h5>
+          <span class="badge bg-primary" th:text="${#lists.size(problems)} + ' problems'">0 problems</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead style="background-color: #dc3545 !important; color: white !important;">
+                <tr>
+                  <th>ID</th>
+                  <th>Order ID</th>
+                  <th>Department</th>
+                  <th>Staff</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="p : ${problems}">
+                  <td>
+                    <span class="badge bg-secondary" th:text="${p.id}">1</span>
+                  </td>
+                  <td>
+                    <span class="fw-bold" th:text="${p.order != null ? p.order.orderId : 'N/A'}">123</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-info" th:text="${p.department}">RECEPTION</span>
+                  </td>
+                  <td th:text="${p.user != null ? p.user.name : 'N/A'}">Staff Name</td>
+                  <td th:text="${#dates.format(p.createdAt, 'yyyy-MM-dd HH:mm')}">2025-10-01 22:04</td>
+                  <td>
+                    <span class="badge" 
+                          th:classappend="${p.status.name() == 'OPEN'} ? 'bg-warning' : 
+                                         (${p.status.name() == 'IN_PROGRESS'} ? 'bg-primary' : 'bg-success')"
+                          th:text="${p.status}">OPEN</span>
+                  </td>
+                  <td>
+                    <span th:if="${p.notes != null && !#strings.isEmpty(p.notes)}" 
+                          th:text="${#strings.abbreviate(p.notes, 50)}" 
+                          th:title="${p.notes}">Problem description...</span>
+                    <span th:if="${p.notes == null || #strings.isEmpty(p.notes)}" 
+                          class="text-muted">No notes</span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary action-btn" 
+                            th:data-problem-id="${p.id}"
+                            th:onclick="|showProblemDetails(${p.id})|">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(problems)}">
+                  <td colspan="8" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                    No problems found
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Problem Details Modal (Ticket View) -->
+      <div class="modal fade" id="problemDetailsModal" tabindex="-1" aria-labelledby="problemDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="problemDetailsModalLabel">
+                <i class="fas fa-ticket-alt me-2"></i>Problem Ticket #<span id="problemId">1</span>
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-              <div class="mb-2"><strong>Order:</strong> <a th:if="${p.order != null}" th:href="@{'/admin/orders/search?orderId=' + ${p.order.cleanCloudOrderId}}" th:text="${p.order.orderId}">-</a><span th:if="${p.order == null}">N/A</span></div>
-              <div class="mb-2"><strong>Department:</strong> <span th:text="${p.department}">RECEPTION</span></div>
-              <div class="mb-2"><strong>Staff:</strong> <span th:text="${p.user != null ? p.user.name : 'N/A'}">User</span></div>
-              <div class="mb-2"><strong>Notes:</strong> <span th:text="${p.notes}">-</span></div>
+            <div class="modal-body">
+              <!-- Navigation Tabs -->
+              <ul class="nav nav-tabs mb-3" id="problemTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                    <i class="fas fa-info-circle me-1"></i>Details
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit" type="button" role="tab">
+                    <i class="fas fa-edit me-1"></i>Edit
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">
+                    <i class="fas fa-comments me-1"></i>Comments
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="assign-tab" data-bs-toggle="tab" data-bs-target="#assign" type="button" role="tab">
+                    <i class="fas fa-user-plus me-1"></i>Assign
+                  </button>
+                </li>
+              </ul>
+
+              <!-- Tab Content -->
+              <div class="tab-content" id="problemTabContent">
+                <!-- Details Tab -->
+                <div class="tab-pane fade show active" id="details" role="tabpanel">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Order ID:</label>
+                        <p id="problemOrderId" class="mb-0">123</p>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Department:</label>
+                        <p id="problemDepartment" class="mb-0">RECEPTION</p>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Staff:</label>
+                        <p id="problemStaff" class="mb-0">Staff Name</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Status:</label>
+                        <p id="problemStatus" class="mb-0">OPEN</p>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Created:</label>
+                        <p id="problemCreated" class="mb-0">2025-10-01 22:04</p>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-bold">Updated:</label>
+                        <p id="problemUpdated" class="mb-0">2025-10-01 22:04</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Notes:</label>
+                    <div id="problemNotes" class="border p-3 bg-light rounded">
+                      Problem description and details...
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Edit Tab -->
+                <div class="tab-pane fade" id="edit" role="tabpanel">
+                  <form id="editProblemForm">
+                    <input type="hidden" id="editProblemId" name="problemId" />
+                    <div class="row">
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Order ID:</label>
+                          <input type="number" id="editOrderId" name="orderId" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Department:</label>
+                          <select id="editDepartment" name="department" class="form-select">
+                            <option value="RECEPTION">RECEPTION</option>
+                            <option value="IRONING">IRONING</option>
+                            <option value="DRY_CLEANING">DRY_CLEANING</option>
+                            <option value="WASHING">WASHING</option>
+                            <option value="PACKAGING">PACKAGING</option>
+                          </select>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Status:</label>
+                          <select id="editStatus" name="status" class="form-select">
+                            <option value="OPEN">OPEN</option>
+                            <option value="IN_PROGRESS">IN_PROGRESS</option>
+                            <option value="RESOLVED">RESOLVED</option>
+                            <option value="CLOSED">CLOSED</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label fw-bold">Assigned Staff:</label>
+                          <select id="editStaff" name="userId" class="form-select">
+                            <option value="">Unassigned</option>
+                            <option th:each="user : ${users}" 
+                                    th:value="${user.id}" 
+                                    th:text="${user.name}">Staff Name</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Notes:</label>
+                      <textarea id="editNotes" name="notes" class="form-control" rows="4" placeholder="Enter problem details..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-bold">Attach File (optional):</label>
+                      <input type="file" id="editFile" name="file" class="form-control" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Comments Tab -->
+                <div class="tab-pane fade" id="comments" role="tabpanel">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Add Comment:</label>
+                    <textarea id="newComment" class="form-control" rows="3" placeholder="Add your comment here..."></textarea>
+                    <div class="mt-2">
+                      <button type="button" class="btn btn-primary btn-sm" onclick="addComment()">
+                        <i class="fas fa-plus me-1"></i>Add Comment
+                      </button>
+                    </div>
+                  </div>
+                  <div id="commentsList" class="border-top pt-3">
+                    <h6 class="fw-bold mb-3">Comments History:</h6>
+                    <div id="commentsContainer">
+                      <!-- Comments will be dynamically added here -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Assign Tab -->
+                <div class="tab-pane fade" id="assign" role="tabpanel">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Assign to Staff:</label>
+                    <select id="assignStaff" class="form-select">
+                      <option value="">Select Staff Member</option>
+                      <option th:each="user : ${users}" 
+                              th:value="${user.id}" 
+                              th:text="${user.name}">Staff Name</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Assign to Department:</label>
+                    <select id="assignDepartment" class="form-select">
+                      <option value="">Select Department</option>
+                      <option value="RECEPTION">RECEPTION</option>
+                      <option value="IRONING">IRONING</option>
+                      <option value="DRY_CLEANING">DRY_CLEANING</option>
+                      <option value="WASHING">WASHING</option>
+                      <option value="PACKAGING">PACKAGING</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Assignment Notes:</label>
+                    <textarea id="assignmentNotes" class="form-control" rows="3" placeholder="Add notes for this assignment..."></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Priority:</label>
+                    <select id="assignPriority" class="form-select">
+                      <option value="LOW">Low</option>
+                      <option value="MEDIUM" selected>Medium</option>
+                      <option value="HIGH">High</option>
+                      <option value="URGENT">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card-footer d-flex justify-content-between align-items-center">
-              <small class="text-muted" th:text="${#dates.format(p.createdAt, 'yyyy-MM-dd HH:mm')}">date</small>
-              <a class="btn btn-sm btn-outline-primary" th:href="@{'/admin/problems?status=' + ${p.status}}">Filter by status</a>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-success" onclick="saveProblemChanges()" style="display: none;" id="saveEditBtn">
+                <i class="fas fa-save me-1"></i>Save Changes
+              </button>
+              <button type="button" class="btn btn-warning" onclick="assignProblem()" style="display: none;" id="assignBtn">
+                <i class="fas fa-user-plus me-1"></i>Assign Problem
+              </button>
             </div>
           </div>
         </div>
-        <div th:if="${#lists.isEmpty(problems)}" class="text-center text-muted">No problems yet</div>
       </div>
 
     </main>
@@ -147,6 +740,269 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Problem data for JavaScript access
+const problems = /*[[${problems}]]*/ [];
+let currentProblem = null;
+
+// Test function to verify modal works
+function testModal() {
+    console.log('Testing modal functionality...');
+    console.log('Problems available:', problems);
+    if (problems && problems.length > 0) {
+        showProblemDetails(problems[0].id);
+    } else {
+        console.log('No problems available for testing');
+    }
+}
+
+function showProblemDetails(problemId) {
+    console.log('showProblemDetails called with ID:', problemId);
+    console.log('Available problems:', problems);
+    
+    // Convert to number if it's a string
+    const numericId = parseInt(problemId);
+    console.log('Numeric ID:', numericId);
+    
+    const problem = problems.find(p => p.id === numericId);
+    if (!problem) {
+        console.log('Problem not found with ID:', numericId);
+        console.log('Available IDs:', problems.map(p => p.id));
+        return;
+    }
+    
+    currentProblem = problem;
+    
+    // Populate Details tab
+    document.getElementById('problemId').textContent = problem.id;
+    document.getElementById('problemOrderId').textContent = problem.order ? problem.order.orderId : 'N/A';
+    document.getElementById('problemDepartment').textContent = problem.department;
+    document.getElementById('problemStaff').textContent = problem.user ? problem.user.name : 'N/A';
+    document.getElementById('problemStatus').textContent = problem.status;
+    document.getElementById('problemCreated').textContent = new Date(problem.createdAt).toLocaleString();
+    document.getElementById('problemUpdated').textContent = new Date(problem.updatedAt).toLocaleString();
+    document.getElementById('problemNotes').textContent = problem.notes || 'No notes available';
+    
+    // Populate Edit tab
+    document.getElementById('editProblemId').value = problem.id;
+    document.getElementById('editOrderId').value = problem.order ? problem.order.orderId : '';
+    document.getElementById('editDepartment').value = problem.department;
+    document.getElementById('editStatus').value = problem.status;
+    document.getElementById('editStaff').value = problem.user ? problem.user.id : '';
+    document.getElementById('editNotes').value = problem.notes || '';
+    
+    // Reset tabs to Details
+    document.getElementById('details-tab').classList.add('active');
+    document.getElementById('details').classList.add('show', 'active');
+    
+    // Hide other tabs
+    ['edit-tab', 'comments-tab', 'assign-tab'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+    });
+    ['edit', 'comments', 'assign'].forEach(id => {
+        document.getElementById(id).classList.remove('show', 'active');
+    });
+    
+    // Hide action buttons initially
+    document.getElementById('saveEditBtn').style.display = 'none';
+    document.getElementById('assignBtn').style.display = 'none';
+    
+    // Show the modal
+    try {
+        const modalElement = document.getElementById('problemDetailsModal');
+        console.log('Modal element found:', modalElement);
+        
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            console.log('Modal created:', modal);
+            modal.show();
+            console.log('Modal show called');
+        } else {
+            console.error('Modal element not found!');
+        }
+    } catch (error) {
+        console.error('Error showing modal:', error);
+    }
+}
+
+// Tab change handlers
+document.addEventListener('DOMContentLoaded', function() {
+    // Edit tab handler
+    document.getElementById('edit-tab').addEventListener('click', function() {
+        document.getElementById('saveEditBtn').style.display = 'inline-block';
+        document.getElementById('assignBtn').style.display = 'none';
+    });
+    
+    // Comments tab handler
+    document.getElementById('comments-tab').addEventListener('click', function() {
+        document.getElementById('saveEditBtn').style.display = 'none';
+        document.getElementById('assignBtn').style.display = 'none';
+        loadComments();
+    });
+    
+    // Assign tab handler
+    document.getElementById('assign-tab').addEventListener('click', function() {
+        document.getElementById('saveEditBtn').style.display = 'none';
+        document.getElementById('assignBtn').style.display = 'inline-block';
+    });
+    
+    // Details tab handler
+    document.getElementById('details-tab').addEventListener('click', function() {
+        document.getElementById('saveEditBtn').style.display = 'none';
+        document.getElementById('assignBtn').style.display = 'none';
+    });
+});
+
+function saveProblemChanges() {
+    if (!currentProblem) return;
+    
+    const formData = new FormData();
+    formData.append('problemId', document.getElementById('editProblemId').value);
+    formData.append('orderId', document.getElementById('editOrderId').value);
+    formData.append('department', document.getElementById('editDepartment').value);
+    formData.append('status', document.getElementById('editStatus').value);
+    formData.append('userId', document.getElementById('editStaff').value);
+    formData.append('notes', document.getElementById('editNotes').value);
+    
+    const fileInput = document.getElementById('editFile');
+    if (fileInput.files[0]) {
+        formData.append('file', fileInput.files[0]);
+    }
+    
+    fetch('/admin/problems/update', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Problem updated successfully!');
+            location.reload(); // Refresh the page to show changes
+        } else {
+            alert('Error updating problem: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating problem');
+    });
+}
+
+function assignProblem() {
+    if (!currentProblem) return;
+    
+    const staffId = document.getElementById('assignStaff').value;
+    const department = document.getElementById('assignDepartment').value;
+    const notes = document.getElementById('assignmentNotes').value;
+    const priority = document.getElementById('assignPriority').value;
+    
+    if (!staffId && !department) {
+        alert('Please select either a staff member or department to assign to');
+        return;
+    }
+    
+    const assignmentData = {
+        problemId: currentProblem.id,
+        staffId: staffId || null,
+        department: department || null,
+        notes: notes,
+        priority: priority
+    };
+    
+    fetch('/admin/problems/assign', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(assignmentData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Problem assigned successfully!');
+            location.reload(); // Refresh the page to show changes
+        } else {
+            alert('Error assigning problem: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error assigning problem');
+    });
+}
+
+function addComment() {
+    if (!currentProblem) return;
+    
+    const commentText = document.getElementById('newComment').value.trim();
+    if (!commentText) {
+        alert('Please enter a comment');
+        return;
+    }
+    
+    const commentData = {
+        problemId: currentProblem.id,
+        comment: commentText
+    };
+    
+    fetch('/admin/problems/comment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(commentData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('newComment').value = '';
+            loadComments(); // Reload comments
+            alert('Comment added successfully!');
+        } else {
+            alert('Error adding comment: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding comment');
+    });
+}
+
+function loadComments() {
+    if (!currentProblem) return;
+    
+    fetch(`/admin/problems/${currentProblem.id}/comments`)
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('commentsContainer');
+        container.innerHTML = '';
+        
+        if (data.comments && data.comments.length > 0) {
+            data.comments.forEach(comment => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'border-bottom pb-2 mb-2';
+                commentDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${comment.author || 'System'}</strong>
+                            <small class="text-muted ms-2">${new Date(comment.createdAt).toLocaleString()}</small>
+                        </div>
+                    </div>
+                    <p class="mb-0 mt-1">${comment.comment}</p>
+                `;
+                container.appendChild(commentDiv);
+            });
+        } else {
+            container.innerHTML = '<p class="text-muted">No comments yet.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading comments:', error);
+        document.getElementById('commentsContainer').innerHTML = '<p class="text-danger">Error loading comments</p>';
+    });
+}
+</script>
 </body>
 </html>
 

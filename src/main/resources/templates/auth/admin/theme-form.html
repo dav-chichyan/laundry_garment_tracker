@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title th:text="${isEdit ? 'Edit Theme' : 'Create Theme'} + ' - Admin Dashboard'">Theme Form - Admin Dashboard</title>
+    
+    <!-- Custom fonts for this template-->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    
+    <!-- Color Picker CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.css">
+    
+    <style>
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            display: inline-block;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .color-preview:hover {
+            border-color: #007bff;
+            transform: scale(1.1);
+        }
+        
+        .live-preview {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .preview-header {
+            background: linear-gradient(135deg, var(--header-bg-color, #FF8871) 0%, var(--header-gradient-color, #e67e5f) 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-sidebar {
+            background-color: var(--sidebar-bg-color, #2c3e50);
+            color: var(--sidebar-text-color, #ffffff);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-card {
+            background-color: var(--card-bg-color, #ffffff);
+            border: 1px solid #e3e6f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .preview-card-header {
+            background-color: var(--card-header-color, #97C0B4);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-section h5 {
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .toggle-preview {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/admin">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-laugh-wink"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Maqoor Admin</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="/admin">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Management
+            </div>
+
+            <!-- Nav Item - User Management -->
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/users-management">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>User Management</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Departments -->
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/departments">
+                    <i class="fas fa-fw fa-building"></i>
+                    <span>Departments</span>
+                </a>
+            </li>
+
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin User</span>
+                                <img class="img-profile rounded-circle" src="/img/undraw_profile.svg">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <!-- Page Heading -->
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800" th:text="${isEdit ? 'Edit Theme' : 'Create New Theme'}">Theme Form</h1>
+                        <a href="/admin/users" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+                            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Form -->
+                    <form th:action="@{/admin/design/save}" th:object="${theme}" method="post">
+                        <input type="hidden" th:field="*{id}" th:if="${isEdit}">
+                        <input type="hidden" name="isEdit" th:value="${isEdit}">
+                        
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <!-- Basic Information -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+                                    
+                                    <div class="form-group">
+                                        <label for="themeName">Theme Name <span class="text-danger">*</span></label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="themeName" 
+                                               th:field="*{themeName}" 
+                                               required 
+                                               placeholder="Enter theme name">
+                                        <small class="form-text text-muted">Choose a unique name for your theme</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="description">Description</label>
+                                        <textarea class="form-control" 
+                                                  id="description" 
+                                                  th:field="*{description}" 
+                                                  rows="3" 
+                                                  placeholder="Describe your theme"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Color Scheme -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-palette"></i> Color Scheme</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="primaryColor">Primary Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="primaryColor" 
+                                                           th:field="*{primaryColor}" 
+                                                           value="#007bff">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="primaryColorPreview" style="background-color: #007bff;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="secondaryColor">Secondary Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="secondaryColor" 
+                                                           th:field="*{secondaryColor}" 
+                                                           value="#6c757d">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="secondaryColorPreview" style="background-color: #6c757d;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="successColor">Success Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="successColor" 
+                                                           th:field="*{successColor}" 
+                                                           value="#28a745">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="successColorPreview" style="background-color: #28a745;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="warningColor">Warning Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="warningColor" 
+                                                           th:field="*{warningColor}" 
+                                                           value="#ffc107">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="warningColorPreview" style="background-color: #ffc107;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="dangerColor">Danger Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="dangerColor" 
+                                                           th:field="*{dangerColor}" 
+                                                           value="#dc3545">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="dangerColorPreview" style="background-color: #dc3545;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="infoColor">Info Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="infoColor" 
+                                                           th:field="*{infoColor}" 
+                                                           value="#17a2b8">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="infoColorPreview" style="background-color: #17a2b8;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="lightColor">Light Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="lightColor" 
+                                                           th:field="*{lightColor}" 
+                                                           value="#f8f9fa">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="lightColorPreview" style="background-color: #f8f9fa;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="darkColor">Dark Color</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="darkColor" 
+                                                           th:field="*{darkColor}" 
+                                                           value="#343a40">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="darkColorPreview" style="background-color: #343a40;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="headerBgColor">Header Background</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="headerBgColor" 
+                                                           th:field="*{headerBgColor}" 
+                                                           value="#FF8871">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="headerBgColorPreview" style="background-color: #FF8871;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="headerGradientColor">Header Gradient</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="headerGradientColor" 
+                                                           th:field="*{headerGradientColor}" 
+                                                           value="#e67e5f">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="headerGradientColorPreview" style="background-color: #e67e5f;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Header & Sidebar Colors -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-window-maximize"></i> Header & Sidebar</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sidebarBgColor">Sidebar Background</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="sidebarBgColor" 
+                                                           th:field="*{sidebarBgColor}" 
+                                                           value="#2c3e50">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="sidebarBgColorPreview" style="background-color: #2c3e50;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="sidebarTextColor">Sidebar Text</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="sidebarTextColor" 
+                                                           th:field="*{sidebarTextColor}" 
+                                                           value="#ffffff">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="sidebarTextColorPreview" style="background-color: #ffffff;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sidebarHoverColor">Sidebar Hover</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="sidebarHoverColor" 
+                                                           th:field="*{sidebarHoverColor}" 
+                                                           value="#34495e">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="sidebarHoverColorPreview" style="background-color: #34495e;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="cardHeaderColor">Card Header</label>
+                                                <div class="input-group">
+                                                    <input type="text" 
+                                                           class="form-control color-picker" 
+                                                           id="cardHeaderColor" 
+                                                           th:field="*{cardHeaderColor}" 
+                                                           value="#97C0B4">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text color-preview" id="cardHeaderColorPreview" style="background-color: #97C0B4;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Typography -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-font"></i> Typography</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="fontFamily">Font Family</label>
+                                                <select class="form-control" id="fontFamily" th:field="*{fontFamily}">
+                                                    <option value="Arial, sans-serif">Arial</option>
+                                                    <option value="Helvetica, sans-serif">Helvetica</option>
+                                                    <option value="Georgia, serif">Georgia</option>
+                                                    <option value="Times New Roman, serif">Times New Roman</option>
+                                                    <option value="Courier New, monospace">Courier New</option>
+                                                    <option value="Verdana, sans-serif">Verdana</option>
+                                                    <option value="'Roboto', sans-serif">Roboto</option>
+                                                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="fontSizeBase">Base Font Size (px)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="fontSizeBase" 
+                                                       th:field="*{fontSizeBase}" 
+                                                       min="10" 
+                                                       max="24" 
+                                                       value="14">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="fontSizeLarge">Large Font Size (px)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="fontSizeLarge" 
+                                                       th:field="*{fontSizeLarge}" 
+                                                       min="12" 
+                                                       max="32" 
+                                                       value="18">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="fontSizeSmall">Small Font Size (px)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="fontSizeSmall" 
+                                                       th:field="*{fontSizeSmall}" 
+                                                       min="8" 
+                                                       max="16" 
+                                                       value="12">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Layout Settings -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-cogs"></i> Layout Settings</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="borderRadius">Border Radius (px)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="borderRadius" 
+                                                       th:field="*{borderRadius}" 
+                                                       min="0" 
+                                                       max="20" 
+                                                       value="4">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <label for="animationDuration">Animation Duration (ms)</label>
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="animationDuration" 
+                                                       th:field="*{animationDuration}" 
+                                                       min="100" 
+                                                       max="2000" 
+                                                       value="300">
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="boxShadow">Box Shadow</label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       id="boxShadow" 
+                                                       th:field="*{boxShadow}" 
+                                                       placeholder="0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)">
+                                            </div>
+                                            
+                                            <div class="form-group">
+                                                <div class="form-check">
+                                                    <input type="checkbox" 
+                                                           class="form-check-input" 
+                                                           id="showLogo" 
+                                                           th:field="*{showLogo}">
+                                                    <label class="form-check-label" for="showLogo">
+                                                        Show Logo
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom CSS -->
+                                <div class="form-section">
+                                    <h5><i class="fas fa-code"></i> Custom CSS</h5>
+                                    
+                                    <div class="form-group">
+                                        <label for="customCss">Additional CSS</label>
+                                        <textarea class="form-control" 
+                                                  id="customCss" 
+                                                  th:field="*{customCss}" 
+                                                  rows="8" 
+                                                  placeholder="/* Add your custom CSS here */
+.custom-class {
+    /* your styles */
+}"></textarea>
+                                        <small class="form-text text-muted">Add any additional CSS rules for your theme</small>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="form-section">
+                                    <div class="d-flex justify-content-between">
+                                        <a href="/admin/users" class="btn btn-secondary">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i> 
+                                            <span th:text="${isEdit ? 'Update Theme' : 'Create Theme'}">Save Theme</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Live Preview Panel -->
+                            <div class="col-lg-4">
+                                <div class="live-preview" id="livePreview">
+                                    <h6 class="mb-3"><i class="fas fa-eye"></i> Live Preview</h6>
+                                    
+                                    <div class="preview-header">
+                                        <h6>Application Header</h6>
+                                        <small>Your theme colors applied</small>
+                                    </div>
+                                    
+                                    <div class="preview-sidebar">
+                                        <h6>Sidebar</h6>
+                                        <small>Navigation items</small>
+                                    </div>
+                                    
+                                    <div class="preview-card">
+                                        <div class="preview-card-header">
+                                            <h6>Card Header</h6>
+                                        </div>
+                                        <p class="mb-2">Sample card content with your theme styling.</p>
+                                        <button class="btn btn-sm" style="background-color: var(--primary-color, #007bff); color: white; border: none; padding: 4px 8px; border-radius: 4px;">Button</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Maqoor 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/js/sb-admin-2.min.js"></script>
+
+    <!-- Color Picker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spectrum/1.8.1/spectrum.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize color pickers
+            $('.color-picker').spectrum({
+                color: $(this).val(),
+                showInput: true,
+                className: "full-spectrum",
+                showInitial: true,
+                showPalette: true,
+                showSelectionPalette: true,
+                maxSelectionSize: 10,
+                preferredFormat: "hex",
+                palette: [
+                    ["#000","#444","#666","#999","#ccc","#eee","#f3f3f3","#fff"],
+                    ["#f00","#f90","#ff0","#0f0","#0ff","#00f","#90f","#f0f"],
+                    ["#f4cccc","#fce5cd","#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"],
+                    ["#ea9999","#f9cb9c","#ffe599","#b6d7a8","#a2c4c9","#a4c2f4","#b4a7d6","#d5a6bd"],
+                    ["#e06666","#f6b26b","#ffd966","#93c47d","#76a5af","#6d9eeb","#8e7cc3","#c27ba0"],
+                    ["#cc0000","#e69138","#f1c232","#6aa84f","#45818e","#3c78d8","#674ea7","#a64d79"],
+                    ["#990000","#b45f06","#bf9000","#38761d","#134f5c","#1155cc","#351c75","#741b47"],
+                    ["#660000","#783f04","#7f6000","#274e13","#0c343d","#0b5394","#20124d","#4c1130"]
+                ]
+            });
+
+            // Update preview when color changes
+            $('.color-picker').on('change', function() {
+                const color = $(this).val();
+                const fieldName = $(this).attr('id');
+                const previewId = fieldName + 'Preview';
+                
+                // Update preview color
+                $('#' + previewId).css('background-color', color);
+                
+                // Update CSS variable and refresh preview
+                updatePreview();
+            });
+
+            // Update preview for other form fields
+            $('#fontFamily, #fontSizeBase, #fontSizeLarge, #fontSizeSmall, #borderRadius, #boxShadow').on('change', function() {
+                updatePreview();
+            });
+
+            function updatePreview() {
+                // Get current form values
+                const primaryColor = $('#primaryColor').val() || '#007bff';
+                const secondaryColor = $('#secondaryColor').val() || '#6c757d';
+                const successColor = $('#successColor').val() || '#28a745';
+                const warningColor = $('#warningColor').val() || '#ffc107';
+                const dangerColor = $('#dangerColor').val() || '#dc3545';
+                const infoColor = $('#infoColor').val() || '#17a2b8';
+                const lightColor = $('#lightColor').val() || '#f8f9fa';
+                const darkColor = $('#darkColor').val() || '#343a40';
+                const headerBgColor = $('#headerBgColor').val() || '#FF8871';
+                const headerGradientColor = $('#headerGradientColor').val() || '#e67e5f';
+                const sidebarBgColor = $('#sidebarBgColor').val() || '#2c3e50';
+                const sidebarTextColor = $('#sidebarTextColor').val() || '#ffffff';
+                const sidebarHoverColor = $('#sidebarHoverColor').val() || '#34495e';
+                const cardHeaderColor = $('#cardHeaderColor').val() || '#97C0B4';
+                const fontFamily = $('#fontFamily').val() || 'Arial, sans-serif';
+                const fontSizeBase = $('#fontSizeBase').val() || '14';
+                const fontSizeLarge = $('#fontSizeLarge').val() || '18';
+                const fontSizeSmall = $('#fontSizeSmall').val() || '12';
+                const borderRadius = $('#borderRadius').val() || '4';
+                const boxShadow = $('#boxShadow').val() || '0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)';
+
+                // Generate CSS
+                const css = `
+                    :root {
+                        --primary-color: ${primaryColor};
+                        --secondary-color: ${secondaryColor};
+                        --success-color: ${successColor};
+                        --warning-color: ${warningColor};
+                        --danger-color: ${dangerColor};
+                        --info-color: ${infoColor};
+                        --light-color: ${lightColor};
+                        --dark-color: ${darkColor};
+                        --header-bg-color: ${headerBgColor};
+                        --header-gradient-color: ${headerGradientColor};
+                        --sidebar-bg-color: ${sidebarBgColor};
+                        --sidebar-text-color: ${sidebarTextColor};
+                        --sidebar-hover-color: ${sidebarHoverColor};
+                        --card-header-color: ${cardHeaderColor};
+                        --font-family: ${fontFamily};
+                        --font-size-base: ${fontSizeBase}px;
+                        --font-size-large: ${fontSizeLarge}px;
+                        --font-size-small: ${fontSizeSmall}px;
+                        --border-radius: ${borderRadius}px;
+                        --box-shadow: ${boxShadow};
+                    }
+                    
+                    .preview-header {
+                        background: linear-gradient(135deg, ${headerBgColor} 0%, ${headerGradientColor} 100%);
+                    }
+                    
+                    .preview-sidebar {
+                        background-color: ${sidebarBgColor};
+                        color: ${sidebarTextColor};
+                    }
+                    
+                    .preview-card-header {
+                        background-color: ${cardHeaderColor};
+                    }
+                    
+                    #livePreview {
+                        font-family: ${fontFamily};
+                        font-size: ${fontSizeBase}px;
+                    }
+                `;
+
+                // Apply CSS to preview
+                let previewStyle = document.getElementById('previewStyle');
+                if (!previewStyle) {
+                    previewStyle = document.createElement('style');
+                    previewStyle.id = 'previewStyle';
+                    document.head.appendChild(previewStyle);
+                }
+                previewStyle.textContent = css;
+            }
+
+            // Initialize preview
+            updatePreview();
+
+            // Toggle preview panel
+            let previewVisible = true;
+            $('.toggle-preview').click(function() {
+                previewVisible = !previewVisible;
+                $('#livePreview').toggle();
+                $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+            });
+        });
+    </script>
+</body>
+</html>
+

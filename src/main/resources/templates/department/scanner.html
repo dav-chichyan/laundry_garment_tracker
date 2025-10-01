@@ -348,15 +348,28 @@
             loadDailyScanCount();
         });
         
-        // Auto-focus input and handle Enter key
-        document.getElementById('garmentIdInput').addEventListener('keypress', function(e) {
+        let scanTimeout;
+        let isScanning = false; // Prevent double scanning
+        
+        // Handle Enter key from barcode scanner
+        document.getElementById('garmentIdInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                scanGarment();
+                e.preventDefault(); // Prevent form submission or any default action
+                
+                // Clear any pending auto-scan timeout
+                if (scanTimeout) {
+                    clearTimeout(scanTimeout);
+                    scanTimeout = null;
+                }
+                
+                // Trigger scan immediately
+                if (!isScanning) {
+                    scanGarment();
+                }
             }
         });
         
-        // Auto-scan when garment ID is entered (with delay for barcode scanners)
-        let scanTimeout;
+        // Auto-scan when garment ID is entered (for manual entry without Enter key)
         document.getElementById('garmentIdInput').addEventListener('input', function(e) {
             const garmentId = e.target.value.trim();
             
@@ -365,17 +378,28 @@
                 clearTimeout(scanTimeout);
             }
             
-            // If garment ID is entered, auto-scan after 500ms delay
-            if (garmentId && garmentId.length > 0) {
+            // Only auto-scan if user is manually typing (not using barcode scanner with Enter)
+            // The barcode scanner will trigger Enter key, so this is a fallback
+            if (garmentId && garmentId.length > 0 && !isScanning) {
                 scanTimeout = setTimeout(() => {
-                    scanGarment();
-                }, 500); // 500ms delay to allow barcode scanner to complete
+                    if (!isScanning) { // Double-check we haven't already started scanning
+                        scanGarment();
+                    }
+                }, 800); // Increased to 800ms to ensure barcode scanner finishes
             }
         });
         
         // Auto-focus input when page loads
         window.addEventListener('load', function() {
             document.getElementById('garmentIdInput').focus();
+        });
+        
+        // Re-focus input whenever user clicks anywhere on the page
+        document.addEventListener('click', function(e) {
+            // Don't steal focus if user is clicking on buttons or links
+            if (!e.target.closest('button') && !e.target.closest('a')) {
+                document.getElementById('garmentIdInput').focus();
+            }
         });
         
         async function scanGarment() {
@@ -392,6 +416,13 @@
                 return;
             }
             
+            // Set scanning flag to prevent double scans
+            if (isScanning) {
+                console.log('Scan already in progress, ignoring duplicate request');
+                return;
+            }
+            isScanning = true;
+            
             // Show loading
             showLoading(true);
             hideResult();
@@ -404,9 +435,8 @@
                 if (!detailsResponse.ok) {
                     if (detailsResponse.status === 404) {
                         showError(`Garment ID ${garmentId} not found in database. Please scan a valid garment.`);
-                        // Clear input and focus for next scan
+                        // Clear input for next scan (focus handled in finally block)
                         document.getElementById('garmentIdInput').value = '';
-                        document.getElementById('garmentIdInput').focus();
                     } else {
                         showError('Error retrieving garment details. Please try again.');
                     }
@@ -448,13 +478,11 @@
                             showInfo(scanData.returnMessage || "This scan was recorded as a workflow return.");
                         }
                         
+                        // Increment scan count
+                        incrementScanCount();
+                        
                         // Clear input for next scan
                         document.getElementById('garmentIdInput').value = '';
-                        
-                        // Update scan count if needed
-                        if (typeof updateScanCount === 'function') {
-                            updateScanCount();
-                        }
                     } else {
                         const errorData = await scanResponse.json();
                         
@@ -494,6 +522,12 @@
                 showError('Network error. Please check your connection and try again.');
             } finally {
                 showLoading(false);
+                isScanning = false; // Reset scanning flag
+                
+                // Always refocus the input for next scan
+                setTimeout(() => {
+                    document.getElementById('garmentIdInput').focus();
+                }, 100); // Small delay to ensure UI updates are complete
             }
         }
         

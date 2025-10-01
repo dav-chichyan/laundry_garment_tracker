@@ -23,6 +23,9 @@ import com.chich.maqoor.repository.GarmentScanRepository;
 import com.chich.maqoor.repository.OrdersRepository;
 import com.chich.maqoor.repository.UserRepository;
 import com.chich.maqoor.entity.constant.Departments;
+import com.chich.maqoor.entity.constant.Role;
+import com.chich.maqoor.entity.constant.UserState;
+import com.chich.maqoor.entity.constant.UserStatus;
 import java.util.Optional;
 import java.util.Date;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -423,7 +426,7 @@ public class WebhookController {
                 vivyen = new User();
                 vivyen.setName("Vivyen");
                 vivyen.setEmail("vivyen@gmail.com");
-                vivyen.setPassword("vivyen123"); // In production, this should be encoded
+                vivyen.setPassword(passwordEncoder.encode("vivyen123"));
                 vivyen.setRole(com.chich.maqoor.entity.constant.Role.USER);
                 vivyen.setState(com.chich.maqoor.entity.constant.UserState.ACTIVE);
                 vivyen.setDepartment(Departments.EXAMINATION);
@@ -602,6 +605,53 @@ public class WebhookController {
             
         } catch (Exception e) {
             log.error("Error creating test garment: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PostMapping("/create-dav-user")
+    public ResponseEntity<Map<String, Object>> createDavUser() {
+        log.info("Creating Dav user for testing");
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if Dav user already exists
+            Optional<User> davOpt = userRepository.findByEmail("dav@gmail.com");
+            if (davOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Dav user already exists");
+                response.put("userId", davOpt.get().getId());
+                return ResponseEntity.ok(response);
+            }
+            
+            // Create Dav user
+            User dav = new User();
+            dav.setName("Dav Test");
+            dav.setEmail("dav@gmail.com");
+            dav.setPassword(passwordEncoder.encode("dav123"));
+            dav.setRole(Role.USER);
+            dav.setState(UserState.ACTIVE);
+            dav.setStatus(UserStatus.ACTIVE);
+            dav.setUsername("dav@gmail.com");
+            dav.setDepartment(Departments.RECEPTION);
+            
+            User savedDav = userRepository.save(dav);
+            
+            log.info("Successfully created Dav user: {}", savedDav.getEmail());
+            
+            response.put("success", true);
+            response.put("message", "Dav user created successfully");
+            response.put("email", savedDav.getEmail());
+            response.put("userId", savedDav.getId());
+            response.put("password", "dav123");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            log.error("Error creating Dav user: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

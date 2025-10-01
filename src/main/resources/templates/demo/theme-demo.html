@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Theme Demo - Maqoor</title>
+    
+    <!-- Custom fonts for this template-->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    
+    <!-- Dynamic Theme CSS -->
+    <link rel="stylesheet" th:href="@{/theme/css}" type="text/css">
+    
+    <style>
+        /* Demo-specific styles using CSS variables */
+        .demo-header {
+            background: linear-gradient(135deg, var(--header-bg-color, #FF8871) 0%, var(--header-gradient-color, #e67e5f) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius, 8px);
+        }
+        
+        .demo-sidebar {
+            background-color: var(--sidebar-bg-color, #2c3e50);
+            color: var(--sidebar-text-color, #ffffff);
+            padding: 1.5rem;
+            border-radius: var(--border-radius, 8px);
+            margin-bottom: 2rem;
+        }
+        
+        .demo-card {
+            background-color: var(--card-bg-color, #ffffff);
+            border: 1px solid #e3e6f0;
+            border-radius: var(--border-radius, 8px);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--box-shadow, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
+            transition: all var(--animation-duration, 300ms) ease;
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .demo-card-header {
+            background-color: var(--card-header-color, #97C0B4);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius, 4px);
+            margin: -1.5rem -1.5rem 1rem -1.5rem;
+            font-size: var(--font-size-large, 18px);
+            font-weight: 600;
+        }
+        
+        .demo-button {
+            background-color: var(--primary-color, #007bff);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius, 4px);
+            font-size: var(--font-size-base, 14px);
+            font-family: var(--font-family, Arial, sans-serif);
+            transition: all var(--animation-duration, 300ms) ease;
+            margin: 0.25rem;
+        }
+        
+        .demo-button:hover {
+            background-color: var(--secondary-color, #6c757d);
+            transform: translateY(-1px);
+        }
+        
+        .demo-button-success {
+            background-color: var(--success-color, #28a745);
+        }
+        
+        .demo-button-warning {
+            background-color: var(--warning-color, #ffc107);
+            color: var(--dark-color, #343a40);
+        }
+        
+        .demo-button-danger {
+            background-color: var(--danger-color, #dc3545);
+        }
+        
+        .demo-button-info {
+            background-color: var(--info-color, #17a2b8);
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0.25rem;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .demo-text {
+            font-family: var(--font-family, Arial, sans-serif);
+            font-size: var(--font-size-base, 14px);
+            line-height: 1.6;
+            color: var(--dark-color, #343a40);
+        }
+        
+        .demo-text-large {
+            font-size: var(--font-size-large, 18px);
+        }
+        
+        .demo-text-small {
+            font-size: var(--font-size-small, 12px);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .demo-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--light-color, #f8f9fa);
+            border-radius: var(--border-radius, 8px);
+        }
+        
+        .demo-section h3 {
+            color: var(--primary-color, #007bff);
+            margin-bottom: 1rem;
+            font-family: var(--font-family, Arial, sans-serif);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Demo Header -->
+    <div class="demo-header text-center">
+        <div class="container">
+            <h1 class="display-4">Theme Demo</h1>
+            <p class="lead">See how your theme looks across different components</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Color Palette Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-palette"></i> Color Palette</h3>
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <h6>Primary Colors</h6>
+                    <span class="color-swatch" style="background-color: var(--primary-color, #007bff);"></span>
+                    <span class="color-swatch" style="background-color: var(--secondary-color, #6c757d);"></span>
+                    <span class="color-swatch" style="background-color: var(--success-color, #28a745);"></span>
+                </div>
+                <div class="demo-card">
+                    <h6>Status Colors</h6>
+                    <span class="color-swatch" style="background-color: var(--warning-color, #ffc107);"></span>
+                    <span class="color-swatch" style="background-color: var(--danger-color, #dc3545);"></span>
+                    <span class="color-swatch" style="background-color: var(--info-color, #17a2b8);"></span>
+                </div>
+                <div class="demo-card">
+                    <h6>UI Colors</h6>
+                    <span class="color-swatch" style="background-color: var(--light-color, #f8f9fa);"></span>
+                    <span class="color-swatch" style="background-color: var(--dark-color, #343a40);"></span>
+                    <span class="color-swatch" style="background-color: var(--header-bg-color, #FF8871);"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typography Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-font"></i> Typography</h3>
+            <div class="demo-card">
+                <div class="demo-card-header">Typography Examples</div>
+                <p class="demo-text-large">Large text with your theme's font family and size</p>
+                <p class="demo-text">Regular text with your theme's font family and size</p>
+                <p class="demo-text-small">Small text with your theme's font family and size</p>
+                <p class="demo-text">
+                    This is a paragraph demonstrating how text looks with your theme's font family: 
+                    <strong>var(--font-family, Arial, sans-serif)</strong> and base font size: 
+                    <strong>var(--font-size-base, 14px)</strong>.
+                </p>
+            </div>
+        </div>
+
+        <!-- Button Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-mouse-pointer"></i> Buttons</h3>
+            <div class="demo-card">
+                <div class="demo-card-header">Button Styles</div>
+                <button class="demo-button">Primary Button</button>
+                <button class="demo-button demo-button-success">Success Button</button>
+                <button class="demo-button demo-button-warning">Warning Button</button>
+                <button class="demo-button demo-button-danger">Danger Button</button>
+                <button class="demo-button demo-button-info">Info Button</button>
+            </div>
+        </div>
+
+        <!-- Cards Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-id-card"></i> Cards</h3>
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <div class="demo-card-header">Card Header</div>
+                    <p class="demo-text">This is a sample card demonstrating your theme's card styling with custom colors, border radius, and shadows.</p>
+                    <button class="demo-button">Action</button>
+                </div>
+                <div class="demo-card">
+                    <div class="demo-card-header">Another Card</div>
+                    <p class="demo-text">Cards use your theme's card background color, header color, and border radius settings.</p>
+                    <button class="demo-button demo-button-success">Success</button>
+                </div>
+                <div class="demo-card">
+                    <div class="demo-card-header">Third Card</div>
+                    <p class="demo-text">Hover over the cards to see the animation duration and transform effects.</p>
+                    <button class="demo-button demo-button-info">Info</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-bars"></i> Sidebar Style</h3>
+            <div class="demo-sidebar">
+                <h5><i class="fas fa-home"></i> Dashboard</h5>
+                <h5><i class="fas fa-users"></i> User Management</h5>
+                <h5><i class="fas fa-building"></i> Departments</h5>
+                <h5><i class="fas fa-palette"></i> Design Management</h5>
+                <p class="demo-text">This demonstrates how your sidebar will look with the selected colors.</p>
+            </div>
+        </div>
+
+        <!-- Layout Settings Demo -->
+        <div class="demo-section">
+            <h3><i class="fas fa-cogs"></i> Layout Settings</h3>
+            <div class="demo-card">
+                <div class="demo-card-header">Layout Properties</div>
+                <p class="demo-text">
+                    <strong>Border Radius:</strong> var(--border-radius, 4px)<br>
+                    <strong>Box Shadow:</strong> var(--box-shadow, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075))<br>
+                    <strong>Animation Duration:</strong> var(--animation-duration, 300ms)<br>
+                    <strong>Font Family:</strong> var(--font-family, Arial, sans-serif)
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Design Management -->
+        <div class="text-center mb-4">
+            <a href="/admin/design" class="demo-button">
+                <i class="fas fa-arrow-left"></i> Back to Design Management
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="/vendor/jquery/jquery.min.js"></script>
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="/js/sb-admin-2.min.js"></script>
+
+    <script>
+        // Add some interactive demo functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effects to demo buttons
+            const demoButtons = document.querySelectorAll('.demo-button');
+            demoButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+            
+            // Add hover effects to demo cards
+            const demoCards = document.querySelectorAll('.demo-card');
+            demoCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

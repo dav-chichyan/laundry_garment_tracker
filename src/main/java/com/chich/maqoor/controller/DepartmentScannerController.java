@@ -76,12 +76,11 @@ public class DepartmentScannerController {
             model.addAttribute("userId", currentUser.getId());
             model.addAttribute("userName", currentUser.getName());
             
-            // Get the primary department for display (first one in the set)
-            String primaryDepartment = userDepartments.iterator().next().toString();
-            model.addAttribute("userDepartment", primaryDepartment);
+            // Set the userDepartment to the department they're actually working in
+            model.addAttribute("userDepartment", dept.toString());
             
             log.info("Adding to model - userId: {}, userName: {}, userDepartment: {}", 
-                    currentUser.getId(), currentUser.getName(), primaryDepartment);
+                    currentUser.getId(), currentUser.getName(), dept.toString());
             
             return "department/scanner";
         } catch (IllegalArgumentException e) {

@@ -19,6 +19,7 @@ import com.chich.maqoor.service.GarmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -69,6 +70,9 @@ public class AdminController {
 
     @Autowired
     private ProblemRepository problemRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/users")
     public String usersDashboard(Model model,
@@ -261,18 +265,79 @@ public class AdminController {
     @GetMapping("/problems")
     public String problemsPage(Model model,
                                @RequestParam(value = "status", required = false) ProblemStatus status,
-                               @RequestParam(value = "department", required = false) Departments dept) {
-        List<Problem> problems;
+                               @RequestParam(value = "department", required = false) Departments dept,
+                               @RequestParam(value = "staff", required = false) Integer staffId,
+                               @RequestParam(value = "search", required = false) String search,
+                               @RequestParam(value = "dateFrom", required = false) String dateFrom,
+                               @RequestParam(value = "dateTo", required = false) String dateTo,
+                               @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+                               @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
+        
+        List<Problem> problems = problemRepository.findAll();
+        
+        // Apply filters
         if (status != null) {
-            problems = problemRepository.findByStatus(status);
-        } else if (dept != null) {
-            problems = problemRepository.findByDepartment(dept);
-        } else {
-            problems = problemRepository.findAll();
+            problems = problems.stream().filter(p -> p.getStatus() == status).toList();
         }
+        if (dept != null) {
+            problems = problems.stream().filter(p -> p.getDepartment() == dept).toList();
+        }
+        if (staffId != null) {
+            problems = problems.stream().filter(p -> p.getUser() != null && p.getUser().getId() == staffId).toList();
+        }
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            problems = problems.stream().filter(p -> 
+                (p.getNotes() != null && p.getNotes().toLowerCase().contains(searchLower)) ||
+                (p.getOrder() != null && String.valueOf(p.getOrder().getOrderId()).contains(search))
+            ).toList();
+        }
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            try {
+                java.time.LocalDate fromDate = java.time.LocalDate.parse(dateFrom);
+                problems = problems.stream().filter(p -> 
+                    p.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().isAfter(fromDate.minusDays(1))
+                ).toList();
+            } catch (Exception e) {
+                log.warn("Invalid dateFrom format: {}", dateFrom);
+            }
+        }
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            try {
+                java.time.LocalDate toDate = java.time.LocalDate.parse(dateTo);
+                problems = problems.stream().filter(p -> 
+                    p.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().isBefore(toDate.plusDays(1))
+                ).toList();
+            } catch (Exception e) {
+                log.warn("Invalid dateTo format: {}", dateTo);
+            }
+        }
+        
+        // Apply sorting
+        java.util.Comparator<Problem> comparator = switch (sortBy) {
+            case "department" -> java.util.Comparator.comparing(p -> p.getDepartment().name());
+            case "user.name" -> java.util.Comparator.comparing(p -> p.getUser() != null ? p.getUser().getName() : "");
+            default -> java.util.Comparator.comparing(Problem::getCreatedAt);
+        };
+        
+        if ("asc".equals(sortOrder)) {
+            problems = problems.stream().sorted(comparator).toList();
+        } else {
+            problems = problems.stream().sorted(comparator.reversed()).toList();
+        }
+        
+        // Add attributes to model
         model.addAttribute("problems", problems);
         model.addAttribute("departments", getVisibleDepartments());
         model.addAttribute("statuses", ProblemStatus.values());
+        model.addAttribute("search", search);
+        model.addAttribute("dateFrom", dateFrom);
+        model.addAttribute("dateTo", dateTo);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortOrder", sortOrder);
+        model.addAttribute("department", dept);
+        model.addAttribute("staff", staffId);
+        
         try {
             // Load all non-admin users for staff dropdown
             List<User> allUsers = userService.findAll();
@@ -284,6 +349,7 @@ public class AdminController {
         } catch (Exception ignored) {
             model.addAttribute("users", java.util.Collections.emptyList());
         }
+        
         return "auth/admin/problems";
     }
 
@@ -296,40 +362,67 @@ public class AdminController {
                                 @RequestParam(value = "notes", required = false) String notes,
                                 @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
                                 @RequestParam(value = "type", required = false) com.chich.maqoor.entity.constant.AttachmentType type,
-                                Model model) {
-        Orders order = ordersRepository.findById(orderId).orElse(null);
-        User user = userService.findById(userId).orElse(null);
-        if (order == null || user == null) {
-            model.addAttribute("error", "Invalid order or user");
+                                org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            log.info("CREATE PROBLEM: Received request - orderId={}, department={}, userId={}, status={}", 
+                     orderId, department, userId, status);
+            
+            // Create order reference (no validation - allow any order ID)
+            Orders order = new Orders();
+            order.setOrderId(orderId);
+            
+            // Validate user
+            User user = userService.findById(userId).orElse(null);
+            if (user == null) {
+                log.error("CREATE PROBLEM: User not found with ID: {}", userId);
+                redirectAttributes.addFlashAttribute("error", "User not found with ID: " + userId);
+                return "redirect:/admin/problems";
+            }
+            
+            // Create and save problem
+            Problem p = new Problem();
+            p.setOrder(order);
+            p.setDepartment(department);
+            p.setUser(user);
+            p.setStatus(status != null ? status : ProblemStatus.OPEN);
+            p.setNotes(notes);
+            p.setCreatedAt(new Date());
+            p.setUpdatedAt(new Date());
+            
+            p = problemRepository.save(p);
+            log.info("CREATE PROBLEM: Successfully created problem with ID: {}", p.getId());
+
+            // Handle file upload
+            try {
+                if (file != null && !file.isEmpty()) {
+                    log.info("CREATE PROBLEM: Processing file upload: {}", file.getOriginalFilename());
+                    String uploadsDir = "src/main/resources/static/uploads";
+                    java.nio.file.Files.createDirectories(java.nio.file.Path.of(uploadsDir));
+                    String ext = org.springframework.util.StringUtils.getFilenameExtension(file.getOriginalFilename());
+                    String filename = "problem-" + p.getId() + "-" + System.currentTimeMillis() + (ext != null ? ("." + ext) : "");
+                    java.nio.file.Path dest = java.nio.file.Path.of(uploadsDir, filename);
+                    file.transferTo(dest.toFile());
+                    
+                    // Append file link to notes
+                    String link = "/uploads/" + filename;
+                    String updatedNotes = (p.getNotes() != null ? p.getNotes() + "\n" : "") + 
+                                         "Attachment (" + (type != null ? type.name() : "FILE") + "): " + link;
+                    p.setNotes(updatedNotes);
+                    problemRepository.save(p);
+                    log.info("CREATE PROBLEM: File uploaded successfully: {}", filename);
+                }
+            } catch (Exception e) {
+                log.error("CREATE PROBLEM: Error uploading file: {}", e.getMessage(), e);
+            }
+            
+            redirectAttributes.addFlashAttribute("success", "Problem created successfully!");
+            return "redirect:/admin/problems";
+            
+        } catch (Exception e) {
+            log.error("CREATE PROBLEM: Error creating problem: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("error", "Error creating problem: " + e.getMessage());
             return "redirect:/admin/problems";
         }
-        Problem p = new Problem();
-        p.setOrder(order);
-        p.setDepartment(department);
-        p.setUser(user);
-        if (status != null) p.setStatus(status); else p.setStatus(ProblemStatus.OPEN);
-        p.setNotes(notes);
-        p.setCreatedAt(new Date());
-        p.setUpdatedAt(new Date());
-        p = problemRepository.save(p);
-
-        // If a file was attached in the modal, save it under /static/uploads and store a simple note with the path
-        try {
-            if (file != null && !file.isEmpty()) {
-                String uploadsDir = "src/main/resources/static/uploads";
-                java.nio.file.Files.createDirectories(java.nio.file.Path.of(uploadsDir));
-                String ext = org.springframework.util.StringUtils.getFilenameExtension(file.getOriginalFilename());
-                String filename = "problem-" + p.getId() + "-" + System.currentTimeMillis() + (ext != null ? ("." + ext) : "");
-                java.nio.file.Path dest = java.nio.file.Path.of(uploadsDir, filename);
-                file.transferTo(dest.toFile());
-                // Append quick link to notes
-                String link = "/uploads/" + filename;
-                String updatedNotes = (p.getNotes() != null ? p.getNotes() + "\n" : "") + "Attachment (" + (type != null ? type.name() : "FILE") + "): " + link;
-                p.setNotes(updatedNotes);
-                problemRepository.save(p);
-            }
-        } catch (Exception ignored) { }
-        return "redirect:/admin/problems";
     }
 
     // Helper: Exclude departments not needed for UI (e.g., PACKAGING, LOCKER)
@@ -904,7 +997,7 @@ public class AdminController {
             System.out.println("PASSWORD RESET DEBUG: Setting new password for user: " + user.getName());
             
             // Reset password - encode it properly
-            user.setPassword(newPassword);
+            user.setPassword(passwordEncoder.encode(newPassword));
             userService.save(user);
             
             System.out.println("PASSWORD RESET DEBUG: Password reset successfully for user: " + user.getName());
