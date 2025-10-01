@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: maqoor-postgres
+    environment:
+      POSTGRES_DB: maqoor_db
+      POSTGRES_USER: maqoor
+      POSTGRES_PASSWORD: maqoor123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maqoor -d maqoor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+
+
+
+

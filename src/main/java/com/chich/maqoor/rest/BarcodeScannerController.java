@@ -5,6 +5,8 @@ import com.chich.maqoor.entity.GarmentScan;
 import com.chich.maqoor.entity.Garments;
 import com.chich.maqoor.entity.User;
 import com.chich.maqoor.entity.constant.Departments;
+import com.chich.maqoor.entity.constant.Role;
+import com.chich.maqoor.entity.constant.OrderState;
 import com.chich.maqoor.repository.GarmentRepository;
 import com.chich.maqoor.repository.GarmentScanRepository;
 import com.chich.maqoor.repository.UserRepository;
@@ -18,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,17 +63,26 @@ public class BarcodeScannerController {
                     garment.getGarmentId(), garment.getCleanCloudGarmentId(), garment.getDepartmentId());
             
             User user = userRepository.findById(request.getUserId()).orElseThrow();
-            log.info("Found user: userId={}, name={}, department={}", 
-                    user.getId(), user.getName(), user.getDepartment());
+            log.info("Found user: userId={}, name={}, department={}, role={}", 
+                    user.getId(), user.getName(), user.getDepartment(), user.getRole());
             
-            // Validate user exists
-            if (user == null) {
-                log.error("User not found: userId={}", request.getUserId());
-                Map<String, Object> errorResponse = new HashMap<>();
-                errorResponse.put("success", false);
-                errorResponse.put("message", "User not found: " + request.getUserId());
-                errorResponse.put("errorCode", "USER_NOT_FOUND");
-                return ResponseEntity.badRequest().body(errorResponse);
+            // VALIDATION: Check if order is COMPLETED and user is not ADMIN
+            if (garment.getOrder() != null && garment.getOrder().getOrderState() == OrderState.COMPLETED) {
+                // Only allow admins to scan completed orders
+                if (user.getRole() != Role.ADMIN) {
+                    log.warn("Non-admin user {} attempted to scan garment {} from completed order {}", 
+                            user.getName(), garment.getCleanCloudGarmentId(), garment.getOrder().getCleanCloudOrderId());
+                    Map<String, Object> completedOrderResponse = new HashMap<>();
+                    completedOrderResponse.put("success", false);
+                    completedOrderResponse.put("message", "Order is finished and cannot be scanned. Please contact admin.");
+                    completedOrderResponse.put("errorCode", "ORDER_COMPLETED");
+                    completedOrderResponse.put("orderId", garment.getOrder().getCleanCloudOrderId());
+                    completedOrderResponse.put("orderState", "COMPLETED");
+                    return ResponseEntity.badRequest().body(completedOrderResponse);
+                } else {
+                    log.info("Admin user {} is scanning garment {} from completed order {} - allowing", 
+                            user.getName(), garment.getCleanCloudGarmentId(), garment.getOrder().getCleanCloudOrderId());
+                }
             }
 
             // NEW VALIDATION: Check if garment is already in the requested department

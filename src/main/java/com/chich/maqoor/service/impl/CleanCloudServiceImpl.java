@@ -330,9 +330,21 @@ public class CleanCloudServiceImpl implements CleanCloudService {
                 Orders order = existingOrder.get();
                 order.setStatus(String.valueOf(newStatus));
                 order.setUpdatedAt(new Date());
+                
+                // If new status is 2, mark order as completed
+                if (newStatus == 2) {
+                    order.setOrderState(com.chich.maqoor.entity.constant.OrderState.COMPLETED);
+                    log.info("Order {} marked as COMPLETED (status: 2)", orderId);
+                } else {
+                    // For other statuses, set as ACTIVE
+                    order.setOrderState(com.chich.maqoor.entity.constant.OrderState.ACTIVE);
+                    log.info("Order {} set as ACTIVE (status: {})", orderId, newStatus);
+                }
+                
                 ordersRepository.save(order);
-                log.info("Updated order {} status to {}", orderId, newStatus);
+                log.info("Updated order {} status to {} with orderState: {}", orderId, newStatus, order.getOrderState());
             } else {
+                log.warn("Order {} not found in database, syncing from CleanCloud", orderId);
                 // If order doesn't exist, sync it completely
                 syncOrderWithDatabase(orderId);
             }

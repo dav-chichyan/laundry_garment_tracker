@@ -31,6 +31,7 @@ import com.chich.maqoor.repository.OrdersRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import java.util.stream.Collectors;
 
 // add import
@@ -470,6 +471,119 @@ public class AdminController {
             }
         }
         return "auth/admin/order-search";
+    }
+
+    @PutMapping("/orders/{orderId}/state")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateOrderState(@PathVariable int orderId, @RequestBody Map<String, String> request) {
+        log.info("Received request to update order state for order ID: {}, request: {}", orderId, request);
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String orderStateStr = request.get("orderState");
+            log.info("Order state from request: {}", orderStateStr);
+            
+            if (orderStateStr == null || orderStateStr.isEmpty()) {
+                log.warn("Order state is missing from request");
+                response.put("success", false);
+                response.put("message", "Order state is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Find order by internal ID
+            Optional<Orders> orderOpt = ordersRepository.findById(orderId);
+            if (!orderOpt.isPresent()) {
+                log.warn("Order not found with ID: {}", orderId);
+                response.put("success", false);
+                response.put("message", "Order not found with ID: " + orderId);
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            Orders order = orderOpt.get();
+            log.info("Found order: ID={}, CleanCloud ID={}, Current State={}", 
+                     order.getOrderId(), order.getCleanCloudOrderId(), order.getOrderState());
+            
+            // Update order state
+            com.chich.maqoor.entity.constant.OrderState newState = com.chich.maqoor.entity.constant.OrderState.valueOf(orderStateStr);
+            order.setOrderState(newState);
+            order.setUpdatedAt(new Date());
+            ordersRepository.save(order);
+
+            log.info("Order {} (CleanCloud ID: {}) state updated to {} by admin", 
+                     orderId, order.getCleanCloudOrderId(), newState);
+
+            response.put("success", true);
+            response.put("message", "Order state updated successfully");
+            response.put("newState", newState.name());
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid order state value: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Invalid order state: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            log.error("Error updating order state for order {}: {}", orderId, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Failed to update order state: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/garments/{garmentId}/department")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateGarmentDepartment(@PathVariable int garmentId, @RequestBody Map<String, String> request) {
+        log.info("Received request to update garment department for garment ID: {}, request: {}", garmentId, request);
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String departmentStr = request.get("department");
+            log.info("Department from request: {}", departmentStr);
+            
+            if (departmentStr == null || departmentStr.isEmpty()) {
+                log.warn("Department is missing from request");
+                response.put("success", false);
+                response.put("message", "Department is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Find garment by internal ID
+            Optional<Garments> garmentOpt = garmentRepository.findById(garmentId);
+            if (!garmentOpt.isPresent()) {
+                log.warn("Garment not found with ID: {}", garmentId);
+                response.put("success", false);
+                response.put("message", "Garment not found with ID: " + garmentId);
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            Garments garment = garmentOpt.get();
+            log.info("Found garment: ID={}, CleanCloud ID={}, Current Department={}", 
+                     garment.getGarmentId(), garment.getCleanCloudGarmentId(), garment.getDepartmentId());
+            
+            // Update garment department
+            Departments newDepartment = Departments.valueOf(departmentStr);
+            garment.setDepartmentId(newDepartment);
+            garment.setLastUpdate(new Date());
+            garmentRepository.save(garment);
+
+            log.info("Garment {} (CleanCloud ID: {}) department updated from {} to {} by admin", 
+                     garmentId, garment.getCleanCloudGarmentId(), garment.getDepartmentId(), newDepartment);
+
+            response.put("success", true);
+            response.put("message", "Garment department updated successfully");
+            response.put("newDepartment", newDepartment.name());
+            response.put("garmentId", garmentId);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid department value: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Invalid department: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            log.error("Error updating garment department for garment {}: {}", garmentId, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Failed to update garment department: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     private String searchOrder(int orderId, Model model) {

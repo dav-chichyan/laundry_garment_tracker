@@ -273,7 +273,7 @@
             border-color: #17a2b8;
             color: white;
         }
-        
+
         /* Search form */
         .search-form .form-control { min-width: 300px; }
         
@@ -343,6 +343,178 @@
             font-weight: 600;
             font-size: 0.7rem;
             letter-spacing: 0.025em;
+        }
+        
+        /* Order State Selector Styling */
+        .order-state-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            margin-right: 0.75rem;
+        }
+        
+        .order-state-container:hover {
+            border-color: #6c757d;
+            box-shadow: 0 3px 10px rgba(108, 117, 125, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .order-state-container .form-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+            font-weight: 700;
+        }
+        
+        .order-state-container .form-select {
+            font-weight: 600;
+            font-size: 0.8rem;
+            border: 2px solid #dee2e6;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0.375rem 1.75rem 0.375rem 0.5rem;
+            min-width: 130px;
+        }
+        
+        .order-state-container .form-select.state-active {
+            background: linear-gradient(135deg, #d1e7dd 0%, #a3cfbb 100%);
+            border-color: #198754;
+            color: #0f5132;
+        }
+        
+        .order-state-container .form-select.state-active:hover {
+            background: linear-gradient(135deg, #c3e6cb 0%, #93c5a8 100%);
+            border-color: #157347;
+        }
+        
+        .order-state-container .form-select.state-completed {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #6c757d;
+            color: #495057;
+        }
+        
+        .order-state-container .form-select.state-completed:hover {
+            background: linear-gradient(135deg, #dee2e6 0%, #ced4da 100%);
+            border-color: #5a6268;
+        }
+        
+        .order-state-container .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.15);
+        }
+        
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            border-radius: 16px 16px 0 0;
+            padding: 1.5rem;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+        }
+        
+        .modal-header.bg-primary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+        }
+        
+        .modal-header.bg-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%) !important;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        .modal-body {
+            padding: 2.5rem 2rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+        
+        .modal-body i.fa-3x {
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 1.25rem 1.5rem;
+            background-color: #f8f9fa;
+        }
+        
+        .modal-footer .btn {
+            min-width: 120px;
+            font-weight: 600;
+            padding: 0.625rem 1.5rem;
+        }
+        
+        .modal-footer .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            border: none;
+        }
+        
+        .modal-footer .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #545b62 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+        
+        .modal-footer .btn-primary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+        }
+        
+        .modal-footer .btn-primary:hover {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(73, 80, 87, 0.3);
+        }
+        
+        .modal-footer .btn-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            border: none;
+        }
+        
+        .modal-footer .btn-info:hover {
+            background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+        
+        .modal-backdrop.show {
+            opacity: 0.75;
+            background-color: #000;
+        }
+        
+        /* Modal animation */
+        .modal.fade .modal-dialog {
+            transform: scale(0.8);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .modal.show .modal-dialog {
+            transform: scale(1);
         }
         
         /* Responsive adjustments */
@@ -434,6 +606,12 @@
                                 Problems
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/departments">
+                                <i class="fas fa-building me-2"></i>
+                                Departments
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
@@ -505,12 +683,29 @@
                 <div class="row mt-3" th:if="${order != null}">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="mb-0">Order <span th:text="${orderId}">-</span> Details</h5>
-                                    <small class="text-muted">Total Garments: <span th:text="${garments != null ? garments.size() : 0}">0</span></small>
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">Order <span th:text="${orderId}">-</span> Details</h5>
+                                        <small class="text-muted">Total Garments: <span th:text="${garments != null ? garments.size() : 0}">0</span></small>
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-end">
+                                        <div class="order-state-container">
+                                            <label class="form-label mb-1">
+                                                <i class="fas fa-toggle-on me-1"></i>Order State
+                                            </label>
+                                            <select class="form-select form-select-sm" id="orderStateSelect" 
+                                                    th:data-order-id="${order != null ? order.orderId : ''}"
+                                                    onchange="updateOrderState(this)">
+                                                <option value="ACTIVE" th:selected="${order != null && order.orderState != null && order.orderState.name() == 'ACTIVE'}">ACTIVE</option>
+                                                <option value="COMPLETED" th:selected="${order != null && order.orderState != null && order.orderState.name() == 'COMPLETED'}">COMPLETED</option>
+                                            </select>
+                                        </div>
+                                        <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/users}">
+                                            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                                        </a>
+                                    </div>
                                 </div>
-                                <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/users}"><i class="fas fa-arrow-left me-1"></i> Back to Dashboard</a>
                             </div>
                             <div class="card-body">
                                 <div th:if="${#lists.isEmpty(garments)}" class="text-center text-muted py-4">
@@ -542,6 +737,20 @@
                                                                class="badge bg-info text-decoration-none department-link" 
                                                                th:text="${garment.departmentId != null ? garment.departmentId : 'UNKNOWN'}">IRONING</a>
                                                         </p>
+                                                        <p><strong>Change Department:</strong></p>
+                                                        <select class="form-select form-select-sm" 
+                                                                th:id="'dept-select-' + ${garment.garmentId}"
+                                                                th:data-garment-id="${garment.garmentId}"
+                                                                th:data-garment-cc-id="${garment.cleanCloudGarmentId}"
+                                                                onchange="updateGarmentDepartment(this)">
+                                                            <option value="" selected disabled>Select Department</option>
+                                                            <option value="RECEPTION" th:selected="${garment.departmentId == 'RECEPTION'}">RECEPTION</option>
+                                                            <option value="EXAMINATION" th:selected="${garment.departmentId == 'EXAMINATION'}">EXAMINATION</option>
+                                                            <option value="IRONING" th:selected="${garment.departmentId == 'IRONING'}">IRONING</option>
+                                                            <option value="STAIN_REMOVAL" th:selected="${garment.departmentId == 'STAIN_REMOVAL'}">STAIN REMOVAL</option>
+                                                            <option value="DRY_CLEANING" th:selected="${garment.departmentId == 'DRY_CLEANING'}">DRY CLEANING</option>
+                                                            <option value="DELIVERY" th:selected="${garment.departmentId == 'DELIVERY'}">DELIVERY</option>
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <p><strong>Last Update:</strong> 
@@ -577,21 +786,30 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-6">
-                                        <h6>Finding Order IDs:</h6>
+                                    <div class="col-md-4">
+                                        <h6><i class="fas fa-search me-2 text-primary"></i>Finding Order IDs:</h6>
                                         <ul class="mb-0">
                                             <li>Check CleanCloud system for order numbers</li>
                                             <li>Look at garment tags or labels</li>
                                             <li>Review order confirmations or invoices</li>
                                         </ul>
                                     </div>
-                                    <div class="col-md-6">
-                                        <h6>What You'll See:</h6>
+                                    <div class="col-md-4">
+                                        <h6><i class="fas fa-eye me-2 text-success"></i>What You'll See:</h6>
                                         <ul class="mb-0">
                                             <li>Order details and status</li>
                                             <li>List of garments in the order</li>
                                             <li>Department assignments</li>
                                             <li>Processing history</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6><i class="fas fa-edit me-2 text-info"></i>Admin Features:</h6>
+                                        <ul class="mb-0">
+                                            <li><strong>Change Order State:</strong> Use dropdown to set ACTIVE or COMPLETED</li>
+                                            <li><strong>Move Garments:</strong> Change department assignment per garment</li>
+                                            <li>View detailed garment history</li>
+                                            <li>Real-time updates with confirmations</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -600,6 +818,79 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Order State Confirmation Modal -->
+    <div class="modal fade" id="orderStateModal" tabindex="-1" aria-labelledby="orderStateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="orderStateModalLabel">
+                        <i class="fas fa-exchange-alt me-2"></i>Change Order State
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center py-4">
+                        <div class="mb-4">
+                            <i class="fas fa-clipboard-check fa-4x mb-3" style="color: #6c757d;"></i>
+                        </div>
+                        <p class="fs-5 mb-2" style="color: #495057;">Are you sure you want to change the order state to</p>
+                        <div class="mt-3 mb-3">
+                            <span class="badge px-4 py-3 fs-5" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); border-radius: 12px; letter-spacing: 0.05em;" id="orderStateNewValue">COMPLETED</span>
+                        </div>
+                        <p class="text-muted small mb-0">This action will update the order status immediately</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmOrderStateBtn">
+                        <i class="fas fa-check-circle me-2"></i>Confirm Change
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Garment Department Confirmation Modal -->
+    <div class="modal fade" id="garmentDepartmentModal" tabindex="-1" aria-labelledby="garmentDepartmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="garmentDepartmentModalLabel">
+                        <i class="fas fa-arrows-alt me-2"></i>Move Garment to Department
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center py-4">
+                        <div class="mb-4">
+                            <i class="fas fa-tshirt fa-4x mb-3" style="color: #17a2b8;"></i>
+                        </div>
+                        <p class="fs-5 mb-2" style="color: #495057;">Are you sure you want to move this garment to</p>
+                        <div class="mt-3 mb-3">
+                            <span class="badge px-4 py-3 fs-5" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border-radius: 12px; letter-spacing: 0.05em;" id="garmentDeptNewValue">DRY_CLEANING</span>
+                        </div>
+                        <div class="mt-3 p-3 rounded" style="background-color: #f8f9fa; border: 1px solid #e9ecef;">
+                            <small class="text-muted d-block mb-1">
+                                <i class="fas fa-barcode me-2"></i>Garment ID
+                            </small>
+                            <strong class="text-dark" id="garmentIdDisplay">-</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-info" id="confirmGarmentDeptBtn">
+                        <i class="fas fa-arrows-alt me-2"></i>Move Garment
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -612,7 +903,310 @@
         // Auto-focus on search input when page loads
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('orderId').focus();
+            
+            // Apply color class to order state select on page load
+            const orderStateSelect = document.getElementById('orderStateSelect');
+            if (orderStateSelect) {
+                updateOrderStateColor(orderStateSelect);
+            }
         });
+        
+        // Update order state select color based on value
+        function updateOrderStateColor(selectElement) {
+            const value = selectElement.value;
+            selectElement.classList.remove('state-active', 'state-completed');
+            
+            if (value === 'ACTIVE') {
+                selectElement.classList.add('state-active');
+            } else if (value === 'COMPLETED') {
+                selectElement.classList.add('state-completed');
+            }
+        }
+        
+        // Global variables for modal confirmation
+        let pendingOrderStateChange = null;
+        let pendingGarmentDeptChange = null;
+        
+        // Update order state function
+        function updateOrderState(selectElement) {
+            const orderId = selectElement.getAttribute('data-order-id');
+            const newState = selectElement.value;
+            const originalValue = selectElement.getAttribute('data-original-value') || selectElement.options[selectElement.selectedIndex === 0 ? 1 : 0].value;
+            
+            if (!orderId) {
+                showNotification('Order ID not found', 'error');
+                return;
+            }
+            
+            // Store the original value if not set
+            if (!selectElement.getAttribute('data-original-value')) {
+                selectElement.setAttribute('data-original-value', originalValue);
+            }
+            
+            // Update modal content
+            const badgeElement = document.getElementById('orderStateNewValue');
+            badgeElement.textContent = newState;
+            
+            // Update badge color based on state
+            if (newState === 'ACTIVE') {
+                badgeElement.style.background = 'linear-gradient(135deg, #198754 0%, #157347 100%)';
+                badgeElement.style.color = '#fff';
+            } else if (newState === 'COMPLETED') {
+                badgeElement.style.background = 'linear-gradient(135deg, #6c757d 0%, #495057 100%)';
+                badgeElement.style.color = '#fff';
+            }
+            
+            // Store pending change
+            pendingOrderStateChange = {
+                selectElement: selectElement,
+                orderId: orderId,
+                newState: newState,
+                originalValue: originalValue
+            };
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('orderStateModal'));
+            modal.show();
+        }
+        
+        // Confirm order state change
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('confirmOrderStateBtn')?.addEventListener('click', function() {
+                if (!pendingOrderStateChange) return;
+                
+                const { selectElement, orderId, newState, originalValue } = pendingOrderStateChange;
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('orderStateModal')).hide();
+                
+                // Show loading
+                selectElement.disabled = true;
+                
+                fetch(`/admin/orders/${orderId}/state`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderState: newState })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showNotification('Order state updated successfully!', 'success');
+                        selectElement.disabled = false;
+                        selectElement.setAttribute('data-original-value', newState);
+                        // Update color class
+                        updateOrderStateColor(selectElement);
+                    } else {
+                        const errorMsg = data.message || 'Unknown error occurred';
+                        showNotification('Failed to update order state: ' + errorMsg, 'error');
+                        selectElement.disabled = false;
+                        selectElement.value = originalValue;
+                        // Revert color class
+                        updateOrderStateColor(selectElement);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating order state:', error);
+                    showNotification('Network error: Unable to update order state', 'error');
+                    selectElement.disabled = false;
+                    selectElement.value = originalValue;
+                    // Revert color class
+                    updateOrderStateColor(selectElement);
+                })
+                .finally(() => {
+                    pendingOrderStateChange = null;
+                });
+            });
+            
+            // Handle modal cancel - revert selection
+            document.getElementById('orderStateModal')?.addEventListener('hidden.bs.modal', function() {
+                if (pendingOrderStateChange) {
+                    const { selectElement, originalValue } = pendingOrderStateChange;
+                    selectElement.value = originalValue;
+                    pendingOrderStateChange = null;
+                }
+            });
+        });
+        
+        // Update garment department function
+        function updateGarmentDepartment(selectElement) {
+            const garmentId = selectElement.getAttribute('data-garment-id');
+            const garmentCCId = selectElement.getAttribute('data-garment-cc-id');
+            const newDepartment = selectElement.value;
+            const originalValue = selectElement.getAttribute('data-original-value');
+            
+            if (!garmentId) {
+                showNotification('Garment ID not found', 'error');
+                return;
+            }
+            
+            if (!newDepartment || newDepartment === '') {
+                return;
+            }
+            
+            // Store the original value if not set
+            if (!originalValue) {
+                const currentSelected = Array.from(selectElement.options).find(opt => opt.selected && opt.value !== '');
+                if (currentSelected && currentSelected.value !== newDepartment) {
+                    selectElement.setAttribute('data-original-value', currentSelected.value);
+                } else {
+                    selectElement.setAttribute('data-original-value', newDepartment);
+                }
+            }
+            
+            // Update modal content
+            document.getElementById('garmentDeptNewValue').textContent = newDepartment;
+            document.getElementById('garmentIdDisplay').textContent = garmentCCId || garmentId;
+            
+            // Store pending change
+            pendingGarmentDeptChange = {
+                selectElement: selectElement,
+                garmentId: garmentId,
+                garmentCCId: garmentCCId,
+                newDepartment: newDepartment,
+                originalValue: selectElement.getAttribute('data-original-value')
+            };
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('garmentDepartmentModal'));
+            modal.show();
+        }
+        
+        // Confirm garment department change
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('confirmGarmentDeptBtn')?.addEventListener('click', function() {
+                if (!pendingGarmentDeptChange) return;
+                
+                const { selectElement, garmentId, newDepartment, originalValue } = pendingGarmentDeptChange;
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('garmentDepartmentModal')).hide();
+                
+                // Show loading
+                selectElement.disabled = true;
+                
+                fetch(`/admin/garments/${garmentId}/department`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ department: newDepartment })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showNotification(`Garment moved to ${newDepartment} successfully!`, 'success');
+                        selectElement.disabled = false;
+                        selectElement.setAttribute('data-original-value', newDepartment);
+                        // Update the department badge in the accordion header
+                        updateDepartmentBadge(garmentId, newDepartment);
+                        // Update the current department link
+                        updateCurrentDepartmentLink(garmentId, newDepartment);
+                    } else {
+                        const errorMsg = data.message || 'Unknown error occurred';
+                        showNotification('Failed to update garment department: ' + errorMsg, 'error');
+                        selectElement.disabled = false;
+                        selectElement.value = originalValue || '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating garment department:', error);
+                    showNotification('Network error: Unable to update garment department', 'error');
+                    selectElement.disabled = false;
+                    selectElement.value = originalValue || '';
+                })
+                .finally(() => {
+                    pendingGarmentDeptChange = null;
+                });
+            });
+            
+            // Handle modal cancel - revert selection
+            document.getElementById('garmentDepartmentModal')?.addEventListener('hidden.bs.modal', function() {
+                if (pendingGarmentDeptChange) {
+                    const { selectElement, originalValue } = pendingGarmentDeptChange;
+                    selectElement.value = originalValue || '';
+                    pendingGarmentDeptChange = null;
+                }
+            });
+        });
+        
+        function updateDepartmentBadge(garmentId, newDepartment) {
+            // Find the badge in the accordion header for this garment
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                const badge = button.querySelector('.badge');
+                if (badge) {
+                    badge.textContent = newDepartment;
+                }
+            });
+        }
+        
+        function updateCurrentDepartmentLink(garmentId, newDepartment) {
+            // Update the "Current Department" link in the accordion body
+            const departmentLinks = document.querySelectorAll('.department-link');
+            departmentLinks.forEach(link => {
+                // Simple update - just change text and href
+                link.textContent = newDepartment;
+                link.href = `/admin/departments/${newDepartment}`;
+            });
+        }
+        
+        function showNotification(message, type) {
+            // Validate message
+            if (!message || message === 'undefined') {
+                message = 'An error occurred';
+                console.error('showNotification called with undefined message');
+            }
+            
+            console.log('Showing notification:', message, 'Type:', type);
+            
+            // Create a Bootstrap toast notification
+            let toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) {
+                const container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '11';
+                document.body.appendChild(container);
+                toastContainer = container;
+            }
+            
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
     </script>
 </body>
 </html>
