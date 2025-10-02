@@ -248,11 +248,8 @@ public class WebhookController {
                 return ResponseEntity.badRequest().body(errorResponse);
             }
             
-            // Add "0" prefix to garment ID only if it doesn't already start with "0"
-            String formattedGarmentId = garmentId.startsWith("0") ? garmentId : "0" + garmentId;
-            
             // Find garment by cleanCloudGarmentId
-            Garments garment = garmentRepository.findByCleanCloudGarmentId(formattedGarmentId);
+            Garments garment = garmentRepository.findByCleanCloudGarmentId(garmentId);
             if (garment == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -322,11 +319,8 @@ public class WebhookController {
             
             log.info("Testing scan for garment: {}, user: {}, department: {}", garmentId, userId, departmentStr);
             
-            // Add "0" prefix to garment ID only if it doesn't already start with "0"
-            String formattedGarmentId = garmentId.startsWith("0") ? garmentId : "0" + garmentId;
-            
             // Find garment by cleanCloudGarmentId
-            Garments garment = garmentRepository.findByCleanCloudGarmentId(formattedGarmentId);
+            Garments garment = garmentRepository.findByCleanCloudGarmentId(garmentId);
             if (garment == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);

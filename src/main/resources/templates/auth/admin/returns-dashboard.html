@@ -59,14 +59,14 @@
             margin-bottom: 1.5rem;
         }
         .card-header {
-            background-color: #ff6b35;
-            color: #fff;
+            background-color: #ffc107;
+            color: #000;
             border-bottom: none;
         }
         .btn-warning {
-            background-color: #ff6b35;
-            border-color: #ff6b35;
-            color: #fff;
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
         }
         .return-item {
             border-left: 4px solid #ffc107;
@@ -78,7 +78,7 @@
             transition: all 0.3s ease;
         }
         .stats-card {
-            background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
+            background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
             color: white;
             border: none;
         }
@@ -153,12 +153,6 @@
                             <a class="nav-link active" href="/admin/returns-dashboard">
                                 <i class="fas fa-undo me-2"></i>
                                 Returns Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/admin/departments">
-                                <i class="fas fa-building me-2"></i>
-                                Departments
                             </a>
                         </li>
                         <li class="nav-item">
@@ -300,19 +294,13 @@
                     </div>
                     <div class="col-md-6">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-exchange-alt"></i> Returns by Department Transition</h5>
-                                <a href="/admin/returns-detailed" class="btn btn-sm btn-outline-light">
-                                    <i class="fas fa-external-link-alt me-1"></i> See More
-                                </a>
                             </div>
                             <div class="card-body">
                                 <div th:if="${#maps.isEmpty(returnsByTransition)}" class="text-center text-muted">
                                     <i class="fas fa-exchange-alt fa-3x mb-3"></i>
                                     <p>No transition data available</p>
-                                    <a href="/admin/returns-detailed" class="btn btn-primary mt-2">
-                                        <i class="fas fa-external-link-alt me-1"></i> View All Returns
-                                    </a>
                                 </div>
                                 <div th:each="entry : ${returnsByTransition}" class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="transition-badge" th:text="${entry.key}">From → To</span>
@@ -334,7 +322,7 @@
                                 <div class="row">
                                     <div th:each="dept : ${T(com.chich.maqoor.entity.constant.Departments).values()}" class="col-md-2 col-sm-4 col-6 mb-3">
                                         <div class="text-center p-3 border rounded" style="background-color: #f8f9fa;">
-                                            <h6 class="mb-2" th:text="${#strings.equals(dept.name(),'STAIN_REMOVAL') ? 'STAIN' : (#strings.equals(dept.name(),'DRY_CLEANING') ? 'DRY' : dept)}">Department</h6>
+                                            <h6 class="mb-2" th:text="${dept}">Department</h6>
                                             <p class="mb-1 text-muted small">Returns count</p>
                                             <div class="d-inline-flex align-items-center justify-content-center" 
                                                  style="width: 40px; height: 40px; background-color: #fd7e14; color: white; border-radius: 50%; font-weight: bold;">
@@ -370,15 +358,15 @@
                                         </div>
                                         <div class="col-md-2">
                                             <strong>From:</strong><br>
-                                            <span class="badge bg-secondary" th:text="${#strings.equals(returnRecord.fromDepartment.name(),'STAIN_REMOVAL') ? 'STAIN' : (#strings.equals(returnRecord.fromDepartment.name(),'DRY_CLEANING') ? 'DRY' : returnRecord.fromDepartment)}">From</span>
+                                            <span class="badge bg-secondary" th:text="${returnRecord.fromDepartment}">From</span>
                                         </div>
                                         <div class="col-md-2">
                                             <strong>To:</strong><br>
-                                            <span class="badge bg-danger" th:text="${#strings.equals(returnRecord.toDepartment.name(),'STAIN_REMOVAL') ? 'STAIN' : (#strings.equals(returnRecord.toDepartment.name(),'DRY_CLEANING') ? 'DRY' : returnRecord.toDepartment)}">To</span>
+                                            <span class="badge bg-danger" th:text="${returnRecord.toDepartment}">To</span>
                                         </div>
                                         <div class="col-md-2">
                                             <strong>Expected:</strong><br>
-                                            <span class="badge bg-success" th:text="${returnRecord.expectedNextDepartment != null ? (#strings.equals(returnRecord.expectedNextDepartment,'STAIN_REMOVAL') ? 'STAIN' : (#strings.equals(returnRecord.expectedNextDepartment,'DRY_CLEANING') ? 'DRY' : returnRecord.expectedNextDepartment)) : 'N/A'}">Expected</span>
+                                            <span class="badge bg-success" th:text="${returnRecord.expectedNextDepartment}">Expected</span>
                                         </div>
                                         <div class="col-md-2">
                                             <strong>User:</strong><br>
@@ -440,12 +428,12 @@
                     datasets: [{
                         label: 'Returns Count',
                         data: chartData.data,
-                        borderColor: '#ff6b35',
-                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: '#ff6b35',
+                        pointBackgroundColor: '#ffc107',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 6,
@@ -463,7 +451,7 @@
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             titleColor: '#fff',
                             bodyColor: '#fff',
-                            borderColor: '#ff6b35',
+                            borderColor: '#ffc107',
                             borderWidth: 1,
                             callbacks: {
                                 title: function(context) {
@@ -511,7 +499,7 @@
                     },
                     elements: {
                         point: {
-                            hoverBackgroundColor: '#ff6b35'
+                            hoverBackgroundColor: '#ffc107'
                         }
                     }
                 }

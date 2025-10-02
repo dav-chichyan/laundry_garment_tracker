@@ -48,14 +48,10 @@ public class BarcodeScannerController {
             log.info("Processing scan request: garmentId={}, userId={}, department={}", 
                     request.getGarmentId(), request.getUserId(), request.getDepartment());
             
-            // Add "0" prefix to garment ID only if it doesn't already start with "0"
-            String scannedId = String.valueOf(request.getGarmentId());
-            String formattedGarmentId = scannedId.startsWith("0") ? scannedId : "0" + scannedId;
-            
             // Validate that the garment exists in the database by cleanCloudGarmentId
-            Garments garment = garmentRepository.findByCleanCloudGarmentId(formattedGarmentId);
+            Garments garment = garmentRepository.findByCleanCloudGarmentId(String.valueOf(request.getGarmentId()));
             if (garment == null) {
-                log.warn("Garment not found in database: cleanCloudGarmentId={}", formattedGarmentId);
+                log.warn("Garment not found in database: cleanCloudGarmentId={}", request.getGarmentId());
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("message", "Garment ID " + request.getGarmentId() + " not found in database");
@@ -166,11 +162,8 @@ public class BarcodeScannerController {
     @GetMapping("/garment/{garmentId}/details")
     public ResponseEntity<?> getGarmentDetails(@PathVariable String garmentId) {
         try {
-            // Add "0" prefix to garment ID only if it doesn't already start with "0"
-            String formattedGarmentId = garmentId.startsWith("0") ? garmentId : "0" + garmentId;
-            
             // Search by cleanCloudGarmentId instead of internal garmentId
-            Garments garment = garmentRepository.findByCleanCloudGarmentId(formattedGarmentId);
+            Garments garment = garmentRepository.findByCleanCloudGarmentId(garmentId);
             if (garment == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
