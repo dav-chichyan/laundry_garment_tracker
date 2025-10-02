@@ -525,12 +525,24 @@ public class CleanCloudServiceImpl implements CleanCloudService {
         return orderDetails;
     }
     
+    /**
+     * Format garment ID by adding a leading "0" prefix
+     * Example: "146081" becomes "0146081"
+     */
+    private String formatGarmentId(String garmentId) {
+        if (garmentId == null || garmentId.isEmpty()) {
+            return garmentId;
+        }
+        return "0" + garmentId;
+    }
+
     private CleanCloudOrderDetails.CleanCloudGarment convertToCleanCloudGarment(CleanCloudGarmentsResponse.CleanCloudGarmentData garmentData) {
         CleanCloudOrderDetails.CleanCloudGarment garment = new CleanCloudOrderDetails.CleanCloudGarment();
-        garment.setBarcodeID(garmentData.getBarcodeID());
+        String formattedGarmentId = formatGarmentId(garmentData.getBarcodeID());
+        garment.setBarcodeID(formattedGarmentId);
         
         // Use the actual barcodeID as garmentId since that's what we want to display
-        garment.setGarmentId(garmentData.getBarcodeID());
+        garment.setGarmentId(formattedGarmentId);
         
         // Set compatibility fields
         garment.setDescription(garmentData.getNotes() != null ? garmentData.getNotes() : "Garment");

@@ -979,7 +979,7 @@ public class AdminController {
             // Group returns by department transition
             Map<String, Long> returnsByTransition = returnsInRange.stream()
                 .collect(Collectors.groupingBy(
-                    returnRecord -> returnRecord.getFromDepartment() + " → " + returnRecord.getToDepartment(),
+                    returnRecord -> formatDepartmentName(returnRecord.getFromDepartment()) + " → " + formatDepartmentName(returnRecord.getToDepartment()),
                     Collectors.counting()
                 ));
             
@@ -1304,6 +1304,25 @@ public class AdminController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Format department names for UI display
+     * - STAIN_REMOVAL becomes STAIN
+     * - DRY_CLEANING becomes DRY
+     */
+    private String formatDepartmentName(Departments dept) {
+        if (dept == null) {
+            return "N/A";
+        }
+        switch (dept) {
+            case STAIN_REMOVAL:
+                return "STAIN";
+            case DRY_CLEANING:
+                return "DRY";
+            default:
+                return dept.name();
         }
     }
 }
